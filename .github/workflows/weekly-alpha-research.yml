@@ -52,8 +52,11 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
         run: |
+          # 알파 리서치는 핵심 산출물 — 실패 시 워크플로 실패.
           corepack pnpm start:swing:alpha
-          corepack pnpm start:swing:improve
+          # 자기개선 루프는 선행 상태(유지보수 리포트)가 필요 — best-effort.
+          corepack pnpm start:swing:maintain || echo "maintain 건너뜀 (상태/데이터 부족)"
+          corepack pnpm start:swing:improve || echo "improve 건너뜀 (유지보수 리포트 없음)"
 
       - name: Notify completion
         if: always()
