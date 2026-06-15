@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "pykrx": {
+      "command": "uvx",
+      "args": [
+        "pykrx-mcp"
+      ]
+    },
+    "koreaStockOfficial": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "korea-stock-mcp@latest"
+      ]
+    }
+  }
+}
