@@ -28,8 +28,8 @@ export const ENV = {
   llmThinkingBudget: Number(process.env.LLM_THINKING_BUDGET ?? 0),
   // Anthropic direct — preferred path when ANTHROPIC_API_KEY is present.
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
-  anthropicModel: process.env.ANTHROPIC_MODEL ?? "claude-opus-4-8",
-  llmEffort: (process.env.LLM_EFFORT ?? "high") as "low" | "medium" | "high" | "max",
+  anthropicModel: process.env.ANTHROPIC_MODEL || "claude-opus-4-8",
+  llmEffort: (process.env.LLM_EFFORT || "high") as "low" | "medium" | "high" | "max",
   // Commander-only Telegram channel (raw high-conviction signals).
   commanderChatId: process.env.COMMANDER_CHAT_ID ?? "",
   // News / market-sentiment sources (optional).
