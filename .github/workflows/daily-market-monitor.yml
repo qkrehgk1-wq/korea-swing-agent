@@ -41,6 +41,7 @@ jobs:
       - name: Run watchlist monitoring job
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ALLOW_LOCAL_STORE_FALLBACK: "true"
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
           BUILT_IN_FORGE_API_KEY: ${{ secrets.BUILT_IN_FORGE_API_KEY }}
