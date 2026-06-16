@@ -327,7 +327,8 @@ function parseNaverOhlcv(text: string): OhlcvRow[] {
   // Data rows look like: ["20260601", 319500, 354500, 319500, 349000, 45052488, 48.3]
   const pattern = /\["(\d{8})",\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)/g;
   let prevClose = 0;
-  for (const match of text.matchAll(pattern)) {
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) {
     const ymd = match[1];
     const close = Number(match[5]);
     if (!Number.isFinite(close) || close <= 0) continue;
@@ -372,6 +373,29 @@ async function fetchNaverOhlcvRows(ticker: string, daysBack = 365): Promise<Ohlc
     return rows.length > 0 ? rows : null;
   } catch (error) {
     console.warn(`[Naver OHLCV] Failed for ${ticker}:`, error);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Korean stock name from Naver (pure Node) — pykrx-free, works locally and in CI.
+async function fetchNaverStockName(ticker: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(
+      `https://polling.finance.naver.com/api/realtime/domestic/stock/${ticker}`,
+      {
+        signal: controller.signal,
+        headers: { "user-agent": "Mozilla/5.0", referer: "https://finance.naver.com/" },
+      }
+    );
+    if (!response.ok) return null;
+    const data = (await response.json()) as { datas?: Array<{ stockName?: string }> };
+    const name = data?.datas?.[0]?.stockName;
+    return typeof name === "string" && name.trim().length > 0 ? name.trim() : null;
+  } catch {
     return null;
   } finally {
     clearTimeout(timer);
@@ -1148,6 +1172,13 @@ export async function getKoreanStockName(ticker: string): Promise<string> {
   }
 
   try {
+    // Primary: Naver (pure Node). Fall back to pykrx/official only if it fails.
+    const naverName = await fetchNaverStockName(ticker);
+    if (naverName) {
+      koreanStockNameCache.set(ticker, naverName);
+      return naverName;
+    }
+
     const pythonSnapshot = await fetchPythonDirectKrxSnapshot(ticker);
     if (pythonSnapshot?.companyName) {
       koreanStockNameCache.set(ticker, pythonSnapshot.companyName);
