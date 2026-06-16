@@ -224,8 +224,15 @@ function patternWeightAdjustments(genome: Genome): Partial<Record<PatternName, n
   return adjustments;
 }
 
-/** Writes the evolved genome into the live override files the screener reads. */
-async function promoteToLiveOverrides(genome: Genome, summary: BacktestSummary, fitness: number) {
+/** Writes a genome into the live override files the screener reads. */
+async function promoteToLiveOverrides(
+  genome: Genome,
+  summary?: BacktestSummary | null,
+  fitness = 0
+) {
+  const totalTrades = summary?.totalTrades ?? 0;
+  const winRate = summary?.winRate ?? 0;
+  const avgReturnPct = summary?.avgReturnPct ?? 0;
   const existingLearned = await readJson<SwingLearnedOverrides>(SWING_LEARNED_OVERRIDES_PATH);
   const policy: WorkflowApprovalPolicy = existingLearned?.workflowApprovalPolicy ?? {
     minAgreementScore: 55,
@@ -237,15 +244,15 @@ async function promoteToLiveOverrides(genome: Genome, summary: BacktestSummary, 
   const learned: SwingLearnedOverrides = {
     generatedAt: new Date().toISOString(),
     sourceReport: "swing-evolution",
-    totalTrades: summary.totalTrades,
-    overallWinRate: summary.winRate,
-    overallAvgReturnPct: summary.avgReturnPct,
+    totalTrades,
+    overallWinRate: winRate,
+    overallAvgReturnPct: avgReturnPct,
     minTradesForAdjustment: Number(process.env.SWING_TUNING_MIN_TRADES) || 5,
     patternWeightAdjustments: patternWeightAdjustments(genome),
     effectivePatternWeights: genome.patternWeights,
     workflowApprovalPolicy: policy,
     notes: [
-      `자동진화 에이전트가 승격한 가중치입니다 (적합도 ${fitness.toFixed(3)}, 체결 ${summary.totalTrades}건, 승률 ${summary.winRate.toFixed(1)}%).`,
+      `자동진화 에이전트가 적용한 가중치입니다 (적합도 ${fitness.toFixed(3)}, 체결 ${totalTrades}건, 승률 ${winRate.toFixed(1)}%).`,
       "기존 워크플로우 승인 정책은 유지했습니다.",
     ],
   };
@@ -254,8 +261,8 @@ async function promoteToLiveOverrides(genome: Genome, summary: BacktestSummary, 
   const quality: SwingPredictionQualityOverrides = {
     generatedAt: new Date().toISOString(),
     sourceReport: "swing-evolution",
-    totalTrades: summary.totalTrades,
-    sampleSize: summary.totalTrades,
+    totalTrades,
+    sampleSize: totalTrades,
     minDefaultSwingScore: genome.quality.minDefaultSwingScore,
     minEarlyBowlSwingScore: genome.quality.minEarlyBowlSwingScore,
     minVolumeRatio: genome.quality.minVolumeRatio,
@@ -312,7 +319,43 @@ function toMarkdown(result: EvolutionRunResult): string {
   ].join("\n");
 }
 
-export async function runSwingEvolution(): Promise<EvolutionRunResult> {
+function shouldRunFullEvolution(): boolean {
+  if ((process.env.EVOLUTION_FORCE ?? "") === "true") return true;
+  const configured = Number(process.env.EVOLUTION_DAY);
+  const targetDay = Number.isInteger(configured) && configured >= 0 && configured <= 6 ? configured : 1; // 기본 월요일(KST)
+  const kstDay = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).getDay();
+  return kstDay === targetDay;
+}
+
+/**
+ * Daily-cheap path: re-assert the persisted champion onto the live override
+ * files. The daily backtest/tuner regenerates those files every run, so the
+ * champion must be re-applied each day to drive recommendations between the
+ * weekly evolution searches.
+ */
+async function applyChampionToLive(): Promise<boolean> {
+  const champion = await readJson<{ genome?: Genome; summary?: BacktestSummary; fitness?: number }>(
+    CHAMPION_PATH
+  );
+  // Only apply a champion that an evolution run actually promoted (has a backtest
+  // summary). The initial base seed has none — leave the daily tuner output in
+  // place so there is no regression until the first weekly evolution improves it.
+  if (!champion?.genome?.patternWeights || !champion.genome.quality || !champion.summary) {
+    return false;
+  }
+  await promoteToLiveOverrides(clampGenome(champion.genome), champion.summary, champion.fitness ?? 0);
+  return true;
+}
+
+export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
+  if (!shouldRunFullEvolution()) {
+    const applied = await applyChampionToLive();
+    console.log(
+      `[Swing Evolution] 주간 진화일 아님 — 탐색 생략. 챔피언 적용: ${applied ? "완료" : "건너뜀(시드 없음)"}`
+    );
+    return null;
+  }
+
   const population = Math.max(2, Number(process.env.EVOLUTION_POPULATION) || 8);
   const generations = Math.max(1, Number(process.env.EVOLUTION_GENERATIONS) || 3);
   const mutationRate = Number(process.env.EVOLUTION_MUTATION_RATE) || 0.5;
@@ -430,6 +473,9 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult> {
 
 async function runFromCli() {
   const result = await runSwingEvolution();
+  if (!result) {
+    return;
+  }
   console.log(
     `[Swing Evolution] ${result.promoted ? "PROMOTED" : "HELD"} — incumbent ${result.incumbent.fitness.toFixed(
       3
