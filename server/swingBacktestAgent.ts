@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 import { deriveElliottFractalInsightFromRows } from "./agentTeams/elliottFractalAgent";
@@ -12,6 +13,7 @@ import { LIMIT_UP_UNIVERSE } from "./limitUpPredictionAgent";
 import {
   DEFAULT_SWING_UNIVERSE,
   screenTechnicalSwingCandidatesFromRows,
+  type InjectedSwingOverrides,
   type TechnicalSwingCandidate,
   type TechnicalSwingRowsByTicker,
 } from "./technicalSwingScreener";
@@ -373,10 +375,19 @@ async function writeReport(report: BacktestReport) {
   ]);
 }
 
-async function runBacktest() {
-  const universe = resolveBacktestUniverse();
-  const rowsByTicker = await fetchKoreanOhlcvRowsBatch(universe, LOOKBACK_DAYS);
+export async function fetchBacktestRows(): Promise<TechnicalSwingRowsByTicker> {
+  return fetchKoreanOhlcvRowsBatch(resolveBacktestUniverse(), LOOKBACK_DAYS);
+}
 
+/**
+ * Replays the screener over historical snapshots and returns the resulting
+ * trades. `injected` lets the evolution agent score a candidate strategy
+ * variant without writing the live override files.
+ */
+export async function collectBacktestTrades(
+  rowsByTicker: TechnicalSwingRowsByTicker,
+  injected?: InjectedSwingOverrides
+): Promise<{ trades: BacktestTrade[]; signalWindows: number }> {
   const benchmarkRows = rowsByTicker["069500"] ?? rowsByTicker["229200"] ?? [];
   const maxSignalIndex = Math.max(0, benchmarkRows.length - HOLDING_DAYS - 1);
   const signalIndexes: number[] = [];
@@ -393,7 +404,7 @@ async function runBacktest() {
     }
 
     const snapshotRows = buildRowsSnapshot(rowsByTicker, signalIndex);
-    const result = await screenTechnicalSwingCandidatesFromRows(snapshotRows);
+    const result = await screenTechnicalSwingCandidatesFromRows(snapshotRows, undefined, injected);
 
     for (const candidate of result.candidates) {
       const fullRows = rowsByTicker[candidate.ticker] ?? [];
@@ -430,6 +441,23 @@ async function runBacktest() {
     }
   }
 
+  return { trades, signalWindows: signalIndexes.length };
+}
+
+export type BacktestSummary = {
+  totalSignals: number;
+  totalTrades: number;
+  winRate: number;
+  avgReturnPct: number;
+  medianReturnPct: number;
+  stopRate: number;
+  targetRate: number;
+  noTriggerRate: number;
+  patternStats: PatternStat[];
+  elliottLabelStats: ElliottLabelStat[];
+};
+
+export function summarizeBacktestTrades(trades: BacktestTrade[]): BacktestSummary {
   const triggeredTrades = trades.filter(trade => trade.outcome !== "not_triggered");
   const winningTrades = triggeredTrades.filter(trade => trade.returnPct > 0);
   const stopTrades = triggeredTrades.filter(trade => trade.outcome === "stop");
@@ -482,15 +510,7 @@ async function runBacktest() {
     };
   }).sort((a, b) => b.winRate - a.winRate || b.avgReturnPct - a.avgReturnPct);
 
-  const baseReport = {
-    generatedAt: new Date().toISOString(),
-    intervalDays: DEFAULT_INTERVAL_DAYS,
-    lookbackDays: LOOKBACK_DAYS,
-    signalStepDays: SIGNAL_STEP_DAYS,
-    holdingDays: HOLDING_DAYS,
-    entryLookaheadDays: ENTRY_LOOKAHEAD_DAYS,
-    universeSize: Object.keys(rowsByTicker).length - 2,
-    signalWindows: signalIndexes.length,
+  return {
     totalSignals: trades.length,
     totalTrades: triggeredTrades.length,
     winRate: triggeredTrades.length ? round((winningTrades.length / triggeredTrades.length) * 100, 1) : 0,
@@ -501,11 +521,38 @@ async function runBacktest() {
     noTriggerRate: trades.length ? round((noTriggerTrades.length / trades.length) * 100, 1) : 0,
     patternStats,
     elliottLabelStats,
+  };
+}
+
+async function runBacktest() {
+  const rowsByTicker = await fetchBacktestRows();
+  const { trades, signalWindows } = await collectBacktestTrades(rowsByTicker);
+  const summary = summarizeBacktestTrades(trades);
+
+  const baseReport = {
+    generatedAt: new Date().toISOString(),
+    intervalDays: DEFAULT_INTERVAL_DAYS,
+    lookbackDays: LOOKBACK_DAYS,
+    signalStepDays: SIGNAL_STEP_DAYS,
+    holdingDays: HOLDING_DAYS,
+    entryLookaheadDays: ENTRY_LOOKAHEAD_DAYS,
+    universeSize: Object.keys(rowsByTicker).length - 2,
+    signalWindows,
+    totalSignals: summary.totalSignals,
+    totalTrades: summary.totalTrades,
+    winRate: summary.winRate,
+    avgReturnPct: summary.avgReturnPct,
+    medianReturnPct: summary.medianReturnPct,
+    stopRate: summary.stopRate,
+    targetRate: summary.targetRate,
+    noTriggerRate: summary.noTriggerRate,
+    patternStats: summary.patternStats,
+    elliottLabelStats: summary.elliottLabelStats,
     trades: trades.slice(-200),
   };
   const report: BacktestReport = {
     ...baseReport,
-    recommendations: buildRecommendations(patternStats, elliottLabelStats, baseReport),
+    recommendations: buildRecommendations(summary.patternStats, summary.elliottLabelStats, baseReport),
   };
 
   await writeReport(report);
@@ -538,7 +585,9 @@ async function main() {
   await runBacktest();
 }
 
-main().catch(error => {
-  console.error("[Swing Backtest Agent] Fatal error:", error);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
+  main().catch(error => {
+    console.error("[Swing Backtest Agent] Fatal error:", error);
+    process.exit(1);
+  });
+}

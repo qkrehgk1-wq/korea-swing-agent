@@ -109,6 +109,24 @@ type SwingPredictionQualityOverrides = {
   notes: string[];
 };
 
+export type SwingQualityParams = {
+  minDefaultSwingScore: number;
+  minEarlyBowlSwingScore: number;
+  minVolumeRatio: number;
+  maxRsi14: number;
+  maxVolatility20: number;
+};
+
+/**
+ * Parameters the evolution agent injects to backtest a candidate strategy
+ * variant without touching the live override files. When passed, the screener
+ * uses these instead of reading learned/quality overrides from disk.
+ */
+export type InjectedSwingOverrides = {
+  patternWeights?: Partial<Record<PatternName, number>> | null;
+  quality?: SwingQualityParams | null;
+};
+
 const LEARNED_OVERRIDES_PATH = path.join(
   process.cwd(),
   ".data",
@@ -738,7 +756,7 @@ function buildCandidate(
   detections: Array<{ name: PatternName; result: PatternDetection }>,
   regime: MarketRegime,
   patternWeights: SwingPatternWeights,
-  qualityOverrides?: SwingPredictionQualityOverrides | null
+  qualityOverrides?: Partial<SwingQualityParams> | null
 ): Candidate | null {
   const patterns = detections.filter(item => item.result.matched).map(item => item.name);
   if (patterns.length === 0) {
@@ -891,11 +909,14 @@ export async function resolveSwingUniverse(): Promise<string[]> {
 
 export async function screenTechnicalSwingCandidatesFromRows(
   rowsByTicker: TechnicalSwingRowsByTicker,
-  inputTickers?: string[]
+  inputTickers?: string[],
+  injected?: InjectedSwingOverrides
 ): Promise<ScreenerResult> {
-  const learnedOverrides = await loadSwingLearnedOverrides();
-  const qualityOverrides = await loadSwingPredictionQualityOverrides();
-  const patternWeights = resolveSwingPatternWeights(learnedOverrides?.effectivePatternWeights);
+  const learnedOverrides = injected ? null : await loadSwingLearnedOverrides();
+  const qualityOverrides = injected ? injected.quality ?? null : await loadSwingPredictionQualityOverrides();
+  const patternWeights = resolveSwingPatternWeights(
+    injected?.patternWeights ?? learnedOverrides?.effectivePatternWeights
+  );
   const tickers = inputTickers?.filter(isKoreanTicker) ?? DEFAULT_SWING_UNIVERSE;
   const kospiRows = rowsByTicker["069500"];
   const kosdaqRows = rowsByTicker["229200"];
@@ -993,7 +1014,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
         ? `학습 반영: ${path.basename(LEARNED_OVERRIDES_PATH)} (${learnedOverrides.generatedAt})`
         : "학습 반영: 아직 학습 오버라이드가 없어 기본 가중치를 사용합니다.",
       qualityOverrides
-        ? `품질 필터 반영: ${path.basename(QUALITY_OVERRIDES_PATH)} (${qualityOverrides.generatedAt}) / 최소 거래량비 ${qualityOverrides.minVolumeRatio.toFixed(2)}x / RSI 상한 ${qualityOverrides.maxRsi14.toFixed(1)} / 변동성 상한 ${qualityOverrides.maxVolatility20.toFixed(1)}`
+        ? `품질 필터 반영: ${path.basename(QUALITY_OVERRIDES_PATH)} (${"generatedAt" in qualityOverrides ? qualityOverrides.generatedAt : "주입"}) / 최소 거래량비 ${qualityOverrides.minVolumeRatio.toFixed(2)}x / RSI 상한 ${qualityOverrides.maxRsi14.toFixed(1)} / 변동성 상한 ${qualityOverrides.maxVolatility20.toFixed(1)}`
         : "품질 필터 반영: 아직 예측 품질 오버라이드가 없어 기본 필터를 사용합니다.",
       "기본 유니버스는 빠른 검증용 핵심 종목군이며, 이후 관심종목/사용자 유니버스로 확장할 수 있습니다.",
       "패턴은 참고용 자동화 규칙이므로, 실제 진입 전 일봉 위치와 거래량 재확인을 권장합니다.",
