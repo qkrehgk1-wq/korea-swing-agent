@@ -402,6 +402,57 @@ async function fetchNaverStockName(ticker: string): Promise<string | null> {
   }
 }
 
+export type NaverUniverseEntry = { ticker: string; name: string; market: "코스피" | "코스닥" };
+
+/**
+ * Top market-cap universe from Naver (KOSPI or KOSDAQ), with ticker + name +
+ * market in one shot. Pure Node — builds the swing scanner's universe instead
+ * of a hardcoded 30-ticker list.
+ */
+export async function fetchNaverUniverse(
+  market: "KOSPI" | "KOSDAQ",
+  count: number
+): Promise<NaverUniverseEntry[]> {
+  const marketLabel: "코스피" | "코스닥" = market === "KOSPI" ? "코스피" : "코스닥";
+  const pageSize = 100;
+  const pages = Math.max(1, Math.ceil(count / pageSize));
+  const entries: NaverUniverseEntry[] = [];
+
+  for (let page = 1; page <= pages; page += 1) {
+    const url = `https://m.stock.naver.com/api/stocks/marketValue/${market}?page=${page}&pageSize=${pageSize}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: { "user-agent": "Mozilla/5.0", referer: "https://m.stock.naver.com/" },
+      });
+      if (!response.ok) break;
+      const data = (await response.json()) as {
+        stocks?: Array<{ itemCode?: string; stockName?: string }>;
+      };
+      const stocks = data?.stocks ?? [];
+      if (stocks.length === 0) break;
+      for (const stock of stocks) {
+        const ticker = String(stock.itemCode ?? "");
+        const name = String(stock.stockName ?? "").trim();
+        if (/^\d{6}$/.test(ticker) && name) {
+          entries.push({ ticker, name, market: marketLabel });
+        }
+      }
+    } catch (error) {
+      console.warn(`[Naver Universe] ${market} page ${page} failed:`, error);
+      break;
+    } finally {
+      clearTimeout(timer);
+    }
+    if (entries.length >= count) break;
+    await sleep(150);
+  }
+
+  return entries.slice(0, count);
+}
+
 function parseJsonText<T>(text: string): T | null {
   if (!text) {
     return null;

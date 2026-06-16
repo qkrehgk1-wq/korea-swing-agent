@@ -3,6 +3,7 @@ import path from "node:path";
 
 import {
   fetchKoreanOhlcvRowsBatch,
+  fetchNaverUniverse,
   isKoreanTicker,
   type OhlcvRow,
 } from "./koreaStockMcp";
@@ -793,7 +794,7 @@ function buildCandidate(
   return {
     ticker,
     companyName,
-    market: DEFAULT_SWING_MARKETS[ticker] ?? "코스피",
+    market: marketFor(ticker),
     patterns,
     swingScore,
     swingFit,
@@ -828,6 +829,53 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
+/**
+ * Dynamic name/market maps populated at runtime from the Naver market-cap
+ * universe; DEFAULT_SWING_* stay as the offline fallback.
+ */
+const runtimeNames: Record<string, string> = {};
+const runtimeMarkets: Record<string, "코스피" | "코스닥"> = {};
+let cachedUniverse: string[] | null = null;
+
+function nameFor(ticker: string): string {
+  return runtimeNames[ticker] ?? DEFAULT_SWING_NAMES[ticker] ?? ticker;
+}
+
+function marketFor(ticker: string): "코스피" | "코스닥" {
+  return runtimeMarkets[ticker] ?? DEFAULT_SWING_MARKETS[ticker] ?? "코스피";
+}
+
+/**
+ * Builds the scan universe from Naver's top market-cap KOSPI + KOSDAQ lists
+ * (size via SWING_UNIVERSE_KOSPI / SWING_UNIVERSE_KOSDAQ), caching per process.
+ * Falls back to the hardcoded DEFAULT_SWING_UNIVERSE if the fetch is too thin.
+ */
+export async function resolveSwingUniverse(): Promise<string[]> {
+  if (cachedUniverse) return cachedUniverse;
+  const kospiCount = Number(process.env.SWING_UNIVERSE_KOSPI) || 120;
+  const kosdaqCount = Number(process.env.SWING_UNIVERSE_KOSDAQ) || 80;
+  try {
+    const [kospi, kosdaq] = await Promise.all([
+      fetchNaverUniverse("KOSPI", kospiCount),
+      fetchNaverUniverse("KOSDAQ", kosdaqCount),
+    ]);
+    const merged = [...kospi, ...kosdaq];
+    if (merged.length >= 20) {
+      for (const entry of merged) {
+        runtimeNames[entry.ticker] = entry.name;
+        runtimeMarkets[entry.ticker] = entry.market;
+      }
+      cachedUniverse = merged.map(entry => entry.ticker);
+      return cachedUniverse;
+    }
+    console.warn(`[Swing Universe] dynamic fetch too thin (${merged.length}), using default`);
+  } catch (error) {
+    console.warn("[Swing Universe] dynamic fetch failed, using default:", error);
+  }
+  cachedUniverse = [...DEFAULT_SWING_UNIVERSE];
+  return cachedUniverse;
+}
+
 export async function screenTechnicalSwingCandidatesFromRows(
   rowsByTicker: TechnicalSwingRowsByTicker,
   inputTickers?: string[]
@@ -835,7 +883,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
   const learnedOverrides = await loadSwingLearnedOverrides();
   const qualityOverrides = await loadSwingPredictionQualityOverrides();
   const patternWeights = resolveSwingPatternWeights(learnedOverrides?.effectivePatternWeights);
-  const tickers = (inputTickers?.filter(isKoreanTicker) || DEFAULT_SWING_UNIVERSE).slice(0, 30);
+  const tickers = inputTickers?.filter(isKoreanTicker) ?? DEFAULT_SWING_UNIVERSE;
   const kospiRows = rowsByTicker["069500"];
   const kosdaqRows = rowsByTicker["229200"];
   const kospiRegime = assessMarketRegime(buildIndicatorSnapshot(toBars(kospiRows)));
@@ -878,7 +926,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
         ticker,
         candidate: buildCandidate(
           ticker,
-          DEFAULT_SWING_NAMES[ticker] ?? ticker,
+          nameFor(ticker),
           indicators,
           detections,
           marketRegime,
@@ -905,7 +953,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
   const shortHistoryCount = skipped.filter(item => item.skipReason.includes("140봉")).length;
   const skippedSummary = skipped
     .slice(0, 5)
-    .map(item => `${DEFAULT_SWING_NAMES[item.ticker] ?? item.ticker}: ${item.skipReason}`)
+    .map(item => `${nameFor(item.ticker)}: ${item.skipReason}`)
     .join(" | ");
 
   return {
@@ -941,7 +989,9 @@ export async function screenTechnicalSwingCandidatesFromRows(
 }
 
 export async function screenTechnicalSwingCandidates(inputTickers?: string[]): Promise<ScreenerResult> {
-  const tickers = (inputTickers?.filter(isKoreanTicker) || DEFAULT_SWING_UNIVERSE).slice(0, 30);
+  const tickers = inputTickers?.length
+    ? inputTickers.filter(isKoreanTicker)
+    : await resolveSwingUniverse();
   const rowsByTicker = await fetchKoreanOhlcvRowsBatch(["069500", "229200", ...tickers]);
   return await screenTechnicalSwingCandidatesFromRows(rowsByTicker, tickers);
 }
