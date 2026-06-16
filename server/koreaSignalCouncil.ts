@@ -24,13 +24,52 @@ export type SwingCouncilScore = {
 
 export type SwingDecision = "ACT" | "PREPARE" | "WATCH" | "AVOID";
 
+export type SwingHorizon = "단기" | "중기" | "장기";
+
 export type SwingCouncilVerdict = {
   score: SwingCouncilScore;
   total: number; // 0-100
   decision: SwingDecision;
+  horizon: SwingHorizon;
   summary: string;
   rationale: string[];
 };
+
+const HORIZON_HOLD: Record<SwingHorizon, string> = {
+  단기: "1~5일",
+  중기: "1~4주",
+  장기: "1~3개월",
+};
+
+/** Classify holding horizon from chart structure + fundamentals (deterministic). */
+export function classifyHorizon(
+  snapshot: PriceSnapshot,
+  patterns: string[],
+  data: KoreanStockAnalysisData
+): SwingHorizon {
+  // 단기: 돌파/거래량 급등/고점 근접 모멘텀
+  if (
+    patterns.some(p => p.includes("돌파")) ||
+    snapshot.volumeRatio >= 2.0 ||
+    Math.abs(snapshot.distanceFromHigh) <= 2.5
+  ) {
+    return "단기";
+  }
+  // 장기: 60·120일선 정배열 + 120일선 위 + 재무 뒷받침/저변동성
+  const longTrend =
+    snapshot.ma60 > snapshot.ma120 &&
+    snapshot.latestClose > snapshot.ma120 &&
+    snapshot.return120d > 0;
+  const fin = data.officialFinancials;
+  const hasFundamentals = Boolean(
+    fin && (((fin.operatingProfit ?? 0) > 0) || ((fin.revenueYoY ?? 0) > 0))
+  );
+  if (longTrend && (hasFundamentals || snapshot.annualVolatility < 35)) {
+    return "장기";
+  }
+  // 중기: 그 외 (밥그릇/하이힐/눌림목)
+  return "중기";
+}
 
 const DECISION_LABEL: Record<SwingDecision, string> = {
   ACT: "실행 (분할 진입 후보)",
@@ -177,7 +216,8 @@ export function buildSwingVerdict(
   if (data.officialFinancials && score.fundamentalBacking >= 7)
     rationale.push("DART 재무가 흑자/성장으로 뒷받침");
 
-  const summary = `총점 ${total}/100 · 결정 ${decision} (${DECISION_LABEL[decision]}) · 추세 ${score.trendStrength} 거래량 ${score.volumeConfidence} 패턴 ${score.patternClarity} 타점 ${score.entryTiming} 수급 ${score.supplyDemand} 리스크 ${score.riskLevel} 펀더멘털 ${score.fundamentalBacking}`;
+  const horizon = classifyHorizon(snapshot, patterns, data);
+  const summary = `${horizon}(${HORIZON_HOLD[horizon]}) · 총점 ${total}/100 · 결정 ${decision}(${DECISION_LABEL[decision]}) · 추세 ${score.trendStrength} 거래량 ${score.volumeConfidence} 패턴 ${score.patternClarity} 타점 ${score.entryTiming} 수급 ${score.supplyDemand} 리스크 ${score.riskLevel} 펀더멘털 ${score.fundamentalBacking}`;
 
-  return { score, total, decision, summary, rationale };
+  return { score, total, decision, horizon, summary, rationale };
 }

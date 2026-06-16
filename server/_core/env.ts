@@ -37,6 +37,11 @@ export const ENV = {
   geminiModel: process.env.GEMINI_MODEL || "gemini-2.5-flash",
   openrouterApiKey: process.env.OPENROUTER_API_KEY ?? "",
   openrouterModel: process.env.OPENROUTER_MODEL || "openai/gpt-4o",
+  // Cheap models for routine work (tier: "cheap") — summarization, classification.
+  openaiCheapModel: process.env.OPENAI_CHEAP_MODEL || "gpt-4o-mini",
+  anthropicCheapModel: process.env.ANTHROPIC_CHEAP_MODEL || "claude-haiku-4-5",
+  geminiCheapModel: process.env.GEMINI_CHEAP_MODEL || "gemini-2.5-flash",
+  openrouterCheapModel: process.env.OPENROUTER_CHEAP_MODEL || "openai/gpt-4o-mini",
   // Provider priority order. Override to skip a capped provider, e.g.
   // LLM_PROVIDER_ORDER="openai,gemini,anthropic".
   llmProviderOrder:

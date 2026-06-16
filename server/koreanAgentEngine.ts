@@ -138,34 +138,90 @@ function buildFactSheet(
 const BASE_RULES =
   "반드시 한국어로만 답하세요. 아래 '사실 시트'에 제시된 숫자만 근거로 사용하고, 시트에 없는 수치·뉴스·재무·목표가를 지어내지 마세요. 데이터가 없으면 '데이터 없음'이라고 분명히 쓰세요. 한국 시장의 단기~중기(2~8주) 스윙 매매 관점에서, 막연한 표현 대신 실제 매매 판단에 쓸 수 있게 간결한 투자 메모 톤으로 쓰세요.";
 
-async function generateSection(
-  role: string,
-  systemPrompt: string,
-  userPrompt: string,
-  fallback: string
-): Promise<string> {
+type CombinedSections = {
+  pattern: string;
+  indicator: string;
+  supply: string;
+  risk: string;
+  swingMemo: string;
+  insight: string;
+};
+
+function extractJsonObject(text: string): Record<string, unknown> | null {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const candidate = fenced ? fenced[1] : text;
+  const start = candidate.indexOf("{");
+  const end = candidate.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+  try {
+    const parsed = JSON.parse(candidate.slice(start, end + 1));
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+// One LLM call produces all 6 sections (was 6 calls) on the cheap tier, with
+// per-section constitution checks and deterministic fallback.
+async function generateCombined(
+  facts: string,
+  fallback: KoreanAnalysisResult
+): Promise<CombinedSections> {
+  const det: CombinedSections = {
+    pattern: fallback.fundamentalAnalysis,
+    indicator: fallback.technicalAnalysis,
+    supply: fallback.insiderAnalysis,
+    risk: fallback.riskAnalysis,
+    swingMemo: fallback.marketIntelligenceAnalysis,
+    insight: fallback.investmentInsight,
+  };
+
+  const system = `${BASE_RULES} 당신은 한국 일봉 스윙 분석 6개 역할(패턴 구조·기술 지표·수급·리스크·스윙 전략·종합 투자메모)을 한 번에 수행합니다. 각 값은 마크다운 소제목(###)으로 구성하세요.`;
+  const user = [
+    facts,
+    "",
+    "[지시] 위 사실만 근거로 아래 6개 키를 가진 JSON 객체 하나만 출력하세요. 다른 텍스트 없이 JSON만.",
+    '{"pattern":"패턴 구조 분석","indicator":"기술 지표 분석","supply":"수급 분석","risk":"리스크 분석","swingMemo":"스윙 전략 메모","insight":"종합 투자 메모: 최종 판단·왜 지금·확인할 것·실행 계획(진입/비중/철회)"}',
+    "각 값은 마크다운 문자열. 과장·단정 금지, 시트에 없으면 '데이터 없음'.",
+  ].join("\n");
+
   try {
     const response = await invokeLLM({
+      tier: "cheap",
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "system", content: system },
+        { role: "user", content: user },
       ],
+      maxTokens: 4096,
     });
     const content = response.choices[0]?.message.content;
-    if (typeof content === "string" && content.trim().length > 0) {
-      const text = content.trim();
-      // DataValidator harness: block scam-grade language, log hype tone.
+    if (typeof content !== "string") return det;
+    const obj = extractJsonObject(content);
+    if (!obj) return det;
+
+    const pick = (key: keyof CombinedSections, role: string): string => {
+      const raw = obj[key];
+      if (typeof raw !== "string" || raw.trim().length === 0) return det[key];
+      const text = raw.trim();
       const check = checkAnalysisConstitution(text);
       if (!check.ok) {
-        await logConstitutionViolation(role, check.violations);
-        if (check.severe) return fallback;
+        void logConstitutionViolation(role, check.violations);
+        if (check.severe) return det[key];
       }
       return text;
-    }
-    return fallback;
+    };
+
+    return {
+      pattern: pick("pattern", "패턴 구조 분석가"),
+      indicator: pick("indicator", "기술적 지표 분석가"),
+      supply: pick("supply", "수급 분석가"),
+      risk: pick("risk", "리스크 관리자"),
+      swingMemo: pick("swingMemo", "스윙 전략가"),
+      insight: pick("insight", "종합 투자 전략가"),
+    };
   } catch (error) {
-    console.warn("[KoreanAgentEngine] LLM section failed, using deterministic fallback:", error);
-    return fallback;
+    console.warn("[KoreanAgentEngine] combined LLM call failed, using deterministic:", error);
+    return det;
   }
 }
 
@@ -202,69 +258,15 @@ export async function runKoreanAgentAnalysis(
 
   const news = await fetchNewsSentiment(deterministic.companyName);
   const facts = buildFactSheet(ticker, deterministic.companyName, snapshot, data, verdict, news);
-
-  const [fundamental, technical, insider, risk, market] = await Promise.all([
-    generateSection(
-      "패턴 구조 분석가",
-      `${BASE_RULES} 당신은 차트 패턴 구조를 읽는 분석가입니다. 밥그릇/하이힐/돌파/컵앤핸들 등 한국 스윙 패턴 관점에서 현재 구조를 해석하세요.`,
-      `${facts}\n\n[지시] 다음 형식으로 답하세요.\n### 패턴 구조 결론\n### 패턴 체크 숫자\n- 3개\n### 지금 타점인가\n- 진입 가능 조건과 아직 이른 이유를 균형 있게`,
-      deterministic.fundamentalAnalysis
-    ),
-    generateSection(
-      "기술적 지표 분석가",
-      `${BASE_RULES} 당신은 이동평균·거래량·모멘텀·변동성을 보는 기술적 지표 분석가입니다.`,
-      `${facts}\n\n[지시] 다음 형식으로 답하세요.\n### 인디케이터 요약\n### 거래량과 변동성\n### 기술적 액션\n- 비중과 진입 타이밍 관점`,
-      deterministic.technicalAnalysis
-    ),
-    generateSection(
-      "수급 분석가",
-      `${BASE_RULES} 당신은 외국인·기관 수급과 거래량으로 수급 주체를 해석하는 분석가입니다. 수급 수치가 없으면 거래량 배수로 보수적으로 해석하세요.`,
-      `${facts}\n\n[지시] 다음 형식으로 답하세요.\n### 수급 해석\n### 거래량을 차트로 읽는 법\n### 주의할 점`,
-      deterministic.insiderAnalysis
-    ),
-    generateSection(
-      "리스크 관리자",
-      `${BASE_RULES} 당신은 손실 방어에 집중하는 리스크 관리자입니다. 변동성·낙폭·추세 훼손 조건을 구체적 숫자로 짚으세요.`,
-      `${facts}\n\n[지시] 다음 형식으로 답하세요.\n### 지금 가장 큰 리스크\n### 무엇이 깨지면 시나리오가 무너지나\n- 3개\n### 손절/비중 관리 기준`,
-      deterministic.riskAnalysis
-    ),
-    generateSection(
-      "스윙 전략가",
-      `${BASE_RULES} 당신은 시장 흐름과 종목 위치를 엮는 스윙 전략 메모 작성자입니다.`,
-      `${facts}\n\n[지시] 다음 형식으로 답하세요.\n### 스윙 매매 메모\n### 실전 해석\n- 시장이 이 종목을 받아주는 자리인지 판단`,
-      deterministic.marketIntelligenceAnalysis
-    ),
-  ]);
-
-  const investmentInsight = await generateSection(
-    "종합 투자 전략가",
-    `${BASE_RULES} 당신은 위 분석들을 종합해 실제 매매 계획으로 바꾸는 수석 스윙 트레이더입니다.`,
-    [
-      facts,
-      "",
-      "[에이전트 분석 요약]",
-      `## 패턴\n${fundamental}`,
-      `## 지표\n${technical}`,
-      `## 수급\n${insider}`,
-      `## 리스크\n${risk}`,
-      `## 스윙메모\n${market}`,
-      "",
-      "[지시] 다음 형식으로만 답하세요.",
-      "## 최종 판단\n- 의견:\n- 확신도(0~100):\n- 한줄 요약:",
-      "## 왜 지금 볼 만한가\n- 3개",
-      "## 지금 사기 전에 확인할 것\n- 3개",
-      "## 실행 계획\n- 진입 전략:\n- 비중 전략:\n- 철회(손절) 조건:",
-    ].join("\n"),
-    deterministic.investmentInsight
-  );
+  const sections = await generateCombined(facts, result);
 
   return {
     ...result,
-    fundamentalAnalysis: fundamental,
-    technicalAnalysis: technical,
-    insiderAnalysis: insider,
-    riskAnalysis: risk,
-    marketIntelligenceAnalysis: market,
-    investmentInsight,
+    fundamentalAnalysis: sections.pattern,
+    technicalAnalysis: sections.indicator,
+    insiderAnalysis: sections.supply,
+    riskAnalysis: sections.risk,
+    marketIntelligenceAnalysis: sections.swingMemo,
+    investmentInsight: sections.insight,
   };
 }

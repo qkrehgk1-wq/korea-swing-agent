@@ -88,13 +88,20 @@ async function runSwingTelegramPipeline() {
       console.log(
         `[Swing Pipeline] Elliott-fractal insights collected for ${elliottFractalInsights.length} candidates`
       );
-      const danteLearning = await collectDanteLearningReport({
-        maxVideos: 30,
-        transcriptLimit: 5,
-      }).catch(error => {
-        console.warn("[Swing Pipeline] YouTube learning skipped:", error);
-        return undefined;
-      });
+      // 유튜브 학습은 비용·쿼터가 커서 주 1회(월요일 KST)만 실행. ENABLE_YOUTUBE_LEARNING=true로 강제 가능.
+      const kstDay = new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
+      ).getDay();
+      const runYoutubeLearning = process.env.ENABLE_YOUTUBE_LEARNING === "true" || kstDay === 1;
+      const danteLearning = runYoutubeLearning
+        ? await collectDanteLearningReport({
+            maxVideos: 30,
+            transcriptLimit: 5,
+          }).catch(error => {
+            console.warn("[Swing Pipeline] YouTube learning skipped:", error);
+            return undefined;
+          })
+        : undefined;
       if (danteLearning) {
         console.log(
           `[Swing Pipeline] YouTube learning extracted ${danteLearning.rules.length} Dante-style rules from ${danteLearning.sources.length} videos`

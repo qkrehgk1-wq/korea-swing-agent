@@ -58,6 +58,8 @@ export type ToolChoice =
 
 export type InvokeParams = {
   messages: Message[];
+  // "cheap" routes to each provider's low-cost model (summarization/classification).
+  tier?: "cheap" | "standard";
   tools?: Tool[];
   toolChoice?: ToolChoice;
   tool_choice?: ToolChoice;
@@ -357,7 +359,7 @@ async function callOpenAICompatible(
 }
 
 // Google Gemini (Generative Language API) — different request/response shape.
-async function callGemini(params: InvokeParams): Promise<InvokeResult> {
+async function callGemini(params: InvokeParams, model: string): Promise<InvokeResult> {
   const systemParts: string[] = [];
   const contents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }> = [];
   for (const message of params.messages) {
@@ -383,10 +385,10 @@ async function callGemini(params: InvokeParams): Promise<InvokeResult> {
     body.systemInstruction = { parts: [{ text: systemParts.join("\n\n") }] };
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${ENV.geminiModel}:generateContent?key=${ENV.geminiApiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${ENV.geminiApiKey}`;
   const data = await withRetry(
     () => postJsonOnce(url, {}, body, ENV.llmTimeoutMs),
-    `gemini(${ENV.geminiModel})`
+    `gemini(${model})`
   );
 
   const text = (data?.candidates?.[0]?.content?.parts ?? [])
@@ -396,7 +398,7 @@ async function callGemini(params: InvokeParams): Promise<InvokeResult> {
   return {
     id: `gemini-${Date.now()}`,
     created: Date.now(),
-    model: ENV.geminiModel,
+    model: model,
     choices: [
       { index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" },
     ],
@@ -429,7 +431,7 @@ function messageToText(message: Message): string {
 // (system role inside messages) into Anthropic's shape (separate system field,
 // only user/assistant turns) and adapts the response back to InvokeResult so
 // callers stay unchanged. The SDK retries 429/5xx automatically.
-async function callAnthropic(params: InvokeParams): Promise<InvokeResult> {
+async function callAnthropic(params: InvokeParams, model: string): Promise<InvokeResult> {
   const client = getAnthropicClient();
 
   const systemParts: string[] = [];
@@ -445,11 +447,13 @@ async function callAnthropic(params: InvokeParams): Promise<InvokeResult> {
   }
 
   const message = await client.messages.create({
-    model: ENV.anthropicModel,
+    model,
     max_tokens: params.maxTokens ?? params.max_tokens ?? ENV.llmMaxTokens,
     ...(systemParts.length ? { system: systemParts.join("\n\n") } : {}),
-    thinking: { type: "adaptive" },
-    output_config: { effort: ENV.llmEffort },
+    // Cheap tier (e.g. Haiku) doesn't support adaptive thinking / effort — omit them.
+    ...(params.tier === "cheap"
+      ? {}
+      : { thinking: { type: "adaptive" as const }, output_config: { effort: ENV.llmEffort } }),
     messages: conversation.length ? conversation : [{ role: "user", content: " " }],
   });
 
@@ -486,11 +490,12 @@ type LlmProvider = { name: string; available: boolean; call: () => Promise<Invok
  * OpenAI → Gemini → OpenRouter → Forge instead of dropping to deterministic.
  */
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+  const cheap = params.tier === "cheap";
   const registry: Record<string, () => LlmProvider> = {
     anthropic: () => ({
       name: "anthropic",
       available: Boolean(ENV.anthropicApiKey),
-      call: () => callAnthropic(params),
+      call: () => callAnthropic(params, cheap ? ENV.anthropicCheapModel : ENV.anthropicModel),
     }),
     openai: () => ({
       name: "openai",
@@ -499,13 +504,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
         callOpenAICompatible(params, {
           url: "https://api.openai.com/v1/chat/completions",
           apiKey: ENV.openaiApiKey,
-          model: ENV.openaiModel,
+          model: cheap ? ENV.openaiCheapModel : ENV.openaiModel,
         }),
     }),
     gemini: () => ({
       name: "gemini",
       available: Boolean(ENV.geminiApiKey),
-      call: () => callGemini(params),
+      call: () => callGemini(params, cheap ? ENV.geminiCheapModel : ENV.geminiModel),
     }),
     openrouter: () => ({
       name: "openrouter",
@@ -514,7 +519,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
         callOpenAICompatible(params, {
           url: "https://openrouter.ai/api/v1/chat/completions",
           apiKey: ENV.openrouterApiKey,
-          model: ENV.openrouterModel,
+          model: cheap ? ENV.openrouterCheapModel : ENV.openrouterModel,
         }),
     }),
     forge: () => ({
