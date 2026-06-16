@@ -5,8 +5,10 @@ import {
   fetchKoreanOhlcvRowsBatch,
   fetchNaverUniverse,
   isKoreanTicker,
+  type NaverUniverseEntry,
   type OhlcvRow,
 } from "./koreaStockMcp";
+import { SWING_UNIVERSE_FALLBACK } from "./swingUniverseFallback";
 
 export type PatternName =
   | "밥그릇 1번자리"
@@ -845,10 +847,21 @@ function marketFor(ticker: string): "코스피" | "코스닥" {
   return runtimeMarkets[ticker] ?? DEFAULT_SWING_MARKETS[ticker] ?? "코스피";
 }
 
+function registerUniverse(entries: NaverUniverseEntry[]): string[] {
+  for (const entry of entries) {
+    runtimeNames[entry.ticker] = entry.name;
+    runtimeMarkets[entry.ticker] = entry.market;
+  }
+  return entries.map(entry => entry.ticker);
+}
+
 /**
- * Builds the scan universe from Naver's top market-cap KOSPI + KOSDAQ lists
- * (size via SWING_UNIVERSE_KOSPI / SWING_UNIVERSE_KOSDAQ), caching per process.
- * Falls back to the hardcoded DEFAULT_SWING_UNIVERSE if the fetch is too thin.
+ * Builds the scan universe with layered sources (per-process cached):
+ * 1) Naver live (mobile API → classic page) top market-cap KOSPI + KOSDAQ
+ *    (size via SWING_UNIVERSE_KOSPI / SWING_UNIVERSE_KOSDAQ),
+ * 2) a baked top-cap snapshot (SWING_UNIVERSE_FALLBACK) — survives a geo-blocked
+ *    CI runner with zero network,
+ * 3) the original 30-ticker DEFAULT_SWING_UNIVERSE as the absolute last resort.
  */
 export async function resolveSwingUniverse(): Promise<string[]> {
   if (cachedUniverse) return cachedUniverse;
@@ -861,16 +874,16 @@ export async function resolveSwingUniverse(): Promise<string[]> {
     ]);
     const merged = [...kospi, ...kosdaq];
     if (merged.length >= 20) {
-      for (const entry of merged) {
-        runtimeNames[entry.ticker] = entry.name;
-        runtimeMarkets[entry.ticker] = entry.market;
-      }
-      cachedUniverse = merged.map(entry => entry.ticker);
+      cachedUniverse = registerUniverse(merged);
       return cachedUniverse;
     }
-    console.warn(`[Swing Universe] dynamic fetch too thin (${merged.length}), using default`);
+    console.warn(`[Swing Universe] live fetch too thin (${merged.length}), using baked fallback`);
   } catch (error) {
-    console.warn("[Swing Universe] dynamic fetch failed, using default:", error);
+    console.warn("[Swing Universe] live fetch failed, using baked fallback:", error);
+  }
+  if (SWING_UNIVERSE_FALLBACK.length >= 20) {
+    cachedUniverse = registerUniverse(SWING_UNIVERSE_FALLBACK);
+    return cachedUniverse;
   }
   cachedUniverse = [...DEFAULT_SWING_UNIVERSE];
   return cachedUniverse;

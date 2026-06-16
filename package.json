@@ -19,6 +19,7 @@
     "start:tenbagger": "cross-env NODE_ENV=production tsx server/tenbaggerPipeline.ts",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
+    "gen:universe": "tsx scripts/genSwingUniverseFallback.mts",
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },

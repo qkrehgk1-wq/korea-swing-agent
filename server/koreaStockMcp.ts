@@ -405,11 +405,26 @@ async function fetchNaverStockName(ticker: string): Promise<string | null> {
 export type NaverUniverseEntry = { ticker: string; name: string; market: "코스피" | "코스닥" };
 
 /**
- * Top market-cap universe from Naver (KOSPI or KOSDAQ), with ticker + name +
- * market in one shot. Pure Node — builds the swing scanner's universe instead
- * of a hardcoded 30-ticker list.
+ * Top market-cap universe from Naver, with ticker + name + market in one shot.
+ * Two independent live endpoints so a single-endpoint failure still yields fresh
+ * data: the mobile JSON API first, then the classic (EUC-KR) market-cap page.
  */
 export async function fetchNaverUniverse(
+  market: "KOSPI" | "KOSDAQ",
+  count: number
+): Promise<NaverUniverseEntry[]> {
+  const viaApi = await fetchNaverUniverseViaApi(market, count);
+  if (viaApi.length >= Math.min(count, 20)) return viaApi;
+
+  console.warn(
+    `[Naver Universe] mobile API thin for ${market} (${viaApi.length}); trying classic page`
+  );
+  const viaClassic = await fetchNaverUniverseViaClassic(market, count);
+  return viaClassic.length > viaApi.length ? viaClassic : viaApi;
+}
+
+// Primary: Naver mobile market-cap JSON API (UTF-8).
+async function fetchNaverUniverseViaApi(
   market: "KOSPI" | "KOSDAQ",
   count: number
 ): Promise<NaverUniverseEntry[]> {
@@ -442,6 +457,57 @@ export async function fetchNaverUniverse(
       }
     } catch (error) {
       console.warn(`[Naver Universe] ${market} page ${page} failed:`, error);
+      break;
+    } finally {
+      clearTimeout(timer);
+    }
+    if (entries.length >= count) break;
+    await sleep(150);
+  }
+
+  return entries.slice(0, count);
+}
+
+// Fallback: classic Naver market-cap ranking page (EUC-KR HTML). A different
+// endpoint than the mobile API, so it survives the mobile API changing/erroring.
+async function fetchNaverUniverseViaClassic(
+  market: "KOSPI" | "KOSDAQ",
+  count: number
+): Promise<NaverUniverseEntry[]> {
+  const marketLabel: "코스피" | "코스닥" = market === "KOSPI" ? "코스피" : "코스닥";
+  const sosok = market === "KOSPI" ? 0 : 1;
+  const perPage = 50;
+  const pages = Math.max(1, Math.ceil(count / perPage));
+  const entries: NaverUniverseEntry[] = [];
+  const seen = new Set<string>();
+  const pattern = /\/item\/main\.(?:naver|nhn)\?code=(\d{6})"[^>]*class="tltle"[^>]*>([^<]+)<\/a>/g;
+
+  for (let page = 1; page <= pages; page += 1) {
+    const url = `https://finance.naver.com/sise/sise_market_sum.naver?sosok=${sosok}&page=${page}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: { "user-agent": "Mozilla/5.0", referer: "https://finance.naver.com/" },
+      });
+      if (!response.ok) break;
+      const html = new TextDecoder("euc-kr").decode(await response.arrayBuffer());
+      let match: RegExpExecArray | null;
+      let found = 0;
+      while ((match = pattern.exec(html)) !== null) {
+        const ticker = match[1];
+        const name = match[2].trim();
+        if (ticker && name && !seen.has(ticker)) {
+          seen.add(ticker);
+          entries.push({ ticker, name, market: marketLabel });
+          found += 1;
+        }
+      }
+      pattern.lastIndex = 0;
+      if (found === 0) break;
+    } catch (error) {
+      console.warn(`[Naver Universe classic] ${market} page ${page} failed:`, error);
       break;
     } finally {
       clearTimeout(timer);
