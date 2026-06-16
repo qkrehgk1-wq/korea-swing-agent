@@ -316,6 +316,68 @@ function getDateRange(daysBack = 365) {
   };
 }
 
+function formatNaverDate(date: Date): string {
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(
+    date.getDate()
+  ).padStart(2, "0")}`;
+}
+
+function parseNaverOhlcv(text: string): OhlcvRow[] {
+  const rows: OhlcvRow[] = [];
+  // Data rows look like: ["20260601", 319500, 354500, 319500, 349000, 45052488, 48.3]
+  const pattern = /\["(\d{8})",\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)/g;
+  let prevClose = 0;
+  for (const match of text.matchAll(pattern)) {
+    const ymd = match[1];
+    const close = Number(match[5]);
+    if (!Number.isFinite(close) || close <= 0) continue;
+    const changePercent = prevClose > 0 ? ((close - prevClose) / prevClose) * 100 : 0;
+    rows.push({
+      날짜: `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`,
+      시가: Number(match[2]),
+      고가: Number(match[3]),
+      저가: Number(match[4]),
+      종가: close,
+      거래량: Number(match[6]),
+      등락률: Math.round(changePercent * 100) / 100,
+    });
+    prevClose = close;
+  }
+  return rows;
+}
+
+/**
+ * Pure-Node OHLCV from Naver Finance. Primary source — pykrx needs matplotlib,
+ * whose native ft2font DLL fails to load on some Windows boxes, so it can crash
+ * locally. Naver is plain HTTP and works everywhere; pykrx stays as the fallback
+ * (e.g. if Naver geo-blocks a non-KR CI runner).
+ */
+async function fetchNaverOhlcvRows(ticker: string, daysBack = 365): Promise<OhlcvRow[] | null> {
+  const end = new Date();
+  const start = new Date(end);
+  start.setDate(end.getDate() - daysBack);
+  const url =
+    `https://api.finance.naver.com/siseJson.naver?symbol=${ticker}` +
+    `&requestType=1&startTime=${formatNaverDate(start)}&endTime=${formatNaverDate(end)}&timeframe=day`;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { "user-agent": "Mozilla/5.0", referer: "https://finance.naver.com/" },
+    });
+    if (!response.ok) return null;
+    const rows = parseNaverOhlcv(await response.text());
+    return rows.length > 0 ? rows : null;
+  } catch (error) {
+    console.warn(`[Naver OHLCV] Failed for ${ticker}:`, error);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function parseJsonText<T>(text: string): T | null {
   if (!text) {
     return null;
@@ -1142,38 +1204,21 @@ export async function fetchKoreanStockAnalysisData(
   const officialKrxSupplement = hasOfficialKrxApiKey()
     ? await fetchOfficialKrxSupplement(ticker)
     : pythonDirectSupplement;
-  const { startDate, endDate } = getDateRange(365);
-
-  try {
-    return await withTimeout(
-      withPykrxClient(async client => {
-        const ohlcvResult = await client.callTool({
-          name: "get_stock_ohlcv",
-          arguments: { ticker, start_date: startDate, end_date: endDate, adjusted: true },
-        });
-        const ohlcvParsed = parseJsonText<PykrxResponse<OhlcvRow>>(normalizeToolResult(ohlcvResult).text);
-
-        if (!isValidArrayPayload(ohlcvParsed)) {
-          return null;
-        }
-
-        return {
-          companyName,
-          corpCode: officialCorpInfo?.corp_code,
-          ohlcvRows: ohlcvParsed.data ?? [],
-          fundamentals: [],
-          marketCaps: officialKrxSupplement?.marketCaps ?? [],
-          tradingValues: officialKrxSupplement?.tradingValues ?? [],
-          krxProfile: officialKrxSupplement?.krxProfile ?? null,
-          officialFinancials,
-        };
-      }),
-      35000
-    );
-  } catch (error) {
-    console.warn(`[Korean Stock MCP] Failed for ${ticker}:`, error);
+  const ohlcvRows = await fetchKoreanOhlcvRows(ticker, 365);
+  if (!ohlcvRows || ohlcvRows.length === 0) {
     return null;
   }
+
+  return {
+    companyName,
+    corpCode: officialCorpInfo?.corp_code,
+    ohlcvRows,
+    fundamentals: [],
+    marketCaps: officialKrxSupplement?.marketCaps ?? [],
+    tradingValues: officialKrxSupplement?.tradingValues ?? [],
+    krxProfile: officialKrxSupplement?.krxProfile ?? null,
+    officialFinancials,
+  };
 }
 
 export async function fetchKoreanStockAnalysisDataBatch(
@@ -1237,6 +1282,12 @@ export async function fetchKoreanOhlcvRows(
     return null;
   }
 
+  // Primary: Naver (pure Node). Fall back to pykrx only if it fails.
+  const naverRows = await fetchNaverOhlcvRows(ticker, daysBack);
+  if (naverRows && naverRows.length > 0) {
+    return naverRows;
+  }
+
   const { startDate, endDate } = getDateRange(daysBack);
   const isBenchmarkTicker = BENCHMARK_TICKERS.has(ticker);
   const timeoutMs = Math.max(PYKRX_REQUEST_TIMEOUT_MS, isBenchmarkTicker ? 35000 : 20000);
@@ -1290,58 +1341,71 @@ export async function fetchKoreanOhlcvRowsBatch(
     return rowsByTicker;
   }
 
-  const { startDate, endDate } = getDateRange(daysBack);
+  // Primary: Naver, concurrency-limited.
+  const CONCURRENCY = 6;
+  for (let i = 0; i < uniqueTickers.length; i += CONCURRENCY) {
+    const chunk = uniqueTickers.slice(i, i + CONCURRENCY);
+    const fetched = await Promise.all(chunk.map(ticker => fetchNaverOhlcvRows(ticker, daysBack)));
+    chunk.forEach((ticker, index) => {
+      rowsByTicker[ticker] = fetched[index];
+    });
+    if (i + CONCURRENCY < uniqueTickers.length) {
+      await sleep(150);
+    }
+  }
 
-  try {
-    await withTimeout(
-      withPykrxClient(async client => {
-        for (const ticker of uniqueTickers) {
-          const attempts = BENCHMARK_TICKERS.has(ticker) ? 2 : 1;
-          const perTickerTimeoutMs = Math.max(
-            PYKRX_REQUEST_TIMEOUT_MS,
-            BENCHMARK_TICKERS.has(ticker) ? 35000 : 20000
-          );
-          rowsByTicker[ticker] = await retry(
-            async attempt => {
-              try {
-                const ohlcvResult = await withTimeout(
-                  client.callTool({
-                    name: "get_stock_ohlcv",
-                    arguments: { ticker, start_date: startDate, end_date: endDate, adjusted: true },
-                  }, undefined, {
-                    timeout: PYKRX_REQUEST_TIMEOUT_MS,
-                    maxTotalTimeout: PYKRX_REQUEST_TIMEOUT_MS,
-                  }),
-                  perTickerTimeoutMs
-                );
-                const ohlcvParsed = parseJsonText<PykrxResponse<OhlcvRow>>(
-                  normalizeToolResult(ohlcvResult).text
-                );
-                return isValidArrayPayload(ohlcvParsed) ? ohlcvParsed.data ?? [] : null;
-              } catch (error) {
-                if (attempt < attempts) {
-                  console.warn(
-                    `[Korean Stock MCP] Batch retry ${attempt}/${attempts - 1} for ${ticker} after OHLCV fetch failure:`,
-                    error
+  // Fallback: pykrx for any tickers Naver couldn't return (e.g. Naver geo-block on a CI runner).
+  const failed = uniqueTickers.filter(ticker => !rowsByTicker[ticker]?.length);
+  if (failed.length) {
+    const { startDate, endDate } = getDateRange(daysBack);
+    try {
+      await withTimeout(
+        withPykrxClient(async client => {
+          for (const ticker of failed) {
+            const attempts = BENCHMARK_TICKERS.has(ticker) ? 2 : 1;
+            const perTickerTimeoutMs = Math.max(
+              PYKRX_REQUEST_TIMEOUT_MS,
+              BENCHMARK_TICKERS.has(ticker) ? 35000 : 20000
+            );
+            rowsByTicker[ticker] = await retry(
+              async attempt => {
+                try {
+                  const ohlcvResult = await withTimeout(
+                    client.callTool({
+                      name: "get_stock_ohlcv",
+                      arguments: { ticker, start_date: startDate, end_date: endDate, adjusted: true },
+                    }, undefined, {
+                      timeout: PYKRX_REQUEST_TIMEOUT_MS,
+                      maxTotalTimeout: PYKRX_REQUEST_TIMEOUT_MS,
+                    }),
+                    perTickerTimeoutMs
                   );
+                  const ohlcvParsed = parseJsonText<PykrxResponse<OhlcvRow>>(
+                    normalizeToolResult(ohlcvResult).text
+                  );
+                  return isValidArrayPayload(ohlcvParsed) ? ohlcvParsed.data ?? [] : null;
+                } catch (error) {
+                  if (attempt < attempts) {
+                    console.warn(
+                      `[Korean Stock MCP] Batch retry ${attempt}/${attempts - 1} for ${ticker}:`,
+                      error
+                    );
+                  }
+                  throw error;
                 }
-                throw error;
-              }
-            },
-            attempts,
-            1500
-          ).catch(error => {
-            console.warn(`[Korean Stock MCP] Batch failed to fetch OHLCV for ${ticker}:`, error);
-            return null;
-          });
-        }
-      }),
-      Math.max(60000, uniqueTickers.length * 25000)
-    );
-  } catch (error) {
-    console.warn("[Korean Stock MCP] Batch OHLCV fetch failed:", error);
-    for (const ticker of uniqueTickers) {
-      rowsByTicker[ticker] ??= null;
+              },
+              attempts,
+              1500
+            ).catch(error => {
+              console.warn(`[Korean Stock MCP] pykrx fallback failed for ${ticker}:`, error);
+              return null;
+            });
+          }
+        }),
+        Math.max(60000, failed.length * 25000)
+      );
+    } catch (error) {
+      console.warn("[Korean Stock MCP] pykrx fallback batch failed:", error);
     }
   }
 
