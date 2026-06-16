@@ -79,7 +79,10 @@ export const BASE_GENOME: Genome = {
 };
 
 const EVOLUTION_DIR = path.join(process.cwd(), ".data", "evolution");
-const CHAMPION_PATH = path.join(EVOLUTION_DIR, "champion.json");
+// The champion lives in a TRACKED dir so it survives ephemeral CI runs (the
+// workflow commits it back) — that is what lets evolution accumulate across
+// generations instead of restarting from the daily baseline every run.
+const CHAMPION_PATH = path.join(process.cwd(), "data", "evolution", "champion.json");
 const HISTORY_PATH = path.join(EVOLUTION_DIR, "history.json");
 const REPORT_JSON_PATH = path.join(EVOLUTION_DIR, "latest-report.json");
 const REPORT_MD_PATH = path.join(EVOLUTION_DIR, "latest-report.md");
@@ -363,6 +366,7 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult> {
         "utf8"
       );
     }
+    await mkdir(path.dirname(CHAMPION_PATH), { recursive: true });
     await writeFile(
       CHAMPION_PATH,
       `${JSON.stringify(

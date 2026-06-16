@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-06-16T10:59:20.502Z",
+  "seed": 0,
+  "note": "Initial seed = base genome. Auto-updated by the evolution agent on promotion.",
+  "genome": {
+    "patternWeights": {
+      "밥그릇 2번자리": 20,
+      "밥그릇 1번자리": 18,
+      "밥그릇 패턴": 13,
+      "컵앤핸들": 8,
+      "하이힐 패턴": 7,
+      "돌파매매": 6
+    },
+    "quality": {
+      "minDefaultSwingScore": 62,
+      "minEarlyBowlSwingScore": 48,
+      "minVolumeRatio": 0.9,
+      "maxRsi14": 76,
+      "maxVolatility20": 45
+    }
+  }
+}

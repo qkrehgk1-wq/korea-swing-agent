@@ -13,12 +13,16 @@ concurrency:
 jobs:
   swing-recommendations:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       TZ: Asia/Seoul
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # corepack을 setup-node보다 먼저 켜야 pnpm 캐시가 동작합니다.
       - name: Enable Corepack (pnpm)
@@ -72,6 +76,22 @@ jobs:
           corepack pnpm start:swing:tune
           corepack pnpm start:swing:evolve || echo "evolve 건너뜀 (백테스트 데이터 부족 등)"
           corepack pnpm start:swing
+
+      # 진화 에이전트가 챔피언을 승격했으면 추적 파일을 저장소에 커밋백해
+      # 다음 런이 이어받게 한다(세대 누적). [skip ci]로 재귀 트리거 방지.
+      - name: Persist evolved champion
+        if: always()
+        continue-on-error: true
+        run: |
+          git add data/evolution/champion.json 2>/dev/null || true
+          if git diff --cached --quiet -- data/evolution/champion.json; then
+            echo "champion 변동 없음 — 커밋 생략"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore(evolution): 챔피언 게놈 갱신 [skip ci]"
+            git push
+          fi
 
       - name: Notify completion
         if: always()
