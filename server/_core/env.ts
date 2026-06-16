@@ -30,6 +30,17 @@ export const ENV = {
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
   anthropicModel: process.env.ANTHROPIC_MODEL || "claude-opus-4-8",
   llmEffort: (process.env.LLM_EFFORT || "high") as "low" | "medium" | "high" | "max",
+  // Additional LLM providers (fallback chain when Anthropic is unavailable).
+  openaiApiKey: process.env.OPENAI_API_KEY ?? "",
+  openaiModel: process.env.OPENAI_MODEL || "gpt-4o",
+  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  geminiModel: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+  openrouterApiKey: process.env.OPENROUTER_API_KEY ?? "",
+  openrouterModel: process.env.OPENROUTER_MODEL || "openai/gpt-4o",
+  // Provider priority order. Override to skip a capped provider, e.g.
+  // LLM_PROVIDER_ORDER="openai,gemini,anthropic".
+  llmProviderOrder:
+    process.env.LLM_PROVIDER_ORDER || "anthropic,openai,gemini,openrouter,forge",
   // Commander-only Telegram channel (raw high-conviction signals).
   commanderChatId: process.env.COMMANDER_CHAT_ID ?? "",
   // News / market-sentiment sources (optional).

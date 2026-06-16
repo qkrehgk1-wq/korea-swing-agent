@@ -215,14 +215,6 @@ const resolveApiUrl = () =>
     ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
     : "https://forge.manus.im/v1/chat/completions";
 
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error(
-      "LLM is not configured: set BUILT_IN_FORGE_API_KEY (and optionally BUILT_IN_FORGE_API_URL)."
-    );
-  }
-};
-
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Retry only on transient failures (network errors, timeouts, 429, 5xx).
@@ -275,39 +267,145 @@ const normalizeResponseFormat = ({
   };
 };
 
-type ForgeError = Error & { status?: number };
+type HttpError = Error & { status?: number };
 
-async function callForgeOnce(
-  payload: Record<string, unknown>,
+function buildOpenAIPayload(params: InvokeParams, model: string): Record<string, unknown> {
+  const payload: Record<string, unknown> = {
+    model,
+    messages: params.messages.map(normalizeMessage),
+    max_tokens: params.maxTokens ?? params.max_tokens ?? ENV.llmMaxTokens,
+  };
+
+  if (params.tools && params.tools.length > 0) {
+    payload.tools = params.tools;
+  }
+  const normalizedToolChoice = normalizeToolChoice(params.toolChoice || params.tool_choice, params.tools);
+  if (normalizedToolChoice) {
+    payload.tool_choice = normalizedToolChoice;
+  }
+  const normalizedResponseFormat = normalizeResponseFormat({
+    responseFormat: params.responseFormat,
+    response_format: params.response_format,
+    outputSchema: params.outputSchema,
+    output_schema: params.output_schema,
+  });
+  if (normalizedResponseFormat) {
+    payload.response_format = normalizedResponseFormat;
+  }
+  return payload;
+}
+
+async function postJsonOnce(
+  url: string,
+  headers: Record<string, string>,
+  body: unknown,
   timeoutMs: number
-): Promise<InvokeResult> {
+): Promise<any> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-
   try {
-    const response = await fetch(resolveApiUrl(), {
+    const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${ENV.forgeApiKey}`,
-      },
-      body: JSON.stringify(payload),
+      headers: { "content-type": "application/json", ...headers },
+      body: JSON.stringify(body),
       signal: controller.signal,
     });
-
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
-      const error: ForgeError = new Error(
-        `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+      const error: HttpError = new Error(
+        `${response.status} ${response.statusText} – ${errorText.slice(0, 300)}`
       );
       error.status = response.status;
       throw error;
     }
-
-    return (await response.json()) as InvokeResult;
+    return await response.json();
   } finally {
     clearTimeout(timer);
   }
+}
+
+// Retry a single provider call on transient failures; fail fast otherwise so
+// the caller can move to the next provider in the chain.
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  const maxRetries = Math.max(0, ENV.llmMaxRetries);
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      const status = (error as HttpError).status;
+      const isAbort = error instanceof Error && error.name === "AbortError";
+      const retriable = isAbort || status === undefined || isRetriableStatus(status);
+      if (!retriable || attempt === maxRetries) break;
+      await sleep(400 * 2 ** attempt);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(`${label} failed`);
+}
+
+// OpenAI-compatible /chat/completions — used by OpenAI, OpenRouter, and Forge.
+async function callOpenAICompatible(
+  params: InvokeParams,
+  opts: { url: string; apiKey: string; model: string }
+): Promise<InvokeResult> {
+  const payload = buildOpenAIPayload(params, opts.model);
+  return (await withRetry(
+    () => postJsonOnce(opts.url, { authorization: `Bearer ${opts.apiKey}` }, payload, ENV.llmTimeoutMs),
+    `openai-compatible(${opts.model})`
+  )) as InvokeResult;
+}
+
+// Google Gemini (Generative Language API) — different request/response shape.
+async function callGemini(params: InvokeParams): Promise<InvokeResult> {
+  const systemParts: string[] = [];
+  const contents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }> = [];
+  for (const message of params.messages) {
+    const text = messageToText(message);
+    if (!text) continue;
+    if (message.role === "system") {
+      systemParts.push(text);
+    } else {
+      contents.push({
+        role: message.role === "assistant" ? "model" : "user",
+        parts: [{ text }],
+      });
+    }
+  }
+
+  const body: Record<string, unknown> = {
+    contents: contents.length ? contents : [{ role: "user", parts: [{ text: " " }] }],
+    generationConfig: {
+      maxOutputTokens: params.maxTokens ?? params.max_tokens ?? ENV.llmMaxTokens,
+    },
+  };
+  if (systemParts.length) {
+    body.systemInstruction = { parts: [{ text: systemParts.join("\n\n") }] };
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${ENV.geminiModel}:generateContent?key=${ENV.geminiApiKey}`;
+  const data = await withRetry(
+    () => postJsonOnce(url, {}, body, ENV.llmTimeoutMs),
+    `gemini(${ENV.geminiModel})`
+  );
+
+  const text = (data?.candidates?.[0]?.content?.parts ?? [])
+    .map((part: any) => (typeof part?.text === "string" ? part.text : ""))
+    .join("");
+  const usage = data?.usageMetadata ?? {};
+  return {
+    id: `gemini-${Date.now()}`,
+    created: Date.now(),
+    model: ENV.geminiModel,
+    choices: [
+      { index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" },
+    ],
+    usage: {
+      prompt_tokens: usage.promptTokenCount ?? 0,
+      completion_tokens: usage.candidatesTokenCount ?? 0,
+      total_tokens: usage.totalTokenCount ?? 0,
+    },
+  };
 }
 
 let anthropicClient: Anthropic | null = null;
@@ -379,91 +477,81 @@ async function callAnthropic(params: InvokeParams): Promise<InvokeResult> {
   };
 }
 
+type LlmProvider = { name: string; available: boolean; call: () => Promise<InvokeResult> };
+
+/**
+ * Multi-provider LLM with a fallback chain. Tries each configured provider in
+ * priority order (LLM_PROVIDER_ORDER) and moves to the next on any failure —
+ * so a capped/rate-limited Anthropic key transparently falls through to
+ * OpenAI → Gemini → OpenRouter → Forge instead of dropping to deterministic.
+ */
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  // Prefer Anthropic direct (real Claude) when configured; otherwise use Forge.
-  if (ENV.anthropicApiKey) {
-    return callAnthropic(params);
-  }
-
-  assertApiKey();
-
-  const {
-    messages,
-    tools,
-    toolChoice,
-    tool_choice,
-    outputSchema,
-    output_schema,
-    responseFormat,
-    response_format,
-  } = params;
-
-  const buildPayload = (model: string): Record<string, unknown> => {
-    const payload: Record<string, unknown> = {
-      model,
-      messages: messages.map(normalizeMessage),
-      max_tokens: params.maxTokens ?? params.max_tokens ?? ENV.llmMaxTokens,
-    };
-
-    if (tools && tools.length > 0) {
-      payload.tools = tools;
-    }
-
-    const normalizedToolChoice = normalizeToolChoice(toolChoice || tool_choice, tools);
-    if (normalizedToolChoice) {
-      payload.tool_choice = normalizedToolChoice;
-    }
-
-    // Extended thinking is opt-in (off by default) so the payload stays
-    // compatible across Claude/Gemini model ids exposed by the Forge proxy.
-    if (ENV.llmThinkingBudget > 0) {
-      payload.thinking = { budget_tokens: ENV.llmThinkingBudget };
-    }
-
-    const normalizedResponseFormat = normalizeResponseFormat({
-      responseFormat,
-      response_format,
-      outputSchema,
-      output_schema,
-    });
-    if (normalizedResponseFormat) {
-      payload.response_format = normalizedResponseFormat;
-    }
-
-    return payload;
+  const registry: Record<string, () => LlmProvider> = {
+    anthropic: () => ({
+      name: "anthropic",
+      available: Boolean(ENV.anthropicApiKey),
+      call: () => callAnthropic(params),
+    }),
+    openai: () => ({
+      name: "openai",
+      available: Boolean(ENV.openaiApiKey),
+      call: () =>
+        callOpenAICompatible(params, {
+          url: "https://api.openai.com/v1/chat/completions",
+          apiKey: ENV.openaiApiKey,
+          model: ENV.openaiModel,
+        }),
+    }),
+    gemini: () => ({
+      name: "gemini",
+      available: Boolean(ENV.geminiApiKey),
+      call: () => callGemini(params),
+    }),
+    openrouter: () => ({
+      name: "openrouter",
+      available: Boolean(ENV.openrouterApiKey),
+      call: () =>
+        callOpenAICompatible(params, {
+          url: "https://openrouter.ai/api/v1/chat/completions",
+          apiKey: ENV.openrouterApiKey,
+          model: ENV.openrouterModel,
+        }),
+    }),
+    forge: () => ({
+      name: "forge",
+      available: Boolean(ENV.forgeApiKey),
+      call: () =>
+        callOpenAICompatible(params, {
+          url: resolveApiUrl(),
+          apiKey: ENV.forgeApiKey,
+          model: ENV.forgeModel,
+        }),
+    }),
   };
 
-  // Try the primary model, then the fallback model if the primary is rejected
-  // (e.g. the gateway does not recognise the Claude id). Transient failures are
-  // retried with exponential backoff before moving on.
-  const models = [ENV.forgeModel, ENV.forgeModelFallback].filter(
-    (model, index, all) => model && all.indexOf(model) === index
-  );
-  const maxRetries = Math.max(0, ENV.llmMaxRetries);
+  const providers = ENV.llmProviderOrder
+    .split(",")
+    .map(name => registry[name.trim().toLowerCase()]?.())
+    .filter((p): p is LlmProvider => Boolean(p && p.available));
+
+  if (providers.length === 0) {
+    throw new Error(
+      "No LLM provider configured. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, or BUILT_IN_FORGE_API_KEY."
+    );
+  }
+
   let lastError: unknown;
-
-  for (const model of models) {
-    const payload = buildPayload(model);
-
-    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-      try {
-        return await callForgeOnce(payload, ENV.llmTimeoutMs);
-      } catch (error) {
-        lastError = error;
-        const status = (error as ForgeError).status;
-        const isAbort = error instanceof Error && error.name === "AbortError";
-        const retriable = isAbort || status === undefined || isRetriableStatus(status);
-
-        // Non-retriable client error (bad/unknown model) → stop retrying this
-        // model and let the loop fall through to the fallback model.
-        if (!retriable || attempt === maxRetries) break;
-
-        await sleep(400 * 2 ** attempt);
-      }
+  for (const provider of providers) {
+    try {
+      return await provider.call();
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`[LLM] provider '${provider.name}' failed, trying next: ${message.slice(0, 200)}`);
     }
   }
 
   throw lastError instanceof Error
     ? lastError
-    : new Error("LLM invoke failed for an unknown reason");
+    : new Error("All LLM providers failed");
 }
