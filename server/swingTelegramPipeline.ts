@@ -20,6 +20,7 @@ import {
   notifyDailySwingCandidates,
   notifyDailySwingFailure,
 } from "./notificationService";
+import { recordRecommendations } from "./recommendationJournalAgent";
 import {
   createSwingPipelineExecutionReport,
   createSwingPipelineSeed,
@@ -170,6 +171,9 @@ async function runSwingTelegramPipeline() {
           danteLearning,
           telegramDelivered: true,
         })
+      );
+      await recordRecommendations(mergedSwingCandidates).catch(error =>
+        console.warn("[Swing Pipeline] Journal record failed:", error)
       );
       console.log("[Swing Pipeline] Telegram swing and limit-up alert sent");
     } else {

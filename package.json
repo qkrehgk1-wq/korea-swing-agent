@@ -17,6 +17,7 @@
     "start:swing:backtest": "cross-env NODE_ENV=production tsx server/swingBacktestAgent.ts",
     "start:swing:tune": "cross-env NODE_ENV=production tsx server/swingAdaptiveTuningAgent.ts",
     "start:swing:evolve": "cross-env NODE_ENV=production tsx server/swingEvolutionAgent.ts",
+    "start:swing:journal": "cross-env NODE_ENV=production tsx server/recommendationJournalAgent.ts",
     "start:tenbagger": "cross-env NODE_ENV=production tsx server/tenbaggerPipeline.ts",
     "check": "tsc --noEmit",
     "format": "prettier --write .",

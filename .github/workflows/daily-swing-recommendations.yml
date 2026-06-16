@@ -80,19 +80,28 @@ jobs:
           corepack pnpm start:swing:evolve || echo "evolve 건너뜀 (백테스트 데이터 부족 등)"
           corepack pnpm start:swing
 
-      # 진화 에이전트가 챔피언을 승격했으면 추적 파일을 저장소에 커밋백해
-      # 다음 런이 이어받게 한다(세대 누적). [skip ci]로 재귀 트리거 방지.
-      - name: Persist evolved champion
+      # 만기된 과거 추천을 실제 가격으로 채점(전송 실패와 무관하게 always 실행).
+      - name: Score recommendation journal
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COMMANDER_CHAT_ID: ${{ secrets.COMMANDER_CHAT_ID }}
+        run: corepack pnpm start:swing:journal || echo "journal 채점 건너뜀"
+
+      # 진화 챔피언 + 추천 저널(추적 파일)을 저장소에 커밋백해 다음 런이
+      # 이어받게 한다. [skip ci]로 재귀 트리거 방지.
+      - name: Persist champion and journal
         if: always()
         continue-on-error: true
         run: |
-          git add data/evolution/champion.json 2>/dev/null || true
-          if git diff --cached --quiet -- data/evolution/champion.json; then
-            echo "champion 변동 없음 — 커밋 생략"
+          git add data/ 2>/dev/null || true
+          if git diff --cached --quiet -- data/; then
+            echo "추적 데이터 변동 없음 — 커밋 생략"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore(evolution): 챔피언 게놈 갱신 [skip ci]"
+            git commit -m "chore(data): 챔피언/추천저널 갱신 [skip ci]"
             git push
           fi
 
