@@ -1,0 +1,80 @@
+[
+  {
+    "date": "2026-06-18",
+    "ticker": "028300",
+    "companyName": "HLB",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 51562,
+    "stopLossPrice": 46410,
+    "targetPrice": 61866,
+    "swingScore": 80,
+    "recordedAt": "2026-06-17T20:37:34.648Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-18",
+    "ticker": "348370",
+    "companyName": "엔켐",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 36236,
+    "stopLossPrice": 30549,
+    "targetPrice": 47610,
+    "swingScore": 64,
+    "recordedAt": "2026-06-17T20:37:34.648Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-18",
+    "ticker": "035420",
+    "companyName": "NAVER",
+    "market": "코스피",
+    "source": "swing",
+    "triggerPrice": 247152,
+    "stopLossPrice": 195330,
+    "targetPrice": 350796,
+    "swingScore": 87,
+    "recordedAt": "2026-06-17T20:37:34.648Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-18",
+    "ticker": "015760",
+    "companyName": "한국전력",
+    "market": "코스피",
+    "source": "swing",
+    "triggerPrice": 41107,
+    "stopLossPrice": 36618,
+    "targetPrice": 50085,
+    "swingScore": 76,
+    "recordedAt": "2026-06-17T20:37:34.648Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-18",
+    "ticker": "207940",
+    "companyName": "삼성바이오로직스",
+    "market": "코스피",
+    "source": "swing",
+    "triggerPrice": 1390550,
+    "stopLossPrice": 1267860,
+    "targetPrice": 1635930,
+    "swingScore": 79,
+    "recordedAt": "2026-06-17T20:37:34.648Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-18",
+    "ticker": "064350",
+    "companyName": "현대로템",
+    "market": "코스피",
+    "source": "swing",
+    "triggerPrice": 222285,
+    "stopLossPrice": 172278,
+    "targetPrice": 322299,
+    "swingScore": 75,
+    "recordedAt": "2026-06-17T20:37:34.648Z",
+    "status": "open"
+  }
+]
