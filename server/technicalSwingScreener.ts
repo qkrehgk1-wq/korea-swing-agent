@@ -9,6 +9,7 @@ import {
   type OhlcvRow,
 } from "./koreaStockMcp";
 import { SWING_UNIVERSE_FALLBACK } from "./swingUniverseFallback";
+import { analyzeTechnicalConfluence, type ConfluenceResult } from "./technicalConfluence";
 
 export type PatternName =
   | "밥그릇 1번자리"
@@ -42,6 +43,10 @@ export type TechnicalSwingCandidate = {
   marketRegimeLabel: "강세" | "중립" | "약세";
   marketRegimeScore: number;
   reason: string[];
+  qualityScore?: number;
+  relativeStrength?: number;
+  fibExtensionTarget?: number | null;
+  confluenceSignals?: string[];
 };
 
 type Candidate = TechnicalSwingCandidate;
@@ -756,6 +761,7 @@ function buildCandidate(
   detections: Array<{ name: PatternName; result: PatternDetection }>,
   regime: MarketRegime,
   patternWeights: SwingPatternWeights,
+  confluence: ConfluenceResult,
   qualityOverrides?: Partial<SwingQualityParams> | null
 ): Candidate | null {
   const patterns = detections.filter(item => item.result.matched).map(item => item.name);
@@ -800,6 +806,26 @@ function buildCandidate(
   if (swingScore < (isEarlyBowl ? minEarlyBowlSwingScore : minDefaultSwingScore) && patterns.length === 1) {
     return null;
   }
+
+  // Multi-factor confluence quality gate — proven leadership/trend/golden-ratio
+  // filters that reject single-pattern noise (the main lever on candidate quality).
+  const minConfluence = Number(process.env.MIN_CONFLUENCE_SCORE) || 50;
+  const confluenceFloor = isEarlyBowl ? Math.max(30, minConfluence - 12) : minConfluence;
+  const rsFloorEnv = Number(process.env.MIN_RELATIVE_STRENGTH);
+  const rsFloor = Number.isFinite(rsFloorEnv) ? rsFloorEnv : -10;
+  if (confluence.relativeStrength60 < rsFloor) {
+    return null; // chronically lagging its index — not a leadership stock
+  }
+  if (confluence.overExtended && !isEarlyBowl) {
+    return null; // anti-FOMO: do not chase a stock stretched far above its 20MA
+  }
+  if (!isEarlyBowl && !confluence.trendAligned) {
+    return null; // breakout/continuation setups must sit in an uptrend
+  }
+  if (confluence.qualityScore < confluenceFloor) {
+    return null;
+  }
+
   const triggerPrice = Math.round(
     isEarlyBowl
       ? Math.max(indicators.currentPrice * 1.015, indicators.ma20 * 1.01)
@@ -811,13 +837,18 @@ function buildCandidate(
       : Math.min(indicators.ma20, indicators.ma60 * 0.98)
   );
 
+  // Blend the pattern score with the multi-factor confluence quality so the final
+  // score reflects leadership + trend + momentum, not just the chart pattern.
+  const blendedScore = Math.round(swingScore * 0.55 + confluence.qualityScore * 0.45);
+  const blendedFit = blendedScore >= 78 ? "상" : blendedScore >= 62 ? "중" : "관찰";
+
   return {
     ticker,
     companyName,
     market: marketFor(ticker),
     patterns,
-    swingScore,
-    swingFit,
+    swingScore: blendedScore,
+    swingFit: blendedFit,
     currentPrice: indicators.currentPrice,
     triggerPrice,
     stopLossPrice,
@@ -826,7 +857,14 @@ function buildCandidate(
     volatility20: Number(indicators.volatility20.toFixed(1)),
     marketRegimeLabel: regime.label,
     marketRegimeScore: regime.score,
-    reason: detections.filter(item => item.result.matched).map(item => item.result.note),
+    reason: [
+      ...detections.filter(item => item.result.matched).map(item => item.result.note),
+      ...confluence.signals,
+    ],
+    qualityScore: confluence.qualityScore,
+    relativeStrength: confluence.relativeStrength60,
+    fibExtensionTarget: confluence.fibExtensionTarget,
+    confluenceSignals: confluence.signals,
   };
 }
 
@@ -924,6 +962,8 @@ export async function screenTechnicalSwingCandidatesFromRows(
   const kosdaqRegime = assessMarketRegime(buildIndicatorSnapshot(toBars(kosdaqRows)));
   const marketRegime =
     kospiRegime.score <= kosdaqRegime.score ? kospiRegime : kosdaqRegime;
+  const kospiBars = toBars(kospiRows);
+  const kosdaqBars = toBars(kosdaqRows);
 
   const scanned = await mapWithConcurrency(
     tickers,
@@ -956,6 +996,9 @@ export async function screenTechnicalSwingCandidatesFromRows(
         { name: "컵앤핸들" as const, result: detectCupHandlePattern(bars, indicators) },
       ];
 
+      const benchmarkBars = marketFor(ticker) === "코스닥" ? kosdaqBars : kospiBars;
+      const confluence = analyzeTechnicalConfluence(bars, benchmarkBars);
+
       return {
         ticker,
         candidate: buildCandidate(
@@ -965,6 +1008,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
           detections,
           marketRegime,
           patternWeights,
+          confluence,
           qualityOverrides
         ),
         skipReason: null,

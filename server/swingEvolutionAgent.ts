@@ -147,11 +147,11 @@ export function genomeToInjected(genome: Genome): InjectedSwingOverrides {
  * for a lucky high win-rate on a handful of trades.
  */
 export function genomeFitness(summary: BacktestSummary): number {
-  const minTrades = Number(process.env.EVOLUTION_MIN_TRADES) || 15;
+  const minTrades = Number(process.env.EVOLUTION_MIN_TRADES) || 8;
   if (summary.totalTrades < minTrades) {
     return -1000 + summary.totalTrades;
   }
-  const targetTrades = Number(process.env.EVOLUTION_TARGET_TRADES) || 40;
+  const targetTrades = Number(process.env.EVOLUTION_TARGET_TRADES) || 20;
   const sampleConfidence = Math.min(1, summary.totalTrades / targetTrades);
   const edge = summary.avgReturnPct + (summary.winRate - 50) * 0.04 - summary.stopRate * 0.02;
   return Number((edge * sampleConfidence).toFixed(4));
@@ -167,7 +167,7 @@ export function shouldPromote(
   challenger: Evaluation
 ): { promote: boolean; reason: string } {
   const margin = Number(process.env.EVOLUTION_PROMOTE_MARGIN) || 0.15;
-  const minTrades = Number(process.env.EVOLUTION_MIN_PROMOTE_TRADES) || 20;
+  const minTrades = Number(process.env.EVOLUTION_MIN_PROMOTE_TRADES) || 10;
   if (challenger.summary.totalTrades < minTrades) {
     return { promote: false, reason: `표본 부족 (${challenger.summary.totalTrades} < ${minTrades})` };
   }

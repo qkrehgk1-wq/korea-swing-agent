@@ -105,8 +105,8 @@ describe("genomeFitness", () => {
   });
 
   it("scales down low-sample strong runs via sample confidence", () => {
-    const lowSample = genomeFitness(summary({ totalTrades: 20, avgReturnPct: 2, winRate: 60 }));
-    const fullSample = genomeFitness(summary({ totalTrades: 40, avgReturnPct: 2, winRate: 60 }));
+    const lowSample = genomeFitness(summary({ totalTrades: 10, avgReturnPct: 2, winRate: 60 }));
+    const fullSample = genomeFitness(summary({ totalTrades: 20, avgReturnPct: 2, winRate: 60 }));
     expect(fullSample).toBeGreaterThan(lowSample);
   });
 });
@@ -125,7 +125,7 @@ describe("shouldPromote", () => {
   });
 
   it("holds when the challenger has too few trades", () => {
-    const challenger = evaluation(2.0, { totalTrades: 10, avgReturnPct: 3, winRate: 70 });
+    const challenger = evaluation(2.0, { totalTrades: 6, avgReturnPct: 3, winRate: 70 });
     expect(shouldPromote(incumbent, challenger).promote).toBe(false);
   });
 
