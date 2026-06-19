@@ -34,6 +34,11 @@ type SwingCandidate = {
   volumeRatio?: number;
   rsi14?: number;
   reason?: string[];
+  marketRegimeLabel?: "강세" | "중립" | "약세";
+  marketRegimeScore?: number;
+  supplyState?: "accumulating" | "distributing" | "neutral";
+  qualityScore?: number;
+  relativeStrength?: number;
 };
 
 type LimitUpPredictionCandidate = {
@@ -231,13 +236,27 @@ function won(value: number): string {
   return Math.round(value).toLocaleString("ko-KR");
 }
 
+function supplyMark(candidate: SwingCandidate): string {
+  if (candidate.supplyState === "accumulating") return " 🟢매집";
+  if (candidate.supplyState === "distributing") return " 🔴분산";
+  return "";
+}
+
 function formatPick(candidate: SwingCandidate, rMultiple: number): string {
   const pct = expectedReturnPct(candidate, rMultiple);
-  const reason = [candidate.patterns?.[0], candidate.reason?.[0]].filter(Boolean).join(" · ");
+  const rs =
+    typeof candidate.relativeStrength === "number"
+      ? `RS${candidate.relativeStrength >= 0 ? "+" : ""}${candidate.relativeStrength}`
+      : "";
+  const confluence =
+    candidate.reason?.find(r => r.includes("황금비") || r.includes("VCP") || r.includes("ADX")) ??
+    candidate.patterns?.[0] ??
+    "";
+  const detail = [rs, confluence].filter(Boolean).join(" · ");
   return [
-    `${candidate.companyName} ${candidate.ticker} · ${decisionLabel(candidate)} ${candidate.swingScore}`,
+    `${candidate.companyName} ${candidate.ticker} · ${decisionLabel(candidate)} ${candidate.swingScore}${supplyMark(candidate)}`,
     `  진입 ${won(candidate.triggerPrice)} · 손절 ${won(candidate.stopLossPrice)} · 기대 +${pct}%`,
-    reason ? `  ${reason}` : "",
+    detail ? `  ${detail}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -249,20 +268,21 @@ function kstDateLabel(now: Date): string {
   return `${kst.getMonth() + 1}/${kst.getDate()}(${days[kst.getDay()]})`;
 }
 
-export async function notifyDailySwingCandidates(
+export function buildDailySwingMessage(
   candidates: SwingCandidate[],
   limitUpCandidates: LimitUpPredictionCandidate[] = [],
   firstLimitUpCandidates: FirstLimitUpFollowThroughCandidate[] = [],
-  _externalPlatformReport?: ExternalPlatformReport,
-  _agentTeamReport?: AgentTeamReport,
-  _kosdaqFocusCandidates: SwingCandidate[] = []
-): Promise<NotificationDeliveryResult> {
-  const title = `📊 한국 스윙 · ${kstDateLabel(new Date())}`;
+  now: Date = new Date()
+): { title: string; body: string } {
+  const title = `📊 한국 스윙 · ${kstDateLabel(now)}`;
   const ranked = [...candidates].sort((a, b) => b.swingScore - a.swingScore);
+  const regime = ranked[0]?.marketRegimeLabel;
+  const riskOff = regime === "약세";
+  const picksPerGroup = riskOff ? 1 : 2;
 
   const sections: string[] = [];
   for (const horizon of HORIZONS) {
-    const picks = ranked.filter(c => inferHorizon(c) === horizon.key).slice(0, 2);
+    const picks = ranked.filter(c => inferHorizon(c) === horizon.key).slice(0, picksPerGroup);
     if (!picks.length) continue;
     sections.push([horizon.header, ...picks.map(c => formatPick(c, horizon.rMultiple))].join("\n"));
   }
@@ -275,9 +295,28 @@ export async function notifyDailySwingCandidates(
   if (limitUpNames.length) footer.push(`⚡ 상한가 후보: ${limitUpNames.join(" · ")}`);
   footer.push("🔒 전체 근거·차트 → 대시보드");
 
+  const regimeBanner = riskOff
+    ? "⚠️ 시장 약세 — 신규 진입 신중·비중 축소·현금 권고"
+    : regime === "강세"
+      ? "🟢 시장 강세 — 추세 우호적"
+      : "";
   const body = sections.length
-    ? [`KOSPI·KOSDAQ 자동 스캔 · ${ranked.length}종목`, "", ...sections, "", ...footer].join("\n")
+    ? [regimeBanner, `KOSPI·KOSDAQ 자동 스캔 · ${ranked.length}종목`, "", ...sections, "", ...footer]
+        .filter(Boolean)
+        .join("\n")
     : "오늘은 조건에 맞는 스윙 후보가 없습니다.";
+  return { title, body };
+}
+
+export async function notifyDailySwingCandidates(
+  candidates: SwingCandidate[],
+  limitUpCandidates: LimitUpPredictionCandidate[] = [],
+  firstLimitUpCandidates: FirstLimitUpFollowThroughCandidate[] = [],
+  _externalPlatformReport?: ExternalPlatformReport,
+  _agentTeamReport?: AgentTeamReport,
+  _kosdaqFocusCandidates: SwingCandidate[] = []
+): Promise<NotificationDeliveryResult> {
+  const { title, body } = buildDailySwingMessage(candidates, limitUpCandidates, firstLimitUpCandidates);
 
   try {
     return await deliverMultiChannelNotification(title, body);
