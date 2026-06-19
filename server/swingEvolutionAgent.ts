@@ -28,6 +28,7 @@ import {
   type PatternName,
   type SwingQualityParams,
 } from "./technicalSwingScreener";
+import { loadRecommendationJournal, summarizeJournal } from "./recommendationJournalAgent";
 
 /**
  * Self-evolving strategy optimizer. Treats the screener's tunable parameters
@@ -319,6 +320,38 @@ function toMarkdown(result: EvolutionRunResult): string {
   ].join("\n");
 }
 
+/**
+ * Realized fitness of the live champion from the recommendation journal —
+ * settled picks tagged with this champion's fingerprint, scored with the same
+ * fitness formula as the backtest so the two are directly comparable. Returns
+ * null until enough live picks have settled.
+ */
+async function liveFitnessForChampion(): Promise<number | null> {
+  const champion = await readJson<{ generatedAt?: string }>(CHAMPION_PATH);
+  if (!champion?.generatedAt) return null;
+  const minSamples = Number(process.env.EVOLUTION_LIVE_MIN_SAMPLES) || 8;
+  const journal = await loadRecommendationJournal();
+  const settled = journal.filter(
+    entry =>
+      entry.championAt === champion.generatedAt &&
+      (entry.status === "target" || entry.status === "stop" || entry.status === "time_exit")
+  );
+  if (settled.length < minSamples) return null;
+  const summary = summarizeJournal(settled);
+  return genomeFitness({
+    totalSignals: settled.length,
+    totalTrades: summary.triggered,
+    winRate: summary.winRate,
+    avgReturnPct: summary.avgReturnPct,
+    medianReturnPct: 0,
+    stopRate: summary.stopRate,
+    targetRate: summary.targetRate,
+    noTriggerRate: 0,
+    patternStats: [],
+    elliottLabelStats: [],
+  });
+}
+
 function shouldRunFullEvolution(): boolean {
   if ((process.env.EVOLUTION_FORCE ?? "") === "true") return true;
   const configured = Number(process.env.EVOLUTION_DAY);
@@ -370,7 +403,23 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
     return { genome, summary, fitness: genomeFitness(summary) };
   };
 
-  const incumbent = await evaluate(await loadChampionGenome());
+  const incumbentRaw = await evaluate(await loadChampionGenome());
+  // Ground the incumbent in REAL outcomes: blend its backtest fitness with the
+  // realized fitness of its live recommendations (journal). A champion that is
+  // actually winning live is protected; one that is losing is easier to unseat,
+  // so evolution responds to reality, not just historical replay.
+  const liveFit = await liveFitnessForChampion();
+  const liveWeight = Number(process.env.EVOLUTION_LIVE_WEIGHT) || 0.4;
+  const incumbentFitness =
+    liveFit === null ? incumbentRaw.fitness : incumbentRaw.fitness * (1 - liveWeight) + liveFit * liveWeight;
+  if (liveFit !== null) {
+    console.log(
+      `[Swing Evolution] 실현성과 반영: 라이브 ${liveFit.toFixed(3)} × ${liveWeight} → 챔피언 ${incumbentRaw.fitness.toFixed(
+        3
+      )} → ${incumbentFitness.toFixed(3)}`
+    );
+  }
+  const incumbent: Evaluation = { ...incumbentRaw, fitness: incumbentFitness };
   let best = incumbent;
   const lineage: EvolutionRunResult["lineage"] = [];
 

@@ -24,6 +24,7 @@ export type RecommendationEntry = {
   companyName: string;
   market?: string;
   source: "swing";
+  championAt?: string;
   triggerPrice: number;
   stopLossPrice: number;
   targetPrice: number;
@@ -94,6 +95,26 @@ async function readJournal(): Promise<RecommendationEntry[]> {
 async function writeJournal(entries: RecommendationEntry[]): Promise<void> {
   await mkdir(path.dirname(JOURNAL_PATH), { recursive: true });
   await writeFile(JOURNAL_PATH, `${JSON.stringify(entries, null, 2)}\n`, "utf8");
+}
+
+/** Exposes the journal so the evolution agent can learn from realized outcomes. */
+export async function loadRecommendationJournal(): Promise<RecommendationEntry[]> {
+  return readJournal();
+}
+
+const CHAMPION_PATH = path.join(process.cwd(), "data", "evolution", "champion.json");
+
+/**
+ * Fingerprint (champion timestamp) live when a pick is recorded, so realized
+ * outcomes can later be attributed to the champion strategy that produced them.
+ */
+async function readChampionFingerprint(): Promise<string | undefined> {
+  try {
+    const champion = JSON.parse(await readFile(CHAMPION_PATH, "utf8")) as { generatedAt?: string };
+    return typeof champion.generatedAt === "string" ? champion.generatedAt : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -196,6 +217,7 @@ export async function recordRecommendations(
   const recordedAt = now.toISOString();
   const seen = new Set(journal.map(entry => `${entry.date}|${entry.ticker}`));
   const r = targetMultiple();
+  const championAt = await readChampionFingerprint();
 
   let added = 0;
   for (const candidate of candidates) {
@@ -217,6 +239,7 @@ export async function recordRecommendations(
       stopLossPrice: candidate.stopLossPrice,
       targetPrice,
       swingScore: candidate.swingScore,
+      championAt,
       recordedAt,
       status: "open",
     });
