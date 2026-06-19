@@ -9,6 +9,7 @@ import "dotenv/config";
 
 import { screenTechnicalSwingCandidates, type TechnicalSwingCandidate } from "./technicalSwingScreener";
 import { fetchSupplyTrend } from "./koreaStockMcp";
+import { assessNewsSentiment } from "./newsSentimentAgent";
 import { predictLimitUpCandidates } from "./limitUpPredictionAgent";
 import { predictFirstLimitUpFollowThroughCandidates } from "./firstLimitUpFollowThroughAgent";
 import { collectCompanyIntelligence } from "./agentTeams/companyIntelligenceAgent";
@@ -41,24 +42,36 @@ function uniqueByTicker<T extends { ticker: string }>(items: T[]) {
 }
 
 /**
- * Foreign + institutional net-buying confirmation for the final swing picks
- * (cheap — only the few survivors). Accumulation nudges the score up, smart-money
- * distribution nudges it down, and the note is surfaced in the alert.
+ * Final-pick enrichment (cheap — only the survivors): foreign/institutional
+ * supply (smart-money accumulation/distribution) + behavioral news sentiment.
+ * Both nudge the score and surface a note in the alert.
  */
-async function enrichSwingCandidatesWithSupply(candidates: TechnicalSwingCandidate[]): Promise<void> {
+async function enrichSwingCandidates(candidates: TechnicalSwingCandidate[]): Promise<void> {
   await Promise.all(
     candidates.map(async candidate => {
-      const supply = await fetchSupplyTrend(candidate.ticker);
-      if (!supply) {
-        return;
+      const [supply, news] = await Promise.all([
+        fetchSupplyTrend(candidate.ticker),
+        assessNewsSentiment(candidate.companyName),
+      ]);
+      if (supply) {
+        candidate.supplyState = supply.state;
+        candidate.supplyNote = supply.note;
+        candidate.reason = [...candidate.reason, supply.note];
+        if (supply.state === "accumulating") {
+          candidate.swingScore = Math.min(100, candidate.swingScore + 4);
+        } else if (supply.state === "distributing") {
+          candidate.swingScore = Math.max(0, candidate.swingScore - 8);
+        }
       }
-      candidate.supplyState = supply.state;
-      candidate.supplyNote = supply.note;
-      candidate.reason = [...candidate.reason, supply.note];
-      if (supply.state === "accumulating") {
-        candidate.swingScore = Math.min(100, candidate.swingScore + 4);
-      } else if (supply.state === "distributing") {
-        candidate.swingScore = Math.max(0, candidate.swingScore - 8);
+      if (news && news.state !== "neutral") {
+        candidate.newsState = news.state;
+        candidate.newsNote = news.note;
+        candidate.reason = [...candidate.reason, news.note];
+        if (news.state === "negative") {
+          candidate.swingScore = Math.max(0, candidate.swingScore - 6);
+        } else if (news.state === "positive") {
+          candidate.swingScore = Math.min(100, candidate.swingScore + 2);
+        }
       }
     })
   );
@@ -80,7 +93,7 @@ async function runSwingTelegramPipeline() {
     const externalPlatformReport = await externalPlatformPromise;
     const { candidates, notes, scannedTickers } = result;
     const mergedSwingCandidates = uniqueByTicker([...kosdaqTeamResult.candidates, ...candidates]);
-    await enrichSwingCandidatesWithSupply(mergedSwingCandidates);
+    await enrichSwingCandidates(mergedSwingCandidates);
 
     console.log(
       `[Swing Pipeline] Scanned ${scannedTickers.length} tickers, matched ${candidates.length} candidates`

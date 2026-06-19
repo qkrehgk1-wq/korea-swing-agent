@@ -49,6 +49,8 @@ export type TechnicalSwingCandidate = {
   confluenceSignals?: string[];
   supplyState?: "accumulating" | "distributing" | "neutral";
   supplyNote?: string;
+  newsState?: "positive" | "negative" | "neutral";
+  newsNote?: string;
 };
 
 type Candidate = TechnicalSwingCandidate;

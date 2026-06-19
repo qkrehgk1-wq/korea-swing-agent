@@ -39,6 +39,7 @@ type SwingCandidate = {
   supplyState?: "accumulating" | "distributing" | "neutral";
   qualityScore?: number;
   relativeStrength?: number;
+  newsState?: "positive" | "negative" | "neutral";
 };
 
 type LimitUpPredictionCandidate = {
@@ -242,6 +243,12 @@ function supplyMark(candidate: SwingCandidate): string {
   return "";
 }
 
+function newsMark(candidate: SwingCandidate): string {
+  if (candidate.newsState === "negative") return " 🔴악재";
+  if (candidate.newsState === "positive") return " 🟢호재";
+  return "";
+}
+
 function formatPick(candidate: SwingCandidate, rMultiple: number): string {
   const pct = expectedReturnPct(candidate, rMultiple);
   const rs =
@@ -254,7 +261,7 @@ function formatPick(candidate: SwingCandidate, rMultiple: number): string {
     "";
   const detail = [rs, confluence].filter(Boolean).join(" · ");
   return [
-    `${candidate.companyName} ${candidate.ticker} · ${decisionLabel(candidate)} ${candidate.swingScore}${supplyMark(candidate)}`,
+    `${candidate.companyName} ${candidate.ticker} · ${decisionLabel(candidate)} ${candidate.swingScore}${supplyMark(candidate)}${newsMark(candidate)}`,
     `  진입 ${won(candidate.triggerPrice)} · 손절 ${won(candidate.stopLossPrice)} · 기대 +${pct}%`,
     detail ? `  ${detail}` : "",
   ]

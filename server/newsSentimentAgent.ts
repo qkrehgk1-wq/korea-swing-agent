@@ -102,3 +102,56 @@ export async function fetchNewsSentiment(companyName: string): Promise<NewsSenti
   }
   return null;
 }
+
+// Behavioral / economic-psychology factor: crowd-moving headline keywords.
+// Loss aversion means bad news matters more, so the negative threshold is lower.
+const NEGATIVE_KEYWORDS = [
+  "급락", "폭락", "하한가", "적자", "영업손실", "손실", "횡령", "배임", "소송", "고소",
+  "압수수색", "검찰", "조사", "감자", "상장폐지", "거래정지", "분식", "리콜", "부도",
+  "회생", "워크아웃", "유상증자", "어닝쇼크", "실적쇼크", "목표가 하향", "공매도", "구속",
+];
+const POSITIVE_KEYWORDS = [
+  "급등", "상한가", "신고가", "흑자전환", "흑자", "최대 실적", "사상 최대", "수주", "공급계약",
+  "계약 체결", "승인", "허가", "신약", "목표가 상향", "자사주", "깜짝 실적", "어닝서프라이즈", "흑자 전환",
+];
+
+export type NewsState = "positive" | "negative" | "neutral";
+
+/** Pure keyword sentiment over headlines (deterministic, no LLM cost). */
+export function scoreHeadlines(headlines: string[]): {
+  state: NewsState;
+  score: number;
+  negativeHits: string[];
+  positiveHits: string[];
+} {
+  const text = headlines.join(" ");
+  const negativeHits = NEGATIVE_KEYWORDS.filter(keyword => text.includes(keyword));
+  const positiveHits = POSITIVE_KEYWORDS.filter(keyword => text.includes(keyword));
+  const score = positiveHits.length - negativeHits.length;
+  let state: NewsState = "neutral";
+  if (score <= -1) {
+    state = "negative"; // any net-negative headline flow → caution
+  } else if (score >= 2) {
+    state = "positive"; // require a clear positive flow
+  }
+  return { state, score, negativeHits, positiveHits };
+}
+
+export type NewsAssessment = { state: NewsState; note: string; headlines: string[] };
+
+/** Fetches recent headlines and folds them into a behavioral sentiment signal. */
+export async function assessNewsSentiment(companyName: string): Promise<NewsAssessment | null> {
+  const sentiment = await fetchNewsSentiment(companyName);
+  if (!sentiment || sentiment.headlines.length === 0) {
+    return null;
+  }
+  const scored = scoreHeadlines(sentiment.headlines);
+  if (scored.state === "neutral") {
+    return { state: "neutral", note: "", headlines: sentiment.headlines };
+  }
+  const note =
+    scored.state === "negative"
+      ? `⚠ 악재성 뉴스(${scored.negativeHits.slice(0, 2).join("·")})`
+      : `호재성 뉴스(${scored.positiveHits.slice(0, 2).join("·")})`;
+  return { state: scored.state, note, headlines: sentiment.headlines };
+}
