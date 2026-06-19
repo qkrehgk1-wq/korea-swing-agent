@@ -7,7 +7,8 @@ import "dotenv/config";
  * run the screener independently, then fan out Telegram/Kakao/owner alerts.
  */
 
-import { screenTechnicalSwingCandidates } from "./technicalSwingScreener";
+import { screenTechnicalSwingCandidates, type TechnicalSwingCandidate } from "./technicalSwingScreener";
+import { fetchSupplyTrend } from "./koreaStockMcp";
 import { predictLimitUpCandidates } from "./limitUpPredictionAgent";
 import { predictFirstLimitUpFollowThroughCandidates } from "./firstLimitUpFollowThroughAgent";
 import { collectCompanyIntelligence } from "./agentTeams/companyIntelligenceAgent";
@@ -39,6 +40,30 @@ function uniqueByTicker<T extends { ticker: string }>(items: T[]) {
   });
 }
 
+/**
+ * Foreign + institutional net-buying confirmation for the final swing picks
+ * (cheap — only the few survivors). Accumulation nudges the score up, smart-money
+ * distribution nudges it down, and the note is surfaced in the alert.
+ */
+async function enrichSwingCandidatesWithSupply(candidates: TechnicalSwingCandidate[]): Promise<void> {
+  await Promise.all(
+    candidates.map(async candidate => {
+      const supply = await fetchSupplyTrend(candidate.ticker);
+      if (!supply) {
+        return;
+      }
+      candidate.supplyState = supply.state;
+      candidate.supplyNote = supply.note;
+      candidate.reason = [...candidate.reason, supply.note];
+      if (supply.state === "accumulating") {
+        candidate.swingScore = Math.min(100, candidate.swingScore + 4);
+      } else if (supply.state === "distributing") {
+        candidate.swingScore = Math.max(0, candidate.swingScore - 8);
+      }
+    })
+  );
+}
+
 async function runSwingTelegramPipeline() {
   console.log("[Swing Pipeline] Starting technical swing scan...");
   const seed = createSwingPipelineSeed();
@@ -55,6 +80,7 @@ async function runSwingTelegramPipeline() {
     const externalPlatformReport = await externalPlatformPromise;
     const { candidates, notes, scannedTickers } = result;
     const mergedSwingCandidates = uniqueByTicker([...kosdaqTeamResult.candidates, ...candidates]);
+    await enrichSwingCandidatesWithSupply(mergedSwingCandidates);
 
     console.log(
       `[Swing Pipeline] Scanned ${scannedTickers.length} tickers, matched ${candidates.length} candidates`

@@ -519,6 +519,72 @@ async function fetchNaverUniverseViaClassic(
   return entries.slice(0, count);
 }
 
+export type SupplyTrend = {
+  foreignNet5: number;
+  institutionNet5: number;
+  foreignNet20: number;
+  institutionNet20: number;
+  state: "accumulating" | "distributing" | "neutral";
+  note: string;
+};
+
+type RawSupplyEntry = { foreignerPureBuyQuant?: string; organPureBuyQuant?: string };
+
+function parseSignedInt(value: string | undefined): number {
+  if (!value) return 0;
+  const parsed = Number(value.replace(/[,\s]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/**
+ * Pure: fold daily foreign + institutional net buying into an accumulation /
+ * distribution signal. Net buying by both "smart money" cohorts is one of the
+ * strongest Korean-market swing factors. Entries are newest-first.
+ */
+export function assessSupplyTrend(entries: RawSupplyEntry[]): SupplyTrend {
+  const foreign = entries.map(entry => parseSignedInt(entry.foreignerPureBuyQuant));
+  const organ = entries.map(entry => parseSignedInt(entry.organPureBuyQuant));
+  const sum = (values: number[], days: number) => values.slice(0, days).reduce((acc, value) => acc + value, 0);
+  const foreignNet5 = sum(foreign, 5);
+  const institutionNet5 = sum(organ, 5);
+  const foreignNet20 = sum(foreign, 20);
+  const institutionNet20 = sum(organ, 20);
+  const combined5 = foreignNet5 + institutionNet5;
+  const combined20 = foreignNet20 + institutionNet20;
+
+  let state: SupplyTrend["state"] = "neutral";
+  let note = "수급 중립(외국인·기관 방향성 약함)";
+  if (combined5 > 0 && combined20 > 0) {
+    state = "accumulating";
+    note = "외국인·기관 순매수 누적(스마트머니 매집)";
+  } else if (combined5 < 0 && combined20 < 0) {
+    state = "distributing";
+    note = "⚠ 외국인·기관 순매도(분산) — 수급 부담";
+  }
+  return { foreignNet5, institutionNet5, foreignNet20, institutionNet20, state, note };
+}
+
+/** Recent foreign/institutional net buying from Naver's pure-Node JSON API. */
+export async function fetchSupplyTrend(ticker: string): Promise<SupplyTrend | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(`https://m.stock.naver.com/api/stock/${ticker}/trend`, {
+      signal: controller.signal,
+      headers: { "user-agent": "Mozilla/5.0", referer: "https://m.stock.naver.com/" },
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as RawSupplyEntry[];
+    if (!Array.isArray(data) || data.length === 0) return null;
+    return assessSupplyTrend(data);
+  } catch (error) {
+    console.warn(`[Supply] ${ticker} trend fetch failed:`, error);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function parseJsonText<T>(text: string): T | null {
   if (!text) {
     return null;

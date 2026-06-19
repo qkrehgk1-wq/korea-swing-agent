@@ -47,6 +47,8 @@ export type TechnicalSwingCandidate = {
   relativeStrength?: number;
   fibExtensionTarget?: number | null;
   confluenceSignals?: string[];
+  supplyState?: "accumulating" | "distributing" | "neutral";
+  supplyNote?: string;
 };
 
 type Candidate = TechnicalSwingCandidate;
