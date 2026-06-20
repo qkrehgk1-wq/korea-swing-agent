@@ -404,6 +404,18 @@ async function fetchNaverStockName(ticker: string): Promise<string | null> {
 
 export type NaverUniverseEntry = { ticker: string; name: string; market: "코스피" | "코스닥" };
 
+// ETFs / ETNs leak into the market-cap ranking but are not swing-stock candidates
+// (an index ETF is the market itself; its trigger/stop math is meaningless). Match
+// ASCII brand prefixes with a word boundary (so "SOL 200" matches but "SOLUM" does
+// not) plus the leverage/inverse/ETN keywords. Korean brand prefixes are omitted
+// because \b is unreliable around Hangul and risks false positives (e.g. 파워로직스).
+const ETF_NAME_PATTERN =
+  /^(KODEX|TIGER|KBSTAR|RISE|ARIRANG|KOSEF|HANARO|SOL|ACE|PLUS|TIMEFOLIO|KIWOOM|KINDEX|FOCUS|SMART|WON)\b|레버리지|인버스|ETN/i;
+
+export function isLikelyEtf(name: string): boolean {
+  return ETF_NAME_PATTERN.test(name);
+}
+
 /**
  * Top market-cap universe from Naver, with ticker + name + market in one shot.
  * Two independent live endpoints so a single-endpoint failure still yields fresh
@@ -451,7 +463,7 @@ async function fetchNaverUniverseViaApi(
       for (const stock of stocks) {
         const ticker = String(stock.itemCode ?? "");
         const name = String(stock.stockName ?? "").trim();
-        if (/^\d{6}$/.test(ticker) && name) {
+        if (/^\d{6}$/.test(ticker) && name && !isLikelyEtf(name)) {
           entries.push({ ticker, name, market: marketLabel });
         }
       }
@@ -498,7 +510,7 @@ async function fetchNaverUniverseViaClassic(
       while ((match = pattern.exec(html)) !== null) {
         const ticker = match[1];
         const name = match[2].trim();
-        if (ticker && name && !seen.has(ticker)) {
+        if (ticker && name && !seen.has(ticker) && !isLikelyEtf(name)) {
           seen.add(ticker);
           entries.push({ ticker, name, market: marketLabel });
           found += 1;

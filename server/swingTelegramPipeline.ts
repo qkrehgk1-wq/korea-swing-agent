@@ -1,5 +1,8 @@
 import "dotenv/config";
 
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
 /**
  * Standalone technical swing pipeline.
  *
@@ -260,4 +263,6 @@ async function runSwingTelegramPipeline() {
   }
 }
 
-runSwingTelegramPipeline();
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
+  runSwingTelegramPipeline();
+}

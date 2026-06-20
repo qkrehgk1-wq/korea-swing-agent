@@ -4,7 +4,7 @@
  * (Naver API, pykrx) is unreachable — e.g. a geo-blocked CI runner. Guarantees a
  * broad universe with zero network dependency.
  *
- * Snapshot: 2026-06-16. Regenerate when stale (top-cap names drift slowly).
+ * Snapshot: 2026-06-20. Regenerate with: pnpm gen:universe
  */
 import type { NaverUniverseEntry } from "./koreaStockMcp";
 
@@ -40,13 +40,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "373220",
-    "name": "LG에너지솔루션",
+    "ticker": "032830",
+    "name": "삼성생명",
     "market": "코스피"
   },
   {
-    "ticker": "032830",
-    "name": "삼성생명",
+    "ticker": "373220",
+    "name": "LG에너지솔루션",
     "market": "코스피"
   },
   {
@@ -60,8 +60,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "000270",
-    "name": "기아",
+    "ticker": "207940",
+    "name": "삼성바이오로직스",
     "market": "코스피"
   },
   {
@@ -70,13 +70,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "207940",
-    "name": "삼성바이오로직스",
-    "market": "코스피"
-  },
-  {
-    "ticker": "105560",
-    "name": "KB금융",
+    "ticker": "000270",
+    "name": "기아",
     "market": "코스피"
   },
   {
@@ -85,13 +80,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "012330",
-    "name": "현대모비스",
+    "ticker": "105560",
+    "name": "KB금융",
     "market": "코스피"
   },
   {
-    "ticker": "055550",
-    "name": "신한지주",
+    "ticker": "012330",
+    "name": "현대모비스",
     "market": "코스피"
   },
   {
@@ -100,13 +95,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "006400",
-    "name": "삼성SDI",
+    "ticker": "055550",
+    "name": "신한지주",
     "market": "코스피"
   },
   {
-    "ticker": "267260",
-    "name": "HD현대일렉트릭",
+    "ticker": "006400",
+    "name": "삼성SDI",
     "market": "코스피"
   },
   {
@@ -115,8 +110,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "068270",
-    "name": "셀트리온",
+    "ticker": "267260",
+    "name": "HD현대일렉트릭",
     "market": "코스피"
   },
   {
@@ -125,8 +120,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "066570",
-    "name": "LG전자",
+    "ticker": "068270",
+    "name": "셀트리온",
     "market": "코스피"
   },
   {
@@ -140,13 +135,18 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
+    "ticker": "066570",
+    "name": "LG전자",
+    "market": "코스피"
+  },
+  {
     "ticker": "086790",
     "name": "하나금융지주",
     "market": "코스피"
   },
   {
-    "ticker": "042700",
-    "name": "한미반도체",
+    "ticker": "000810",
+    "name": "삼성화재",
     "market": "코스피"
   },
   {
@@ -160,23 +160,18 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "069500",
-    "name": "KODEX 200",
-    "market": "코스피"
-  },
-  {
-    "ticker": "000810",
-    "name": "삼성화재",
-    "market": "코스피"
-  },
-  {
-    "ticker": "011070",
-    "name": "LG이노텍",
+    "ticker": "042700",
+    "name": "한미반도체",
     "market": "코스피"
   },
   {
     "ticker": "006800",
     "name": "미래에셋증권",
+    "market": "코스피"
+  },
+  {
+    "ticker": "011070",
+    "name": "LG이노텍",
     "market": "코스피"
   },
   {
@@ -190,11 +185,6 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "051910",
-    "name": "LG화학",
-    "market": "코스피"
-  },
-  {
     "ticker": "015760",
     "name": "한국전력",
     "market": "코스피"
@@ -205,8 +195,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "064350",
-    "name": "현대로템",
+    "ticker": "051910",
+    "name": "LG화학",
     "market": "코스피"
   },
   {
@@ -215,8 +205,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "079550",
-    "name": "LIG디펜스앤에어로스페이스",
+    "ticker": "064350",
+    "name": "현대로템",
     "market": "코스피"
   },
   {
@@ -225,28 +215,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "267250",
-    "name": "HD현대",
-    "market": "코스피"
-  },
-  {
     "ticker": "011200",
     "name": "HMM",
     "market": "코스피"
   },
   {
-    "ticker": "272210",
-    "name": "한화시스템",
-    "market": "코스피"
-  },
-  {
-    "ticker": "307950",
-    "name": "현대오토에버",
-    "market": "코스피"
-  },
-  {
-    "ticker": "360750",
-    "name": "TIGER 미국S&P500",
+    "ticker": "079550",
+    "name": "LIG디펜스앤에어로스페이스",
     "market": "코스피"
   },
   {
@@ -255,13 +230,18 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "138040",
-    "name": "메리츠금융지주",
+    "ticker": "267250",
+    "name": "HD현대",
     "market": "코스피"
   },
   {
-    "ticker": "096770",
-    "name": "SK이노베이션",
+    "ticker": "307950",
+    "name": "현대오토에버",
+    "market": "코스피"
+  },
+  {
+    "ticker": "138040",
+    "name": "메리츠금융지주",
     "market": "코스피"
   },
   {
@@ -270,13 +250,18 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "024110",
-    "name": "기업은행",
+    "ticker": "096770",
+    "name": "SK이노베이션",
     "market": "코스피"
   },
   {
-    "ticker": "018260",
-    "name": "삼성에스디에스",
+    "ticker": "272210",
+    "name": "한화시스템",
+    "market": "코스피"
+  },
+  {
+    "ticker": "024110",
+    "name": "기업은행",
     "market": "코스피"
   },
   {
@@ -285,13 +270,23 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
+    "ticker": "086280",
+    "name": "현대글로비스",
+    "market": "코스피"
+  },
+  {
     "ticker": "003550",
     "name": "LG",
     "market": "코스피"
   },
   {
-    "ticker": "086280",
-    "name": "현대글로비스",
+    "ticker": "018260",
+    "name": "삼성에스디에스",
+    "market": "코스피"
+  },
+  {
+    "ticker": "278470",
+    "name": "에이피알",
     "market": "코스피"
   },
   {
@@ -305,11 +300,6 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "278470",
-    "name": "에이피알",
-    "market": "코스피"
-  },
-  {
     "ticker": "030200",
     "name": "KT",
     "market": "코스피"
@@ -317,11 +307,6 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
   {
     "ticker": "071050",
     "name": "한국금융지주",
-    "market": "코스피"
-  },
-  {
-    "ticker": "396500",
-    "name": "TIGER 반도체TOP10",
     "market": "코스피"
   },
   {
@@ -335,53 +320,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "102110",
-    "name": "TIGER 200",
-    "market": "코스피"
-  },
-  {
     "ticker": "005940",
     "name": "NH투자증권",
-    "market": "코스피"
-  },
-  {
-    "ticker": "133690",
-    "name": "TIGER 미국나스닥100",
-    "market": "코스피"
-  },
-  {
-    "ticker": "323410",
-    "name": "카카오뱅크",
-    "market": "코스피"
-  },
-  {
-    "ticker": "047050",
-    "name": "포스코인터내셔널",
-    "market": "코스피"
-  },
-  {
-    "ticker": "443060",
-    "name": "HD현대마린솔루션",
-    "market": "코스피"
-  },
-  {
-    "ticker": "047040",
-    "name": "대우건설",
-    "market": "코스피"
-  },
-  {
-    "ticker": "122630",
-    "name": "KODEX 레버리지",
-    "market": "코스피"
-  },
-  {
-    "ticker": "016360",
-    "name": "삼성증권",
-    "market": "코스피"
-  },
-  {
-    "ticker": "028050",
-    "name": "삼성E&A",
     "market": "코스피"
   },
   {
@@ -390,23 +330,28 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
+    "ticker": "016360",
+    "name": "삼성증권",
+    "market": "코스피"
+  },
+  {
+    "ticker": "323410",
+    "name": "카카오뱅크",
+    "market": "코스피"
+  },
+  {
     "ticker": "003490",
     "name": "대한항공",
     "market": "코스피"
   },
   {
-    "ticker": "039490",
-    "name": "키움증권",
+    "ticker": "443060",
+    "name": "HD현대마린솔루션",
     "market": "코스피"
   },
   {
-    "ticker": "379800",
-    "name": "KODEX 미국S&P500",
-    "market": "코스피"
-  },
-  {
-    "ticker": "005830",
-    "name": "DB손해보험",
+    "ticker": "047050",
+    "name": "포스코인터내셔널",
     "market": "코스피"
   },
   {
@@ -415,8 +360,23 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "278530",
-    "name": "KODEX 200TR",
+    "ticker": "028050",
+    "name": "삼성E&A",
+    "market": "코스피"
+  },
+  {
+    "ticker": "005830",
+    "name": "DB손해보험",
+    "market": "코스피"
+  },
+  {
+    "ticker": "039490",
+    "name": "키움증권",
+    "market": "코스피"
+  },
+  {
+    "ticker": "047040",
+    "name": "대우건설",
     "market": "코스피"
   },
   {
@@ -425,23 +385,18 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "064400",
-    "name": "LG씨엔에스",
-    "market": "코스피"
-  },
-  {
-    "ticker": "379810",
-    "name": "KODEX 미국나스닥100",
-    "market": "코스피"
-  },
-  {
     "ticker": "005387",
     "name": "현대차2우B",
     "market": "코스피"
   },
   {
-    "ticker": "000880",
-    "name": "한화",
+    "ticker": "064400",
+    "name": "LG씨엔에스",
+    "market": "코스피"
+  },
+  {
+    "ticker": "003230",
+    "name": "삼양식품",
     "market": "코스피"
   },
   {
@@ -450,8 +405,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "003230",
-    "name": "삼양식품",
+    "ticker": "000880",
+    "name": "한화",
     "market": "코스피"
   },
   {
@@ -465,11 +420,6 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "488770",
-    "name": "KODEX 머니마켓액티브",
-    "market": "코스피"
-  },
-  {
     "ticker": "001440",
     "name": "대한전선",
     "market": "코스피"
@@ -480,68 +430,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "267270",
-    "name": "HD건설기계",
-    "market": "코스피"
-  },
-  {
-    "ticker": "078930",
-    "name": "GS",
-    "market": "코스피"
-  },
-  {
-    "ticker": "009830",
-    "name": "한화솔루션",
-    "market": "코스피"
-  },
-  {
-    "ticker": "091160",
-    "name": "KODEX 반도체",
-    "market": "코스피"
-  },
-  {
-    "ticker": "004170",
-    "name": "신세계",
-    "market": "코스피"
-  },
-  {
-    "ticker": "498400",
-    "name": "KODEX 200타겟위클리커버드콜",
-    "market": "코스피"
-  },
-  {
-    "ticker": "011790",
-    "name": "SKC",
-    "market": "코스피"
-  },
-  {
-    "ticker": "381180",
-    "name": "TIGER 미국필라델피아반도체나스닥",
-    "market": "코스피"
-  },
-  {
-    "ticker": "459580",
-    "name": "KODEX CD금리액티브(합성)",
-    "market": "코스피"
-  },
-  {
-    "ticker": "454910",
-    "name": "두산로보틱스",
-    "market": "코스피"
-  },
-  {
-    "ticker": "034220",
-    "name": "LG디스플레이",
-    "market": "코스피"
-  },
-  {
     "ticker": "326030",
     "name": "SK바이오팜",
-    "market": "코스피"
-  },
-  {
-    "ticker": "032640",
-    "name": "LG유플러스",
     "market": "코스피"
   },
   {
@@ -550,13 +440,43 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
+    "ticker": "034220",
+    "name": "LG디스플레이",
+    "market": "코스피"
+  },
+  {
+    "ticker": "004170",
+    "name": "신세계",
+    "market": "코스피"
+  },
+  {
+    "ticker": "454910",
+    "name": "두산로보틱스",
+    "market": "코스피"
+  },
+  {
+    "ticker": "267270",
+    "name": "HD건설기계",
+    "market": "코스피"
+  },
+  {
+    "ticker": "009830",
+    "name": "한화솔루션",
+    "market": "코스피"
+  },
+  {
+    "ticker": "078930",
+    "name": "GS",
+    "market": "코스피"
+  },
+  {
     "ticker": "241560",
     "name": "두산밥캣",
     "market": "코스피"
   },
   {
-    "ticker": "090430",
-    "name": "아모레퍼시픽",
+    "ticker": "032640",
+    "name": "LG유플러스",
     "market": "코스피"
   },
   {
@@ -565,13 +485,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "377300",
-    "name": "카카오페이",
-    "market": "코스피"
-  },
-  {
-    "ticker": "310970",
-    "name": "TIGER MSCI Korea TR",
+    "ticker": "090430",
+    "name": "아모레퍼시픽",
     "market": "코스피"
   },
   {
@@ -580,13 +495,23 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "029780",
-    "name": "삼성카드",
+    "ticker": "036570",
+    "name": "NC",
     "market": "코스피"
   },
   {
-    "ticker": "010060",
-    "name": "OCI홀딩스",
+    "ticker": "377300",
+    "name": "카카오페이",
+    "market": "코스피"
+  },
+  {
+    "ticker": "011790",
+    "name": "SKC",
+    "market": "코스피"
+  },
+  {
+    "ticker": "029780",
+    "name": "삼성카드",
     "market": "코스피"
   },
   {
@@ -595,8 +520,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "066970",
-    "name": "엘앤에프",
+    "ticker": "000500",
+    "name": "가온전선",
     "market": "코스피"
   },
   {
@@ -605,13 +530,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
-    "ticker": "036570",
-    "name": "NC",
-    "market": "코스피"
-  },
-  {
-    "ticker": "023530",
-    "name": "롯데쇼핑",
+    "ticker": "271560",
+    "name": "오리온",
     "market": "코스피"
   },
   {
@@ -620,33 +540,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
+    "ticker": "066970",
+    "name": "엘앤에프",
+    "market": "코스피"
+  },
+  {
     "ticker": "001040",
     "name": "CJ",
-    "market": "코스피"
-  },
-  {
-    "ticker": "018880",
-    "name": "한온시스템",
-    "market": "코스피"
-  },
-  {
-    "ticker": "175330",
-    "name": "JB금융지주",
-    "market": "코스피"
-  },
-  {
-    "ticker": "148020",
-    "name": "RISE 200",
-    "market": "코스피"
-  },
-  {
-    "ticker": "271560",
-    "name": "오리온",
-    "market": "코스피"
-  },
-  {
-    "ticker": "229200",
-    "name": "KODEX 코스닥150",
     "market": "코스피"
   },
   {
@@ -655,8 +555,108 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스피"
   },
   {
+    "ticker": "082740",
+    "name": "한화엔진",
+    "market": "코스피"
+  },
+  {
+    "ticker": "023530",
+    "name": "롯데쇼핑",
+    "market": "코스피"
+  },
+  {
+    "ticker": "175330",
+    "name": "JB금융지주",
+    "market": "코스피"
+  },
+  {
+    "ticker": "010060",
+    "name": "OCI홀딩스",
+    "market": "코스피"
+  },
+  {
     "ticker": "052690",
     "name": "한전기술",
+    "market": "코스피"
+  },
+  {
+    "ticker": "085620",
+    "name": "미래에셋생명",
+    "market": "코스피"
+  },
+  {
+    "ticker": "018880",
+    "name": "한온시스템",
+    "market": "코스피"
+  },
+  {
+    "ticker": "088350",
+    "name": "한화생명",
+    "market": "코스피"
+  },
+  {
+    "ticker": "002380",
+    "name": "KCC",
+    "market": "코스피"
+  },
+  {
+    "ticker": "004020",
+    "name": "현대제철",
+    "market": "코스피"
+  },
+  {
+    "ticker": "336260",
+    "name": "두산퓨얼셀",
+    "market": "코스피"
+  },
+  {
+    "ticker": "069960",
+    "name": "현대백화점",
+    "market": "코스피"
+  },
+  {
+    "ticker": "022100",
+    "name": "포스코DX",
+    "market": "코스피"
+  },
+  {
+    "ticker": "103590",
+    "name": "일진전기",
+    "market": "코스피"
+  },
+  {
+    "ticker": "450080",
+    "name": "에코프로머티",
+    "market": "코스피"
+  },
+  {
+    "ticker": "051900",
+    "name": "LG생활건강",
+    "market": "코스피"
+  },
+  {
+    "ticker": "012510",
+    "name": "더존비즈온",
+    "market": "코스피"
+  },
+  {
+    "ticker": "111770",
+    "name": "영원무역",
+    "market": "코스피"
+  },
+  {
+    "ticker": "489790",
+    "name": "한화비전",
+    "market": "코스피"
+  },
+  {
+    "ticker": "251270",
+    "name": "넷마블",
+    "market": "코스피"
+  },
+  {
+    "ticker": "011170",
+    "name": "롯데케미칼",
     "market": "코스피"
   },
   {
@@ -705,13 +705,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "000250",
-    "name": "삼천당제약",
+    "ticker": "039030",
+    "name": "이오테크닉스",
     "market": "코스닥"
   },
   {
-    "ticker": "039030",
-    "name": "이오테크닉스",
+    "ticker": "000250",
+    "name": "삼천당제약",
     "market": "코스닥"
   },
   {
@@ -720,13 +720,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "403870",
-    "name": "HPSP",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "087010",
-    "name": "펩트론",
+    "ticker": "440110",
+    "name": "파두",
     "market": "코스닥"
   },
   {
@@ -735,8 +730,23 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "440110",
-    "name": "파두",
+    "ticker": "347850",
+    "name": "디앤디파마텍",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "319660",
+    "name": "피에스케이",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "087010",
+    "name": "펩트론",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "403870",
+    "name": "HPSP",
     "market": "코스닥"
   },
   {
@@ -750,11 +760,6 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "319660",
-    "name": "피에스케이",
-    "market": "코스닥"
-  },
-  {
     "ticker": "108490",
     "name": "로보티즈",
     "market": "코스닥"
@@ -762,6 +767,11 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
   {
     "ticker": "095340",
     "name": "ISC",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "080220",
+    "name": "제주반도체",
     "market": "코스닥"
   },
   {
@@ -775,23 +785,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "319400",
-    "name": "현대무벡스",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "347850",
-    "name": "디앤디파마텍",
-    "market": "코스닥"
-  },
-  {
     "ticker": "310210",
     "name": "보로노이",
     "market": "코스닥"
   },
   {
-    "ticker": "080220",
-    "name": "제주반도체",
+    "ticker": "319400",
+    "name": "현대무벡스",
     "market": "코스닥"
   },
   {
@@ -810,28 +810,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "064760",
-    "name": "티씨케이",
-    "market": "코스닥"
-  },
-  {
     "ticker": "214450",
     "name": "파마리서치",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "010170",
-    "name": "대한광통신",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "145020",
-    "name": "휴젤",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "357780",
-    "name": "솔브레인",
     "market": "코스닥"
   },
   {
@@ -840,8 +820,18 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "131970",
-    "name": "두산테스나",
+    "ticker": "145020",
+    "name": "휴젤",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "064760",
+    "name": "티씨케이",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "357780",
+    "name": "솔브레인",
     "market": "코스닥"
   },
   {
@@ -855,6 +845,31 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
+    "ticker": "226950",
+    "name": "올릭스",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "131970",
+    "name": "두산테스나",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "237690",
+    "name": "에스티팜",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "010170",
+    "name": "대한광통신",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "263750",
+    "name": "펄어비스",
+    "market": "코스닥"
+  },
+  {
     "ticker": "032820",
     "name": "우리기술",
     "market": "코스닥"
@@ -865,18 +880,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "226950",
-    "name": "올릭스",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "237690",
-    "name": "에스티팜",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "263750",
-    "name": "펄어비스",
+    "ticker": "290650",
+    "name": "엘앤씨바이오",
     "market": "코스닥"
   },
   {
@@ -885,8 +890,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "257720",
-    "name": "실리콘투",
+    "ticker": "089030",
+    "name": "테크윙",
     "market": "코스닥"
   },
   {
@@ -895,18 +900,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
+    "ticker": "257720",
+    "name": "실리콘투",
+    "market": "코스닥"
+  },
+  {
     "ticker": "183300",
     "name": "코미코",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "089030",
-    "name": "테크윙",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "218410",
-    "name": "RFHIC",
     "market": "코스닥"
   },
   {
@@ -920,13 +920,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "290650",
-    "name": "엘앤씨바이오",
+    "ticker": "218410",
+    "name": "RFHIC",
     "market": "코스닥"
   },
   {
-    "ticker": "083650",
-    "name": "비에이치아이",
+    "ticker": "035900",
+    "name": "JYP Ent.",
     "market": "코스닥"
   },
   {
@@ -935,13 +935,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "078600",
-    "name": "대주전자재료",
+    "ticker": "083650",
+    "name": "비에이치아이",
     "market": "코스닥"
   },
   {
-    "ticker": "035900",
-    "name": "JYP Ent.",
+    "ticker": "140410",
+    "name": "메지온",
     "market": "코스닥"
   },
   {
@@ -955,13 +955,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "140410",
-    "name": "메지온",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "041510",
-    "name": "에스엠",
+    "ticker": "140860",
+    "name": "파크시스템스",
     "market": "코스닥"
   },
   {
@@ -970,38 +965,23 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "140860",
-    "name": "파크시스템스",
+    "ticker": "078600",
+    "name": "대주전자재료",
     "market": "코스닥"
   },
   {
-    "ticker": "347700",
-    "name": "스피어",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "060370",
-    "name": "LS마린솔루션",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "437730",
-    "name": "삼현",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "100790",
-    "name": "미래에셋벤처투자",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "323280",
-    "name": "태성",
+    "ticker": "041510",
+    "name": "에스엠",
     "market": "코스닥"
   },
   {
     "ticker": "031330",
     "name": "에스에이엠티",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "060370",
+    "name": "LS마린솔루션",
     "market": "코스닥"
   },
   {
@@ -1015,13 +995,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "476830",
-    "name": "알지노믹스",
+    "ticker": "437730",
+    "name": "삼현",
     "market": "코스닥"
   },
   {
-    "ticker": "166090",
-    "name": "하나머티리얼즈",
+    "ticker": "323280",
+    "name": "태성",
     "market": "코스닥"
   },
   {
@@ -1030,8 +1010,43 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
+    "ticker": "347700",
+    "name": "스피어",
+    "market": "코스닥"
+  },
+  {
     "ticker": "101490",
     "name": "에스앤에스텍",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "166090",
+    "name": "하나머티리얼즈",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "476830",
+    "name": "알지노믹스",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "100790",
+    "name": "미래에셋벤처투자",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "127120",
+    "name": "제이에스링크",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "458870",
+    "name": "씨어스",
+    "market": "코스닥"
+  },
+  {
+    "ticker": "204270",
+    "name": "제이앤티씨",
     "market": "코스닥"
   },
   {
@@ -1045,23 +1060,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "127120",
-    "name": "제이에스링크",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "038500",
-    "name": "삼표시멘트",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "003380",
-    "name": "하림지주",
-    "market": "코스닥"
-  },
-  {
-    "ticker": "458870",
-    "name": "씨어스",
+    "ticker": "099320",
+    "name": "쎄트렉아이",
     "market": "코스닥"
   },
   {
@@ -1070,8 +1070,8 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "099320",
-    "name": "쎄트렉아이",
+    "ticker": "003380",
+    "name": "하림지주",
     "market": "코스닥"
   },
   {
@@ -1085,13 +1085,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "065350",
-    "name": "신성델타테크",
+    "ticker": "085660",
+    "name": "차바이오텍",
     "market": "코스닥"
   },
   {
-    "ticker": "085660",
-    "name": "차바이오텍",
+    "ticker": "065350",
+    "name": "신성델타테크",
     "market": "코스닥"
   },
   {
@@ -1100,13 +1100,13 @@ export const SWING_UNIVERSE_FALLBACK: NaverUniverseEntry[] = [
     "market": "코스닥"
   },
   {
-    "ticker": "032500",
-    "name": "케이엠더블유",
+    "ticker": "038500",
+    "name": "삼표시멘트",
     "market": "코스닥"
   },
   {
-    "ticker": "491000",
-    "name": "리브스메드",
+    "ticker": "083450",
+    "name": "GST",
     "market": "코스닥"
   }
 ];
