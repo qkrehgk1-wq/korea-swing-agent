@@ -223,5 +223,47 @@
     "championAt": "2026-06-16T10:59:20.502Z",
     "recordedAt": "2026-06-19T20:19:20.313Z",
     "status": "open"
+  },
+  {
+    "date": "2026-06-21",
+    "ticker": "214150",
+    "companyName": "클래시스",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 47400,
+    "stopLossPrice": 42840,
+    "targetPrice": 56520,
+    "swingScore": 62,
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-20T20:07:29.405Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-21",
+    "ticker": "214450",
+    "companyName": "파마리서치",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 298410,
+    "stopLossPrice": 264180,
+    "targetPrice": 366870,
+    "swingScore": 63,
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-20T20:07:29.405Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-21",
+    "ticker": "030530",
+    "companyName": "원익홀딩스",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 27361,
+    "stopLossPrice": 22134,
+    "targetPrice": 37815,
+    "swingScore": 48,
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-20T20:07:29.405Z",
+    "status": "open"
   }
 ]
