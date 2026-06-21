@@ -58,6 +58,7 @@ type Candidate = TechnicalSwingCandidate;
 type ScreenerResult = {
   bible: BiblePattern[];
   candidates: Candidate[];
+  watchlist?: Candidate[];
   scannedTickers: string[];
   notes: string[];
 };
@@ -767,7 +768,7 @@ function buildCandidate(
   patternWeights: SwingPatternWeights,
   confluence: ConfluenceResult,
   qualityOverrides?: Partial<SwingQualityParams> | null
-): Candidate | null {
+): { candidate: Candidate; watchOnly: boolean } | null {
   const patterns = detections.filter(item => item.result.matched).map(item => item.name);
   if (patterns.length === 0) {
     return null;
@@ -807,9 +808,9 @@ function buildCandidate(
   if (!isEarlyBowl && indicators.volatility20 > maxVolatility20 && patterns.length === 1) {
     return null;
   }
-  if (swingScore < (isEarlyBowl ? minEarlyBowlSwingScore : minDefaultSwingScore) && patterns.length === 1) {
-    return null;
-  }
+  // Soft score shortfall → not rejected, but demoted to watch-only (see below).
+  const lowPatternScore =
+    swingScore < (isEarlyBowl ? minEarlyBowlSwingScore : minDefaultSwingScore) && patterns.length === 1;
 
   // Multi-factor confluence quality gate — proven leadership/trend/golden-ratio
   // filters that reject single-pattern noise (the main lever on candidate quality).
@@ -826,9 +827,6 @@ function buildCandidate(
   if (!isEarlyBowl && !confluence.trendAligned) {
     return null; // breakout/continuation setups must sit in an uptrend
   }
-  if (confluence.qualityScore < confluenceFloor) {
-    return null;
-  }
 
   const triggerPrice = Math.round(
     isEarlyBowl
@@ -844,31 +842,44 @@ function buildCandidate(
   // Blend the pattern score with the multi-factor confluence quality so the final
   // score reflects leadership + trend + momentum, not just the chart pattern.
   const blendedScore = Math.round(swingScore * 0.55 + confluence.qualityScore * 0.45);
-  const blendedFit = blendedScore >= 78 ? "상" : blendedScore >= 62 ? "중" : "관찰";
+  // Watch-only: structurally sound (passed every hard gate) but the score or
+  // confluence quality is below the conviction floor. Surfaced for situational
+  // awareness so the alert is never silent — never counted as a backtest trade.
+  const watchOnly = lowPatternScore || confluence.qualityScore < confluenceFloor;
+  const blendedFit = watchOnly
+    ? "관찰"
+    : blendedScore >= 78
+      ? "상"
+      : blendedScore >= 62
+        ? "중"
+        : "관찰";
 
   return {
-    ticker,
-    companyName,
-    market: marketFor(ticker),
-    patterns,
-    swingScore: blendedScore,
-    swingFit: blendedFit,
-    currentPrice: indicators.currentPrice,
-    triggerPrice,
-    stopLossPrice,
-    volumeRatio: Number(indicators.volumeRatio.toFixed(2)),
-    rsi14: Number(indicators.rsi14.toFixed(1)),
-    volatility20: Number(indicators.volatility20.toFixed(1)),
-    marketRegimeLabel: regime.label,
-    marketRegimeScore: regime.score,
-    reason: [
-      ...detections.filter(item => item.result.matched).map(item => item.result.note),
-      ...confluence.signals,
-    ],
-    qualityScore: confluence.qualityScore,
-    relativeStrength: confluence.relativeStrength60,
-    fibExtensionTarget: confluence.fibExtensionTarget,
-    confluenceSignals: confluence.signals,
+    candidate: {
+      ticker,
+      companyName,
+      market: marketFor(ticker),
+      patterns,
+      swingScore: blendedScore,
+      swingFit: blendedFit,
+      currentPrice: indicators.currentPrice,
+      triggerPrice,
+      stopLossPrice,
+      volumeRatio: Number(indicators.volumeRatio.toFixed(2)),
+      rsi14: Number(indicators.rsi14.toFixed(1)),
+      volatility20: Number(indicators.volatility20.toFixed(1)),
+      marketRegimeLabel: regime.label,
+      marketRegimeScore: regime.score,
+      reason: [
+        ...detections.filter(item => item.result.matched).map(item => item.result.note),
+        ...confluence.signals,
+      ],
+      qualityScore: confluence.qualityScore,
+      relativeStrength: confluence.relativeStrength60,
+      fibExtensionTarget: confluence.fibExtensionTarget,
+      confluenceSignals: confluence.signals,
+    },
+    watchOnly,
   };
 }
 
@@ -977,6 +988,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
         return {
           ticker,
           candidate: null,
+          watchOnly: false,
           skipReason: "OHLCV 데이터를 가져오지 못했습니다.",
         };
       }
@@ -987,6 +999,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
         return {
           ticker,
           candidate: null,
+          watchOnly: false,
           skipReason: `분석 최소 길이(140봉) 부족: ${bars.length}봉`,
         };
       }
@@ -1003,32 +1016,41 @@ export async function screenTechnicalSwingCandidatesFromRows(
       const benchmarkBars = marketFor(ticker) === "코스닥" ? kosdaqBars : kospiBars;
       const confluence = analyzeTechnicalConfluence(bars, benchmarkBars);
 
+      const built = buildCandidate(
+        ticker,
+        nameFor(ticker),
+        indicators,
+        detections,
+        marketRegime,
+        patternWeights,
+        confluence,
+        qualityOverrides
+      );
       return {
         ticker,
-        candidate: buildCandidate(
-          ticker,
-          nameFor(ticker),
-          indicators,
-          detections,
-          marketRegime,
-          patternWeights,
-          confluence,
-          qualityOverrides
-        ),
+        candidate: built?.candidate ?? null,
+        watchOnly: built?.watchOnly ?? false,
         skipReason: null,
       };
     },
     6
   );
 
-  const skipped = scanned.filter(
-    (item): item is { ticker: string; candidate: null; skipReason: string } =>
-      Boolean(item?.skipReason && !item.candidate)
-  );
+  const skipped = scanned.filter(item => Boolean(item?.skipReason && !item.candidate)) as Array<{
+    ticker: string;
+    skipReason: string;
+  }>;
   const candidates = scanned
-    .map(item => item?.candidate ?? null)
-    .filter((item): item is Candidate => Boolean(item))
+    .filter(item => item?.candidate && !item.watchOnly)
+    .map(item => item!.candidate as Candidate)
     .sort((a, b) => b.swingScore - a.swingScore);
+  // Watch-only near-misses (passed every hard gate, just below the conviction
+  // floor) — surfaced so the daily alert is never silent in a thin/weak tape.
+  const watchlist = scanned
+    .filter(item => item?.candidate && item.watchOnly)
+    .map(item => item!.candidate as Candidate)
+    .sort((a, b) => b.swingScore - a.swingScore)
+    .slice(0, 3);
   const earlyBowlCandidates = candidates.filter(candidate => hasEarlyBowlPattern(candidate.patterns));
   const finalCandidates = rankBowlFocusedCandidates(candidates, 5);
   const dataFailureCount = skipped.filter(item => item.skipReason.includes("OHLCV")).length;
@@ -1041,6 +1063,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
   return {
     bible: buildTechnicalSwingBible(),
     candidates: finalCandidates,
+    watchlist,
     scannedTickers: tickers,
     notes: [
       `시장 요약: 코스피 ${kospiRegime.label} / 코스닥 ${kosdaqRegime.label}`,

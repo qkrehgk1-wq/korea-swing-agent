@@ -94,9 +94,9 @@ async function runSwingTelegramPipeline() {
     const limitUpResult = await predictLimitUpCandidates();
     const firstLimitUpResult = await predictFirstLimitUpFollowThroughCandidates();
     const externalPlatformReport = await externalPlatformPromise;
-    const { candidates, notes, scannedTickers } = result;
+    const { candidates, notes, scannedTickers, watchlist = [] } = result;
     const mergedSwingCandidates = uniqueByTicker([...kosdaqTeamResult.candidates, ...candidates]);
-    await enrichSwingCandidates(mergedSwingCandidates);
+    await enrichSwingCandidates([...mergedSwingCandidates, ...watchlist]);
 
     console.log(
       `[Swing Pipeline] Scanned ${scannedTickers.length} tickers, matched ${candidates.length} candidates`
@@ -114,7 +114,12 @@ async function runSwingTelegramPipeline() {
       `[Swing Pipeline] External platform integrations enabled: ${externalPlatformReport.enabled.join(", ") || "none"}`
     );
 
-    if (mergedSwingCandidates.length || limitUpResult.candidates.length || firstLimitUpResult.candidates.length) {
+    if (
+      mergedSwingCandidates.length ||
+      limitUpResult.candidates.length ||
+      firstLimitUpResult.candidates.length ||
+      watchlist.length
+    ) {
       const companyInsights = await collectCompanyIntelligence([
         ...mergedSwingCandidates,
         ...limitUpResult.candidates,
@@ -169,7 +174,8 @@ async function runSwingTelegramPipeline() {
         firstLimitUpResult.candidates,
         externalPlatformReport,
         agentTeamReport,
-        kosdaqTeamResult.candidates
+        kosdaqTeamResult.candidates,
+        watchlist
       );
       if (!delivery.primaryDelivered) {
         await persistSwingPipelineExecutionReport(

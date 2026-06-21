@@ -65,4 +65,19 @@ describe("buildDailySwingMessage", () => {
   it("handles an empty candidate list", () => {
     expect(buildDailySwingMessage([], [], [], NOW).body).toContain("후보가 없습니다");
   });
+
+  it("surfaces a watch-only floor instead of going silent", () => {
+    const { body } = buildDailySwingMessage([], [], [], NOW, [
+      cand({
+        ticker: "W",
+        companyName: "관찰주",
+        swingScore: 55,
+        supplyState: "accumulating",
+        reason: ["황금비 되돌림 지지(55%)"],
+      }),
+    ]);
+    expect(body).toContain("관찰");
+    expect(body).toContain("관찰주 W");
+    expect(body).not.toContain("후보가 없습니다");
+  });
 });

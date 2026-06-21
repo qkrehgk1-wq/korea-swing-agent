@@ -249,6 +249,16 @@ function newsMark(candidate: SwingCandidate): string {
   return "";
 }
 
+function formatWatch(candidate: SwingCandidate): string {
+  const confluence =
+    candidate.reason?.find(r => r.includes("황금비") || r.includes("VCP") || r.includes("ADX")) ??
+    candidate.patterns?.[0] ??
+    "";
+  return `${candidate.companyName} ${candidate.ticker} · ${candidate.swingScore}${supplyMark(candidate)}${newsMark(candidate)}${
+    confluence ? ` · ${confluence}` : ""
+  }`;
+}
+
 function formatPick(candidate: SwingCandidate, rMultiple: number): string {
   const pct = expectedReturnPct(candidate, rMultiple);
   const rs =
@@ -279,11 +289,12 @@ export function buildDailySwingMessage(
   candidates: SwingCandidate[],
   limitUpCandidates: LimitUpPredictionCandidate[] = [],
   firstLimitUpCandidates: FirstLimitUpFollowThroughCandidate[] = [],
-  now: Date = new Date()
+  now: Date = new Date(),
+  watchlist: SwingCandidate[] = []
 ): { title: string; body: string } {
   const title = `📊 한국 스윙 · ${kstDateLabel(now)}`;
   const ranked = [...candidates].sort((a, b) => b.swingScore - a.swingScore);
-  const regime = ranked[0]?.marketRegimeLabel;
+  const regime = (ranked[0] ?? watchlist[0])?.marketRegimeLabel;
   const riskOff = regime === "약세";
   const picksPerGroup = riskOff ? 1 : 2;
 
@@ -293,6 +304,11 @@ export function buildDailySwingMessage(
     if (!picks.length) continue;
     sections.push([horizon.header, ...picks.map(c => formatPick(c, horizon.rMultiple))].join("\n"));
   }
+  // Watch-only floor — keeps the alert informative (never silent) without
+  // presenting sub-conviction names as ACT signals.
+  const watchSection = watchlist.length
+    ? ["👀 관찰 (조건 미달·참고용)", ...watchlist.slice(0, 3).map(formatWatch)].join("\n")
+    : "";
 
   const limitUpNames = [...limitUpCandidates, ...firstLimitUpCandidates]
     .slice(0, 4)
@@ -307,11 +323,20 @@ export function buildDailySwingMessage(
     : regime === "강세"
       ? "🟢 시장 강세 — 추세 우호적"
       : "";
-  const body = sections.length
-    ? [regimeBanner, `KOSPI·KOSDAQ 자동 스캔 · ${ranked.length}종목`, "", ...sections, "", ...footer]
-        .filter(Boolean)
-        .join("\n")
-    : "오늘은 조건에 맞는 스윙 후보가 없습니다.";
+  const body =
+    sections.length || watchSection
+      ? [
+          regimeBanner,
+          `KOSPI·KOSDAQ 자동 스캔 · 후보 ${ranked.length} · 관찰 ${watchlist.length}`,
+          "",
+          ...sections,
+          watchSection,
+          "",
+          ...footer,
+        ]
+          .filter(Boolean)
+          .join("\n")
+      : "오늘은 조건에 맞는 스윙 후보가 없습니다.";
   return { title, body };
 }
 
@@ -321,9 +346,16 @@ export async function notifyDailySwingCandidates(
   firstLimitUpCandidates: FirstLimitUpFollowThroughCandidate[] = [],
   _externalPlatformReport?: ExternalPlatformReport,
   _agentTeamReport?: AgentTeamReport,
-  _kosdaqFocusCandidates: SwingCandidate[] = []
+  _kosdaqFocusCandidates: SwingCandidate[] = [],
+  watchlist: SwingCandidate[] = []
 ): Promise<NotificationDeliveryResult> {
-  const { title, body } = buildDailySwingMessage(candidates, limitUpCandidates, firstLimitUpCandidates);
+  const { title, body } = buildDailySwingMessage(
+    candidates,
+    limitUpCandidates,
+    firstLimitUpCandidates,
+    new Date(),
+    watchlist
+  );
 
   try {
     return await deliverMultiChannelNotification(title, body);
