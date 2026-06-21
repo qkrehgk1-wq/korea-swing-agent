@@ -12,6 +12,7 @@ import { FIRST_LIMIT_UP_UNIVERSE } from "./firstLimitUpFollowThroughAgent";
 import { LIMIT_UP_UNIVERSE } from "./limitUpPredictionAgent";
 import {
   DEFAULT_SWING_UNIVERSE,
+  resolveSwingUniverse,
   screenTechnicalSwingCandidatesFromRows,
   type InjectedSwingOverrides,
   type TechnicalSwingCandidate,
@@ -105,20 +106,23 @@ const SIGNAL_STEP_DAYS = Number(process.env.SWING_BACKTEST_SIGNAL_STEP_DAYS ?? "
 const WARMUP_BARS = 160;
 const FORCE_RUN = process.env.SWING_BACKTEST_FORCE === "true";
 
-function resolveBacktestUniverse() {
-  const base = [
-    "069500",
-    "229200",
-    ...DEFAULT_SWING_UNIVERSE,
-    ...LIMIT_UP_UNIVERSE,
-    ...FIRST_LIMIT_UP_UNIVERSE,
-  ];
+async function resolveBacktestUniverse(): Promise<string[]> {
+  // Optimize on the SAME universe we trade live (dynamic top market-cap), capped
+  // for backtest performance. Benchmarks + curated lists are always included.
+  const cap = Number(process.env.SWING_BACKTEST_UNIVERSE_SIZE) || 120;
+  let dynamic: string[] = [];
+  try {
+    dynamic = await resolveSwingUniverse();
+  } catch (error) {
+    console.warn("[Swing Backtest] dynamic universe unavailable, using curated only:", error);
+  }
+  const curated = [...DEFAULT_SWING_UNIVERSE, ...LIMIT_UP_UNIVERSE, ...FIRST_LIMIT_UP_UNIVERSE];
   const extra = (process.env.SWING_BACKTEST_EXTRA_TICKERS ?? "")
     .split(",")
     .map(item => item.trim())
     .filter(Boolean);
 
-  return Array.from(new Set([...base, ...extra]));
+  return Array.from(new Set(["069500", "229200", ...dynamic.slice(0, cap), ...curated, ...extra]));
 }
 
 function percentChange(base: number, current: number) {
@@ -376,7 +380,7 @@ async function writeReport(report: BacktestReport) {
 }
 
 export async function fetchBacktestRows(): Promise<TechnicalSwingRowsByTicker> {
-  return fetchKoreanOhlcvRowsBatch(resolveBacktestUniverse(), LOOKBACK_DAYS);
+  return fetchKoreanOhlcvRowsBatch(await resolveBacktestUniverse(), LOOKBACK_DAYS);
 }
 
 /**
