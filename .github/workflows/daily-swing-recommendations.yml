@@ -89,6 +89,15 @@ jobs:
           COMMANDER_CHAT_ID: ${{ secrets.COMMANDER_CHAT_ID }}
         run: corepack pnpm start:swing:journal || echo "journal 채점 건너뜀"
 
+      # 데이터 소스 카탈로그·건전성·통합 분석(거버넌스). 추적 데이터 이상만 알림.
+      - name: Data steward report
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COMMANDER_CHAT_ID: ${{ secrets.COMMANDER_CHAT_ID }}
+        run: corepack pnpm start:swing:data || echo "data steward 건너뜀"
+
       # 진화 챔피언 + 추천 저널(추적 파일)을 저장소에 커밋백해 다음 런이
       # 이어받게 한다. [skip ci]로 재귀 트리거 방지.
       - name: Persist champion and journal
