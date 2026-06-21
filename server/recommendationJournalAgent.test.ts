@@ -4,6 +4,7 @@ import type { OhlcvRow } from "./koreaStockMcp";
 import {
   kstDate,
   scoreEntry,
+  summarizeByFactor,
   summarizeJournal,
   type JournalConfig,
   type RecommendationEntry,
@@ -123,5 +124,28 @@ describe("summarizeJournal", () => {
     expect(summary.total).toBe(0);
     expect(summary.winRate).toBe(0);
     expect(summary.avgReturnPct).toBe(0);
+  });
+});
+
+describe("summarizeByFactor", () => {
+  it("buckets realized performance by supply and news state", () => {
+    const entries: RecommendationEntry[] = [
+      openEntry({ status: "target", returnPct: 10, supplyState: "accumulating", newsState: "positive" }),
+      openEntry({ status: "target", returnPct: 8, supplyState: "accumulating", newsState: "neutral" }),
+      openEntry({ status: "stop", returnPct: -5, supplyState: "distributing", newsState: "negative" }),
+      openEntry({ status: "open", supplyState: "accumulating" }), // not settled → ignored
+    ];
+    const { supply, news } = summarizeByFactor(entries);
+
+    const accumulating = supply.find(bucket => bucket.label === "매집")!;
+    expect(accumulating.settled).toBe(2);
+    expect(accumulating.winRate).toBe(100);
+    expect(accumulating.avgReturnPct).toBe(9);
+
+    const distributing = supply.find(bucket => bucket.label === "분산")!;
+    expect(distributing.settled).toBe(1);
+    expect(distributing.winRate).toBe(0);
+
+    expect(news.find(bucket => bucket.label === "악재")!.settled).toBe(1);
   });
 });

@@ -29,6 +29,10 @@ export type RecommendationEntry = {
   stopLossPrice: number;
   targetPrice: number;
   swingScore?: number;
+  qualityScore?: number;
+  relativeStrength?: number;
+  supplyState?: "accumulating" | "distributing" | "neutral";
+  newsState?: "positive" | "negative" | "neutral";
   recordedAt: string;
   status: RecommendationStatus;
   entryDate?: string;
@@ -239,6 +243,10 @@ export async function recordRecommendations(
       stopLossPrice: candidate.stopLossPrice,
       targetPrice,
       swingScore: candidate.swingScore,
+      qualityScore: candidate.qualityScore,
+      relativeStrength: candidate.relativeStrength,
+      supplyState: candidate.supplyState,
+      newsState: candidate.newsState,
       championAt,
       recordedAt,
       status: "open",
@@ -294,7 +302,62 @@ export async function scoreMaturedRecommendations(now = new Date()): Promise<{
   return { scored, summary: summarizeJournal(journal) };
 }
 
-function toMarkdown(summary: JournalSummary, recent: RecommendationEntry[]): string {
+export type FactorBucket = { label: string; settled: number; winRate: number; avgReturnPct: number };
+
+function bucketStats(label: string, subset: RecommendationEntry[]): FactorBucket {
+  const wins = subset.filter(entry => (entry.returnPct ?? 0) > 0).length;
+  const avg = subset.length
+    ? subset.reduce((sum, entry) => sum + (entry.returnPct ?? 0), 0) / subset.length
+    : 0;
+  return {
+    label,
+    settled: subset.length,
+    winRate: subset.length ? round((wins / subset.length) * 100, 1) : 0,
+    avgReturnPct: round(avg),
+  };
+}
+
+/**
+ * Realized performance bucketed by the factor snapshot recorded at signal time —
+ * tells us whether supply (매집/분산) and news (호재/악재) actually predicted
+ * outcomes. The validation loop the council asked for, made concrete.
+ */
+export function summarizeByFactor(entries: RecommendationEntry[]): {
+  supply: FactorBucket[];
+  news: FactorBucket[];
+} {
+  const triggered = entries.filter(
+    entry => entry.status === "target" || entry.status === "stop" || entry.status === "time_exit"
+  );
+  const supply = (["accumulating", "distributing", "neutral"] as const).map(state =>
+    bucketStats(
+      state === "accumulating" ? "매집" : state === "distributing" ? "분산" : "수급중립",
+      triggered.filter(entry => (entry.supplyState ?? "neutral") === state)
+    )
+  );
+  const news = (["positive", "negative", "neutral"] as const).map(state =>
+    bucketStats(
+      state === "positive" ? "호재" : state === "negative" ? "악재" : "뉴스중립",
+      triggered.filter(entry => (entry.newsState ?? "neutral") === state)
+    )
+  );
+  return { supply, news };
+}
+
+function factorLines(factors: { supply: FactorBucket[]; news: FactorBucket[] }): string[] {
+  const fmt = (bucket: FactorBucket) =>
+    `${bucket.label} ${bucket.settled}건·승률 ${bucket.winRate}%·평균 ${bucket.avgReturnPct}%`;
+  return [
+    `- 수급: ${factors.supply.filter(b => b.settled).map(fmt).join(" / ") || "표본 없음"}`,
+    `- 뉴스: ${factors.news.filter(b => b.settled).map(fmt).join(" / ") || "표본 없음"}`,
+  ];
+}
+
+function toMarkdown(
+  summary: JournalSummary,
+  recent: RecommendationEntry[],
+  factors: { supply: FactorBucket[]; news: FactorBucket[] }
+): string {
   return [
     "# Live Recommendation Journal",
     "",
@@ -305,6 +368,9 @@ function toMarkdown(summary: JournalSummary, recent: RecommendationEntry[]): str
     `- Win rate: ${summary.winRate}% (${summary.wins}W / ${summary.losses}L)`,
     `- Avg return: ${summary.avgReturnPct}%`,
     `- Target hit: ${summary.targetRate}% · Stop hit: ${summary.stopRate}%`,
+    "",
+    "## Factor attribution (realized)",
+    ...factorLines(factors),
     "",
     "## Recently settled",
     ...(recent.length
@@ -326,10 +392,15 @@ export async function runRecommendationJournal(now = new Date()): Promise<Journa
     .sort((a, b) => (b.scoredAt ?? "").localeCompare(a.scoredAt ?? ""))
     .slice(0, 8);
 
+  const factors = summarizeByFactor(journal);
   await mkdir(REPORT_DIR, { recursive: true });
   await Promise.all([
-    writeFile(REPORT_JSON_PATH, `${JSON.stringify({ generatedAt: now.toISOString(), summary, journal }, null, 2)}\n`, "utf8"),
-    writeFile(REPORT_MD_PATH, `${toMarkdown(summary, recentSettled)}\n`, "utf8"),
+    writeFile(
+      REPORT_JSON_PATH,
+      `${JSON.stringify({ generatedAt: now.toISOString(), summary, factors, journal }, null, 2)}\n`,
+      "utf8"
+    ),
+    writeFile(REPORT_MD_PATH, `${toMarkdown(summary, recentSettled, factors)}\n`, "utf8"),
   ]);
 
   console.log(
@@ -344,6 +415,7 @@ export async function runRecommendationJournal(now = new Date()): Promise<Journa
       headline: `실현 승률 ${summary.winRate}% · 평균수익 ${summary.avgReturnPct}% (체결 ${summary.triggered}건)`,
       detail: [
         `타겟 ${summary.targetRate}% · 손절 ${summary.stopRate}% · 진행중 ${summary.open}건`,
+        ...factorLines(factors),
         `이번 채점 ${scored}건 신규 정산.`,
       ],
     }).catch(error => console.warn("[Recommendation Journal] commander notify failed:", error));
