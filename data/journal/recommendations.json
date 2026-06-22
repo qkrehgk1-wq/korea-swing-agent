@@ -317,5 +317,40 @@
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-21T20:16:07.395Z",
     "status": "open"
+  },
+  {
+    "date": "2026-06-23",
+    "ticker": "028300",
+    "companyName": "HLB",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 51562,
+    "stopLossPrice": 46410,
+    "targetPrice": 61866,
+    "swingScore": 46,
+    "qualityScore": 38,
+    "relativeStrength": 12.06,
+    "supplyState": "distributing",
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-22T21:22:41.214Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-23",
+    "ticker": "214450",
+    "companyName": "파마리서치",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 297903,
+    "stopLossPrice": 264180,
+    "targetPrice": 365349,
+    "swingScore": 60,
+    "qualityScore": 56,
+    "relativeStrength": 4.38,
+    "supplyState": "accumulating",
+    "newsState": "negative",
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-22T21:22:41.214Z",
+    "status": "open"
   }
 ]
