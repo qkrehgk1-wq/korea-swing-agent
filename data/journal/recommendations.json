@@ -62,7 +62,12 @@
     "targetPrice": 1635930,
     "swingScore": 79,
     "recordedAt": "2026-06-17T20:37:34.648Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-06-19",
+    "exitDate": "2026-06-24",
+    "exitPrice": 1267860,
+    "returnPct": -8.82,
+    "scoredAt": "2026-06-24T20:22:01.731Z"
   },
   {
     "date": "2026-06-18",
@@ -351,6 +356,58 @@
     "newsState": "negative",
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-22T21:22:41.214Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-25",
+    "ticker": "028300",
+    "companyName": "HLB",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 51054,
+    "stopLossPrice": 46410,
+    "targetPrice": 60342,
+    "swingScore": 68,
+    "qualityScore": 60,
+    "relativeStrength": 18.12,
+    "supplyState": "neutral",
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-24T20:21:59.616Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-25",
+    "ticker": "214150",
+    "companyName": "클래시스",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 46182,
+    "stopLossPrice": 42315,
+    "targetPrice": 53916,
+    "swingScore": 62,
+    "qualityScore": 56,
+    "relativeStrength": 3.76,
+    "supplyState": "neutral",
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-24T20:21:59.616Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-25",
+    "ticker": "214450",
+    "companyName": "파마리서치",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 309067,
+    "stopLossPrice": 264180,
+    "targetPrice": 398841,
+    "swingScore": 64,
+    "qualityScore": 52,
+    "relativeStrength": 15.8,
+    "supplyState": "accumulating",
+    "newsState": "negative",
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-24T20:21:59.616Z",
     "status": "open"
   }
 ]
