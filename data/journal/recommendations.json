@@ -23,7 +23,9 @@
     "targetPrice": 47610,
     "swingScore": 64,
     "recordedAt": "2026-06-17T20:37:34.648Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-25T20:35:05.688Z"
   },
   {
     "date": "2026-06-18",
@@ -36,7 +38,9 @@
     "targetPrice": 350796,
     "swingScore": 87,
     "recordedAt": "2026-06-17T20:37:34.648Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-25T20:35:05.688Z"
   },
   {
     "date": "2026-06-18",
@@ -49,7 +53,9 @@
     "targetPrice": 50085,
     "swingScore": 76,
     "recordedAt": "2026-06-17T20:37:34.648Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-25T20:35:05.688Z"
   },
   {
     "date": "2026-06-18",
@@ -80,7 +86,9 @@
     "targetPrice": 322299,
     "swingScore": 75,
     "recordedAt": "2026-06-17T20:37:34.648Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-25T20:35:05.688Z"
   },
   {
     "date": "2026-06-19",
@@ -408,6 +416,23 @@
     "newsState": "negative",
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-24T20:21:59.616Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-26",
+    "ticker": "214150",
+    "companyName": "클래시스",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 47248,
+    "stopLossPrice": 42840,
+    "targetPrice": 56064,
+    "swingScore": 62,
+    "qualityScore": 56,
+    "relativeStrength": 6.17,
+    "supplyState": "neutral",
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-25T20:35:03.924Z",
     "status": "open"
   }
 ]
