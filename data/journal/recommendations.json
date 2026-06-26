@@ -127,7 +127,9 @@
     "targetPrice": 1818630,
     "swingScore": 84,
     "recordedAt": "2026-06-18T21:08:38.441Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-26T20:22:20.972Z"
   },
   {
     "date": "2026-06-19",
@@ -140,7 +142,12 @@
     "targetPrice": 299460,
     "swingScore": 75,
     "recordedAt": "2026-06-18T21:08:38.441Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-06-22",
+    "exitDate": "2026-06-26",
+    "exitPrice": 172278,
+    "returnPct": -19.75,
+    "scoredAt": "2026-06-26T20:22:20.972Z"
   },
   {
     "date": "2026-06-19",
@@ -153,7 +160,9 @@
     "targetPrice": 46628,
     "swingScore": 71,
     "recordedAt": "2026-06-18T21:08:38.441Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-26T20:22:20.972Z"
   },
   {
     "date": "2026-06-19",
@@ -166,7 +175,9 @@
     "targetPrice": 291564,
     "swingScore": 64,
     "recordedAt": "2026-06-18T21:08:38.441Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-26T20:22:20.972Z"
   },
   {
     "date": "2026-06-19",
@@ -179,7 +190,9 @@
     "targetPrice": 54569,
     "swingScore": 64,
     "recordedAt": "2026-06-18T21:08:38.441Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-26T20:22:20.972Z"
   },
   {
     "date": "2026-06-20",
@@ -221,7 +234,9 @@
     "swingScore": 48,
     "championAt": "2026-06-16T10:59:20.502Z",
     "recordedAt": "2026-06-19T20:19:20.313Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-26T20:22:20.972Z"
   },
   {
     "date": "2026-06-20",
@@ -277,7 +292,9 @@
     "swingScore": 48,
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-20T20:07:29.405Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-26T20:22:20.972Z"
   },
   {
     "date": "2026-06-22",
@@ -433,6 +450,23 @@
     "supplyState": "neutral",
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-25T20:35:03.924Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-27",
+    "ticker": "214150",
+    "companyName": "클래시스",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 45878,
+    "stopLossPrice": 42036,
+    "targetPrice": 53562,
+    "swingScore": 75,
+    "qualityScore": 68,
+    "relativeStrength": 6.7,
+    "supplyState": "accumulating",
+    "championAt": "2026-06-20T20:07:06.225Z",
+    "recordedAt": "2026-06-26T20:22:18.593Z",
     "status": "open"
   }
 ]
