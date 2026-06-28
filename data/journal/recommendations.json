@@ -485,5 +485,22 @@
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-06-27T19:55:43.944Z",
     "status": "open"
+  },
+  {
+    "date": "2026-06-29",
+    "ticker": "214150",
+    "companyName": "클래시스",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 45878,
+    "stopLossPrice": 42036,
+    "targetPrice": 53562,
+    "swingScore": 74,
+    "qualityScore": 68,
+    "relativeStrength": 6.7,
+    "supplyState": "accumulating",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-28T19:57:13.373Z",
+    "status": "open"
   }
 ]
