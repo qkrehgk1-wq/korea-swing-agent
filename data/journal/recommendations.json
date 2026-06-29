@@ -220,7 +220,12 @@
     "swingScore": 63,
     "championAt": "2026-06-16T10:59:20.502Z",
     "recordedAt": "2026-06-19T20:19:20.313Z",
-    "status": "open"
+    "status": "target",
+    "entryDate": "2026-06-22",
+    "exitDate": "2026-06-29",
+    "exitPrice": 366870,
+    "returnPct": 22.94,
+    "scoredAt": "2026-06-29T20:30:17.153Z"
   },
   {
     "date": "2026-06-20",
@@ -278,7 +283,12 @@
     "swingScore": 63,
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-20T20:07:29.405Z",
-    "status": "open"
+    "status": "target",
+    "entryDate": "2026-06-22",
+    "exitDate": "2026-06-29",
+    "exitPrice": 366870,
+    "returnPct": 22.94,
+    "scoredAt": "2026-06-29T20:30:17.153Z"
   },
   {
     "date": "2026-06-21",
@@ -329,7 +339,12 @@
     "newsState": "negative",
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-21T20:16:07.395Z",
-    "status": "open"
+    "status": "target",
+    "entryDate": "2026-06-23",
+    "exitDate": "2026-06-29",
+    "exitPrice": 366870,
+    "returnPct": 22.94,
+    "scoredAt": "2026-06-29T20:30:17.153Z"
   },
   {
     "date": "2026-06-22",
@@ -346,7 +361,9 @@
     "supplyState": "neutral",
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-21T20:16:07.395Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-06-29T20:30:17.153Z"
   },
   {
     "date": "2026-06-23",
@@ -381,7 +398,12 @@
     "newsState": "negative",
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-22T21:22:41.214Z",
-    "status": "open"
+    "status": "target",
+    "entryDate": "2026-06-24",
+    "exitDate": "2026-06-29",
+    "exitPrice": 365349,
+    "returnPct": 22.64,
+    "scoredAt": "2026-06-29T20:30:17.153Z"
   },
   {
     "date": "2026-06-25",
@@ -501,6 +523,93 @@
     "supplyState": "accumulating",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-06-28T19:57:13.373Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-30",
+    "ticker": "214150",
+    "companyName": "클래시스",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 50090,
+    "stopLossPrice": 42840,
+    "targetPrice": 64590,
+    "swingScore": 78,
+    "qualityScore": 48,
+    "relativeStrength": 5.68,
+    "supplyState": "accumulating",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-29T20:30:14.593Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-30",
+    "ticker": "196170",
+    "companyName": "알테오젠",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 378595,
+    "stopLossPrice": 295290,
+    "targetPrice": 545205,
+    "swingScore": 74,
+    "qualityScore": 44,
+    "relativeStrength": 17.18,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-29T20:30:14.593Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-30",
+    "ticker": "028300",
+    "companyName": "HLB",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 51765,
+    "stopLossPrice": 46410,
+    "targetPrice": 62475,
+    "swingScore": 64,
+    "qualityScore": 48,
+    "relativeStrength": 8.75,
+    "supplyState": "neutral",
+    "newsState": "positive",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-29T20:30:14.593Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-30",
+    "ticker": "237690",
+    "companyName": "에스티팜",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 137025,
+    "stopLossPrice": 111690,
+    "targetPrice": 187695,
+    "swingScore": 67,
+    "qualityScore": 44,
+    "relativeStrength": 1.32,
+    "supplyState": "accumulating",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-29T20:30:14.593Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-06-30",
+    "ticker": "195940",
+    "companyName": "HK이노엔",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 43442,
+    "stopLossPrice": 38760,
+    "targetPrice": 52806,
+    "swingScore": 63,
+    "qualityScore": 38,
+    "relativeStrength": -4.78,
+    "supplyState": "accumulating",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-29T20:30:14.593Z",
     "status": "open"
   }
 ]
