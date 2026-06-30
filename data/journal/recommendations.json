@@ -611,5 +611,40 @@
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-06-29T20:30:14.593Z",
     "status": "open"
+  },
+  {
+    "date": "2026-07-01",
+    "ticker": "028300",
+    "companyName": "HLB",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 52780,
+    "stopLossPrice": 46410,
+    "targetPrice": 65520,
+    "swingScore": 63,
+    "qualityScore": 48,
+    "relativeStrength": 11.74,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-30T20:32:34.577Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-07-01",
+    "ticker": "237690",
+    "companyName": "에스티팜",
+    "market": "코스닥",
+    "source": "swing",
+    "triggerPrice": 134183,
+    "stopLossPrice": 111690,
+    "targetPrice": 179169,
+    "swingScore": 76,
+    "qualityScore": 44,
+    "relativeStrength": 0.33,
+    "supplyState": "accumulating",
+    "championAt": "2026-06-27T19:55:20.722Z",
+    "recordedAt": "2026-06-30T20:32:34.577Z",
+    "status": "open"
   }
 ]
