@@ -88,6 +88,7 @@ type BacktestReport = {
   elliottLabelStats: ElliottLabelStat[];
   recommendations: string[];
   trades: BacktestTrade[];
+  splitSample?: SplitSample;
 };
 
 type BacktestState = {
@@ -400,6 +401,10 @@ export async function collectBacktestTrades(
   }
 
   const trades: BacktestTrade[] = [];
+  // Per-ticker cooldown: once a name is in a (triggered) position it is not
+  // re-entered until the holding window passes — otherwise a stock that keeps a
+  // setup across many signal dates is over-counted as many correlated trades.
+  const lastTradeIndexByTicker: Record<string, number> = {};
 
   for (const signalIndex of signalIndexes) {
     const signalDate = benchmarkRows[signalIndex]?.날짜;
@@ -411,6 +416,10 @@ export async function collectBacktestTrades(
     const result = await screenTechnicalSwingCandidatesFromRows(snapshotRows, undefined, injected);
 
     for (const candidate of result.candidates) {
+      const priorIndex = lastTradeIndexByTicker[candidate.ticker];
+      if (priorIndex !== undefined && signalIndex - priorIndex < HOLDING_DAYS) {
+        continue;
+      }
       const fullRows = rowsByTicker[candidate.ticker] ?? [];
       const fullIndex = fullRows.findIndex(row => row.날짜 === signalDate);
       if (fullIndex === -1) {
@@ -427,21 +436,23 @@ export async function collectBacktestTrades(
         },
         snapshotRows[candidate.ticker] ?? null
       );
-      trades.push(
-        evaluateTrade(
-          candidate,
-          signalDate,
-          futureRows,
-          elliottInsight
-            ? {
-                label: elliottInsight.label,
-                score: elliottInsight.score,
-                fractalCompressionScore: elliottInsight.fractalCompressionScore,
-                waveCountEstimate: elliottInsight.waveCountEstimate,
-              }
-            : undefined
-        )
+      const trade = evaluateTrade(
+        candidate,
+        signalDate,
+        futureRows,
+        elliottInsight
+          ? {
+              label: elliottInsight.label,
+              score: elliottInsight.score,
+              fractalCompressionScore: elliottInsight.fractalCompressionScore,
+              waveCountEstimate: elliottInsight.waveCountEstimate,
+            }
+          : undefined
       );
+      trades.push(trade);
+      if (trade.outcome !== "not_triggered") {
+        lastTradeIndexByTicker[candidate.ticker] = signalIndex;
+      }
     }
   }
 
@@ -528,10 +539,55 @@ export function summarizeBacktestTrades(trades: BacktestTrade[]): BacktestSummar
   };
 }
 
+function tradeStats(trades: BacktestTrade[]): { trades: number; winRate: number; avgReturnPct: number } {
+  const active = trades.filter(trade => trade.outcome !== "not_triggered");
+  const wins = active.filter(trade => trade.returnPct > 0).length;
+  return {
+    trades: active.length,
+    winRate: active.length ? round((wins / active.length) * 100, 1) : 0,
+    avgReturnPct: active.length ? round(active.reduce((sum, trade) => sum + trade.returnPct, 0) / active.length) : 0,
+  };
+}
+
+export type SplitSample = {
+  splitDate: string | null;
+  distinctTickers: number;
+  inSample: { trades: number; winRate: number; avgReturnPct: number };
+  outOfSample: { trades: number; winRate: number; avgReturnPct: number };
+};
+
+/**
+ * Walk-forward honesty check: split triggered trades chronologically (first ~60%
+ * in-sample vs last ~40% out-of-sample). If out-of-sample holds up near
+ * in-sample the edge is trustworthy; a big drop flags overfitting / look-ahead.
+ */
+export function splitSampleStats(trades: BacktestTrade[]): SplitSample {
+  const triggered = trades
+    .filter(trade => trade.outcome !== "not_triggered")
+    .sort((a, b) => a.signalDate.localeCompare(b.signalDate));
+  const distinctTickers = new Set(trades.map(trade => trade.ticker)).size;
+  if (triggered.length < 4) {
+    return {
+      splitDate: null,
+      distinctTickers,
+      inSample: tradeStats(triggered),
+      outOfSample: { trades: 0, winRate: 0, avgReturnPct: 0 },
+    };
+  }
+  const splitDate = triggered[Math.floor(triggered.length * 0.6)].signalDate;
+  return {
+    splitDate,
+    distinctTickers,
+    inSample: tradeStats(triggered.filter(trade => trade.signalDate < splitDate)),
+    outOfSample: tradeStats(triggered.filter(trade => trade.signalDate >= splitDate)),
+  };
+}
+
 async function runBacktest() {
   const rowsByTicker = await fetchBacktestRows();
   const { trades, signalWindows } = await collectBacktestTrades(rowsByTicker);
   const summary = summarizeBacktestTrades(trades);
+  const split = splitSampleStats(trades);
 
   const baseReport = {
     generatedAt: new Date().toISOString(),
@@ -553,6 +609,7 @@ async function runBacktest() {
     patternStats: summary.patternStats,
     elliottLabelStats: summary.elliottLabelStats,
     trades: trades.slice(-200),
+    splitSample: split,
   };
   const report: BacktestReport = {
     ...baseReport,
@@ -568,6 +625,9 @@ async function runBacktest() {
   console.log(`[Swing Backtest Agent] Universe size ${report.universeSize}, signal windows ${report.signalWindows}`);
   console.log(
     `[Swing Backtest Agent] Trades ${report.totalTrades}, winRate ${report.winRate.toFixed(1)}%, avgReturn ${report.avgReturnPct.toFixed(2)}%`
+  );
+  console.log(
+    `[Swing Backtest Agent] 고유종목 ${split.distinctTickers} · OOS(최근) 승률 ${split.outOfSample.winRate}%(${split.outOfSample.trades}건) vs IS(과거) ${split.inSample.winRate}%(${split.inSample.trades}건)`
   );
   console.log(
     `[Swing Backtest Agent] Learned adjustments: ${JSON.stringify(learnedOverrides.patternWeightAdjustments)}`

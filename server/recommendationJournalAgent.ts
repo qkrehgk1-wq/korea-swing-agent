@@ -208,7 +208,18 @@ export function summarizeJournal(entries: RecommendationEntry[]): JournalSummary
   };
 }
 
-/** Append today's swing picks to the journal (dedup by date + ticker). */
+/** yyyy-mm-dd shifted back by `days` (pure, for the per-ticker cooldown window). */
+export function isoDateMinusDays(dateStr: string, days: number): string {
+  const date = new Date(`${dateStr}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Append today's swing picks to the journal. A per-ticker cooldown (≈ holding
+ * window) prevents the same name being re-recorded every day it keeps the setup,
+ * so the journal holds roughly independent bets instead of correlated duplicates.
+ */
 export async function recordRecommendations(
   candidates: TechnicalSwingCandidate[],
   now = new Date()
@@ -219,17 +230,21 @@ export async function recordRecommendations(
   const journal = await readJournal();
   const date = kstDate(now);
   const recordedAt = now.toISOString();
-  const seen = new Set(journal.map(entry => `${entry.date}|${entry.ticker}`));
+  const cooldownDays = Number(process.env.JOURNAL_COOLDOWN_DAYS) || 20;
+  const cooldownCutoff = isoDateMinusDays(date, cooldownDays);
+  // Names recorded within the cooldown window are still "in a position".
+  const onCooldown = new Set(
+    journal.filter(entry => entry.date > cooldownCutoff).map(entry => entry.ticker)
+  );
   const r = targetMultiple();
   const championAt = await readChampionFingerprint();
 
   let added = 0;
   for (const candidate of candidates) {
-    const key = `${date}|${candidate.ticker}`;
-    if (seen.has(key)) {
+    if (onCooldown.has(candidate.ticker)) {
       continue;
     }
-    seen.add(key);
+    onCooldown.add(candidate.ticker);
     const targetPrice = Math.round(
       candidate.triggerPrice + r * (candidate.triggerPrice - candidate.stopLossPrice)
     );

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { OhlcvRow } from "./koreaStockMcp";
 import {
+  isoDateMinusDays,
   kstDate,
   scoreEntry,
   summarizeByFactor,
@@ -9,6 +10,13 @@ import {
   type JournalConfig,
   type RecommendationEntry,
 } from "./recommendationJournalAgent";
+
+describe("isoDateMinusDays", () => {
+  it("shifts a yyyy-mm-dd back by N days across month boundaries", () => {
+    expect(isoDateMinusDays("2026-06-21", 20)).toBe("2026-06-01");
+    expect(isoDateMinusDays("2026-03-05", 10)).toBe("2026-02-23");
+  });
+});
 
 function row(date: string, high: number, low: number, close: number): OhlcvRow {
   return { 날짜: date, 시가: close, 고가: high, 저가: low, 종가: close, 거래량: 1000 };
