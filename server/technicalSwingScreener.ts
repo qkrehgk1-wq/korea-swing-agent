@@ -845,7 +845,14 @@ function buildCandidate(
   // Watch-only: structurally sound (passed every hard gate) but the score or
   // confluence quality is below the conviction floor. Surfaced for situational
   // awareness so the alert is never silent — never counted as a backtest trade.
-  const watchOnly = lowPatternScore || confluence.qualityScore < confluenceFloor;
+  // Bear-market risk-off: the backtest shows 약세-regime entries average a loss
+  // (win ~52%, avg −1%), so in a bearish tape demote every pick to watch-only —
+  // out of live picks and backtest trades, still visible for awareness.
+  const skipBearish = (process.env.SKIP_BEARISH_ENTRIES ?? "true") !== "false";
+  const watchOnly =
+    lowPatternScore ||
+    confluence.qualityScore < confluenceFloor ||
+    (skipBearish && regime.label === "약세");
   const blendedFit = watchOnly
     ? "관찰"
     : blendedScore >= 78
