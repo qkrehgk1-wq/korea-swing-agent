@@ -657,7 +657,9 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-06-30T20:32:34.577Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-08T20:07:30.528Z"
   },
   {
     "date": "2026-07-01",
