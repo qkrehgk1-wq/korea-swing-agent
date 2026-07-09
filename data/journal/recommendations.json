@@ -693,7 +693,9 @@
     "supplyState": "neutral",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-01T20:28:11.971Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-09T20:26:55.692Z"
   },
   {
     "date": "2026-07-02",
@@ -728,7 +730,9 @@
     "supplyState": "distributing",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-01T20:28:11.971Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-09T20:26:55.692Z"
   },
   {
     "date": "2026-07-02",
