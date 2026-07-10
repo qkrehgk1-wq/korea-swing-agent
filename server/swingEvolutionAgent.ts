@@ -57,6 +57,8 @@ const QUALITY_KEYS: (keyof SwingQualityParams)[] = [
   "minVolumeRatio",
   "maxRsi14",
   "maxVolatility20",
+  "minConfluenceScore",
+  "minRelativeStrength",
 ];
 
 const WEIGHT_BOUNDS = { min: 3, max: 26 };
@@ -66,6 +68,8 @@ const QUALITY_BOUNDS: Record<keyof SwingQualityParams, { min: number; max: numbe
   minVolumeRatio: { min: 0.6, max: 1.6, step: 0.1 },
   maxRsi14: { min: 68, max: 82, step: 1 },
   maxVolatility20: { min: 30, max: 60, step: 2 },
+  minConfluenceScore: { min: 35, max: 65, step: 3 },
+  minRelativeStrength: { min: -16, max: -4, step: 2 },
 };
 
 export const BASE_GENOME: Genome = {
@@ -76,6 +80,8 @@ export const BASE_GENOME: Genome = {
     minVolumeRatio: 0.9,
     maxRsi14: 76,
     maxVolatility20: 45,
+    minConfluenceScore: 50,
+    minRelativeStrength: -10,
   },
 };
 
@@ -148,11 +154,13 @@ export function genomeToInjected(genome: Genome): InjectedSwingOverrides {
  * for a lucky high win-rate on a handful of trades.
  */
 export function genomeFitness(summary: BacktestSummary): number {
-  const minTrades = Number(process.env.EVOLUTION_MIN_TRADES) || 8;
+  // Sample guard hardened after the 7/4 incident: a 12-trade genome out-scored a
+  // 49-trade robust one and got promoted. Target 40 makes thin samples pay.
+  const minTrades = Number(process.env.EVOLUTION_MIN_TRADES) || 10;
   if (summary.totalTrades < minTrades) {
     return -1000 + summary.totalTrades;
   }
-  const targetTrades = Number(process.env.EVOLUTION_TARGET_TRADES) || 20;
+  const targetTrades = Number(process.env.EVOLUTION_TARGET_TRADES) || 40;
   const sampleConfidence = Math.min(1, summary.totalTrades / targetTrades);
   const edge = summary.avgReturnPct + (summary.winRate - 50) * 0.04 - summary.stopRate * 0.02;
   return Number((edge * sampleConfidence).toFixed(4));
@@ -168,7 +176,7 @@ export function shouldPromote(
   challenger: Evaluation
 ): { promote: boolean; reason: string } {
   const margin = Number(process.env.EVOLUTION_PROMOTE_MARGIN) || 0.15;
-  const minTrades = Number(process.env.EVOLUTION_MIN_PROMOTE_TRADES) || 10;
+  const minTrades = Number(process.env.EVOLUTION_MIN_PROMOTE_TRADES) || 15;
   if (challenger.summary.totalTrades < minTrades) {
     return { promote: false, reason: `표본 부족 (${challenger.summary.totalTrades} < ${minTrades})` };
   }
@@ -269,6 +277,8 @@ async function promoteToLiveOverrides(
     minVolumeRatio: genome.quality.minVolumeRatio,
     maxRsi14: genome.quality.maxRsi14,
     maxVolatility20: genome.quality.maxVolatility20,
+    minConfluenceScore: genome.quality.minConfluenceScore,
+    minRelativeStrength: genome.quality.minRelativeStrength,
     notes: [`자동진화 에이전트가 승격한 품질 필터입니다 (적합도 ${fitness.toFixed(3)}).`],
   };
   await writeSwingPredictionQualityOverrides(quality);

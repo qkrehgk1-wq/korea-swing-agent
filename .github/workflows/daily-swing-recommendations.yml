@@ -67,6 +67,8 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           SWING_BACKTEST_FORCE: "true"
+          # 1000일 룩백 — 표본을 키워 튜닝·진화의 통계 신뢰도 확보(약 25초).
+          SWING_BACKTEST_LOOKBACK_DAYS: "1000"
           # 진화 탐색은 주 1회(EVOLUTION_DAY, 기본 월요일 KST)만 실행하고,
           # 다른 날은 승격된 챔피언을 일일 추천에 적용만 한다(저렴).
           EVOLUTION_AUTO_PROMOTE: ${{ vars.EVOLUTION_AUTO_PROMOTE }}

@@ -125,6 +125,10 @@ export type SwingQualityParams = {
   minVolumeRatio: number;
   maxRsi14: number;
   maxVolatility20: number;
+  // Confluence gates — evolvable so the weekly GA tunes them on the backtest
+  // instead of leaving them as hand-picked constants.
+  minConfluenceScore: number;
+  minRelativeStrength: number;
 };
 
 /**
@@ -809,10 +813,12 @@ function buildCandidate(
 
   // Multi-factor confluence quality gate — proven leadership/trend/golden-ratio
   // filters that reject single-pattern noise (the main lever on candidate quality).
-  const minConfluence = Number(process.env.MIN_CONFLUENCE_SCORE) || 50;
+  const minConfluence =
+    qualityOverrides?.minConfluenceScore ?? (Number(process.env.MIN_CONFLUENCE_SCORE) || 50);
   const confluenceFloor = isEarlyBowl ? Math.max(30, minConfluence - 12) : minConfluence;
   const rsFloorEnv = Number(process.env.MIN_RELATIVE_STRENGTH);
-  const rsFloor = Number.isFinite(rsFloorEnv) ? rsFloorEnv : -10;
+  const rsFloor =
+    qualityOverrides?.minRelativeStrength ?? (Number.isFinite(rsFloorEnv) ? rsFloorEnv : -10);
   if (confluence.relativeStrength60 < rsFloor) {
     return null; // chronically lagging its index — not a leadership stock
   }

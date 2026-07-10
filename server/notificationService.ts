@@ -198,10 +198,11 @@ export async function notifyDailyMarketSummary(
 
 // ── Daily swing push (compact, horizon-grouped) ──
 
+// 기대수익 표기는 저널·백테스트가 실제로 채점하는 2.5R로 통일(정직한 표기).
 const HORIZONS: Array<{ key: "단기" | "중기" | "장기"; header: string; rMultiple: number }> = [
-  { key: "단기", header: "🔴 단기 (1~5일)", rMultiple: 2 },
+  { key: "단기", header: "🔴 단기 (1~5일)", rMultiple: 2.5 },
   { key: "중기", header: "🟡 중기 (1~4주)", rMultiple: 2.5 },
-  { key: "장기", header: "🟢 장기 (1~3개월)", rMultiple: 3 },
+  { key: "장기", header: "🟢 장기 (1~3개월)", rMultiple: 2.5 },
 ];
 
 function inferHorizon(candidate: SwingCandidate): "단기" | "중기" | "장기" {

@@ -71,7 +71,7 @@ function journalConfig(): JournalConfig {
 }
 
 function targetMultiple(): number {
-  return Number(process.env.JOURNAL_TARGET_R) || 2;
+  return Number(process.env.JOURNAL_TARGET_R) || 2.5; // aligned with backtest SWING_TARGET_R
 }
 
 export function kstDate(now = new Date()): string {

@@ -197,7 +197,13 @@ function evaluateTrade(
     waveCountEstimate: string;
   }
 ): BacktestTrade {
-  const targetPrice = Math.round(candidate.triggerPrice * 1.08);
+  // Target = trigger + R×risk — the SAME formula the live journal scores with
+  // (was a flat +8%, so evolution optimized a different exit than we ship).
+  const targetR = Number(process.env.SWING_TARGET_R) || 2.5; // 1000d sweep: avg% peaks at 2.5R
+  const risk = candidate.triggerPrice - candidate.stopLossPrice;
+  const targetPrice = Math.round(
+    risk > 0 ? candidate.triggerPrice + targetR * risk : candidate.triggerPrice * 1.08
+  );
   const entryWindow = futureRows.slice(0, ENTRY_LOOKAHEAD_DAYS);
   let entryRow: OhlcvRow | undefined;
 

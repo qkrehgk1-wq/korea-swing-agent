@@ -30,6 +30,10 @@ export type SwingPredictionQualityOverrides = {
   minVolumeRatio: number;
   maxRsi14: number;
   maxVolatility20: number;
+  // Evolvable confluence gates — written by evolution promotions; absent from
+  // rule-based derivations, so the screener falls back to env/defaults.
+  minConfluenceScore?: number;
+  minRelativeStrength?: number;
   notes: string[];
 };
 
