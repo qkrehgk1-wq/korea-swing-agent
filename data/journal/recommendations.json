@@ -713,7 +713,12 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-01T20:28:11.971Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-07-06",
+    "exitDate": "2026-07-10",
+    "exitPrice": 46410,
+    "returnPct": -8.92,
+    "scoredAt": "2026-07-10T20:03:30.089Z"
   },
   {
     "date": "2026-07-02",
@@ -784,7 +789,9 @@
     "supplyState": "neutral",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-02T20:06:24.146Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-10T20:03:30.089Z"
   },
   {
     "date": "2026-07-03",
@@ -888,7 +895,9 @@
     "supplyState": "neutral",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-03T20:01:42.856Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-10T20:03:30.089Z"
   },
   {
     "date": "2026-07-04",
@@ -942,7 +951,9 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-03T20:01:42.856Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-10T20:03:30.089Z"
   },
   {
     "date": "2026-07-04",
@@ -994,7 +1005,9 @@
     "supplyState": "neutral",
     "championAt": "2026-07-04T19:49:07.719Z",
     "recordedAt": "2026-07-04T19:49:34.502Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-10T20:03:30.089Z"
   },
   {
     "date": "2026-07-05",
@@ -1048,7 +1061,9 @@
     "newsState": "positive",
     "championAt": "2026-07-04T19:49:07.719Z",
     "recordedAt": "2026-07-04T19:49:34.502Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-10T20:03:30.089Z"
   },
   {
     "date": "2026-07-05",
