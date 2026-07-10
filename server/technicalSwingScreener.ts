@@ -774,14 +774,9 @@ function buildCandidate(
     return null;
   }
 
-  const isAggressivePattern = patterns.some(pattern => pattern === "돌파매매" || pattern === "컵앤핸들");
-  if (regime.label === "약세" && isAggressivePattern && patterns.length === 1) {
-    return null;
-  }
-  if (regime.label === "약세" && indicators.return20d < 0 && indicators.currentPrice < indicators.ma20) {
-    return null;
-  }
-
+  // Bear-market handling is unified below (watch-only demotion), so the old
+  // ad-hoc 약세 hard-rejects are gone — every 약세 candidate is surfaced as
+  // watch rather than some vanishing and some showing.
   const swingScore = computeSwingScore(indicators, patterns, patternWeights);
   const swingFit = swingScore >= 78 ? "상" : swingScore >= 62 ? "중" : "관찰";
   const isEarlyBowl = hasEarlyBowlPattern(patterns);

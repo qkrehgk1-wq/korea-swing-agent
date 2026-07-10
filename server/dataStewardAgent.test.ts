@@ -54,7 +54,15 @@ describe("toReport", () => {
       },
       factors: { supply: [], news: [] },
       evolution: { championFitness: null, championAt: null, generations: 0, promotions: 0 },
-      backtest: { winRate: 76.9, avgReturnPct: 2.77, totalTrades: 13, generatedAt: "x" },
+      backtest: {
+        winRate: 76.9,
+        avgReturnPct: 2.77,
+        totalTrades: 13,
+        generatedAt: "x",
+        distinctTickers: 30,
+        inSampleWinRate: 60.7,
+        outOfSampleWinRate: 76.2,
+      },
       issues: ["정산 표본 0 — 라이브 검증 데이터 축적 중(진행 13건)"],
     };
     const md = toReport(analysis);

@@ -125,7 +125,15 @@ export type SystemAnalysis = {
   journal: JournalSummary;
   factors: ReturnType<typeof summarizeByFactor>;
   evolution: { championFitness: number | null; championAt: string | null; generations: number; promotions: number };
-  backtest: { winRate: number | null; avgReturnPct: number | null; totalTrades: number | null; generatedAt: string | null };
+  backtest: {
+    winRate: number | null;
+    avgReturnPct: number | null;
+    totalTrades: number | null;
+    generatedAt: string | null;
+    distinctTickers: number | null;
+    inSampleWinRate: number | null;
+    outOfSampleWinRate: number | null;
+  };
   issues: string[];
 };
 
@@ -157,12 +165,21 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
     avgReturnPct?: number;
     totalTrades?: number;
     generatedAt?: string;
+    splitSample?: {
+      distinctTickers?: number;
+      inSample?: { winRate?: number };
+      outOfSample?: { winRate?: number };
+    };
   }>(SWING_BACKTEST_REPORT_PATH);
+  const sample = backtestReport?.splitSample;
   const backtest = {
     winRate: backtestReport?.winRate ?? null,
     avgReturnPct: backtestReport?.avgReturnPct ?? null,
     totalTrades: backtestReport?.totalTrades ?? null,
     generatedAt: backtestReport?.generatedAt ?? null,
+    distinctTickers: sample?.distinctTickers ?? null,
+    inSampleWinRate: sample?.inSample?.winRate ?? null,
+    outOfSampleWinRate: sample?.outOfSample?.winRate ?? null,
   };
 
   const issues: string[] = [];
@@ -208,6 +225,7 @@ export function toReport(analysis: SystemAnalysis): string {
     "## 진화 / 백테스트",
     `- 챔피언 적합도 ${analysis.evolution.championFitness ?? "(base 시드)"} · 세대 ${analysis.evolution.generations} · 승격 ${analysis.evolution.promotions}`,
     `- 백테스트 승률 ${analysis.backtest.winRate ?? "-"}% · 평균 ${analysis.backtest.avgReturnPct ?? "-"}% · 체결 ${analysis.backtest.totalTrades ?? "-"}`,
+    `- 워크포워드: 최근(OOS) ${analysis.backtest.outOfSampleWinRate ?? "-"}% vs 과거(IS) ${analysis.backtest.inSampleWinRate ?? "-"}% · 고유종목 ${analysis.backtest.distinctTickers ?? "-"}`,
     "",
     "## 점검 이슈",
     ...(analysis.issues.length ? analysis.issues.map(issue => `- ${issue}`) : ["- 없음"]),
