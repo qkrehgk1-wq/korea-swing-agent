@@ -106,7 +106,12 @@
     "targetPrice": 54449,
     "swingScore": 64,
     "recordedAt": "2026-06-18T21:08:38.441Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-06-22",
+    "exitDate": "2026-07-13",
+    "exitPrice": 47450,
+    "returnPct": 1.74,
+    "scoredAt": "2026-07-13T20:02:23.588Z"
   },
   {
     "date": "2026-06-19",
@@ -216,7 +221,12 @@
     "swingScore": 62,
     "championAt": "2026-06-16T10:59:20.502Z",
     "recordedAt": "2026-06-19T20:19:20.313Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-06-22",
+    "exitDate": "2026-07-13",
+    "exitPrice": 47450,
+    "returnPct": 0.11,
+    "scoredAt": "2026-07-13T20:02:23.588Z"
   },
   {
     "date": "2026-06-20",
@@ -265,7 +275,12 @@
     "swingScore": 81,
     "championAt": "2026-06-16T10:59:20.502Z",
     "recordedAt": "2026-06-19T20:19:20.313Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-06-22",
+    "exitDate": "2026-07-13",
+    "exitPrice": 109765,
+    "returnPct": -25.71,
+    "scoredAt": "2026-07-13T20:02:23.588Z"
   },
   {
     "date": "2026-06-21",
@@ -279,7 +294,12 @@
     "swingScore": 62,
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-20T20:07:29.405Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-06-22",
+    "exitDate": "2026-07-13",
+    "exitPrice": 47450,
+    "returnPct": 0.11,
+    "scoredAt": "2026-07-13T20:02:23.588Z"
   },
   {
     "date": "2026-06-21",
