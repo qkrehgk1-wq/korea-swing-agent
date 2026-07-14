@@ -598,7 +598,12 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-06-29T20:30:14.593Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-07-01",
+    "exitDate": "2026-07-14",
+    "exitPrice": 295290,
+    "returnPct": -22,
+    "scoredAt": "2026-07-14T19:53:58.567Z"
   },
   {
     "date": "2026-06-30",
@@ -792,7 +797,12 @@
     "supplyState": "accumulating",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-01T20:28:11.971Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-07-03",
+    "exitDate": "2026-07-14",
+    "exitPrice": 38642,
+    "returnPct": -8.37,
+    "scoredAt": "2026-07-14T19:53:58.567Z"
   },
   {
     "date": "2026-07-03",
@@ -881,7 +891,12 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-02T20:06:24.146Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-07-07",
+    "exitDate": "2026-07-14",
+    "exitPrice": 48858,
+    "returnPct": -13.27,
+    "scoredAt": "2026-07-14T19:53:58.567Z"
   },
   {
     "date": "2026-07-04",
