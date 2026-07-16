@@ -351,7 +351,12 @@
     "supplyState": "neutral",
     "championAt": "2026-06-20T20:07:06.225Z",
     "recordedAt": "2026-06-21T20:16:07.395Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-06-25",
+    "exitDate": "2026-07-16",
+    "exitPrice": 44100,
+    "returnPct": -6.96,
+    "scoredAt": "2026-07-16T19:44:41.884Z"
   },
   {
     "date": "2026-06-22",
