@@ -52,6 +52,7 @@ describe("toReport", () => {
         targetRate: 0,
         stopRate: 0,
       },
+      journalByTicker: { settledTickers: 8, winRate: 25, avgReturnPct: -3.4 },
       factors: { supply: [], news: [] },
       evolution: { championFitness: null, championAt: null, generations: 0, promotions: 0 },
       backtest: {
@@ -70,5 +71,6 @@ describe("toReport", () => {
     expect(md).toContain("추천 저널");
     expect(md).toContain("base 시드");
     expect(md).toContain("정산 표본 0");
+    expect(md).toContain("종목단위");
   });
 });

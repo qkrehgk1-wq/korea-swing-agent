@@ -9,7 +9,9 @@ import {
   loadRecommendationJournal,
   summarizeByFactor,
   summarizeJournal,
+  summarizeJournalByTicker,
   type JournalSummary,
+  type TickerLevelSummary,
 } from "./recommendationJournalAgent";
 import {
   SWING_BACKTEST_REPORT_PATH,
@@ -123,6 +125,7 @@ export type SystemAnalysis = {
   generatedAt: string;
   catalog: SourceStatus[];
   journal: JournalSummary;
+  journalByTicker: TickerLevelSummary;
   factors: ReturnType<typeof summarizeByFactor>;
   evolution: { championFitness: number | null; championAt: string | null; generations: number; promotions: number };
   backtest: {
@@ -149,6 +152,7 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
   const catalog = await catalogData(now);
   const journalEntries = await loadRecommendationJournal();
   const journal = summarizeJournal(journalEntries);
+  const journalByTicker = summarizeJournalByTicker(journalEntries);
   const factors = summarizeByFactor(journalEntries);
 
   const champion = await readJson<{ generatedAt?: string; fitness?: number }>(CHAMPION_PATH);
@@ -194,7 +198,32 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
     issues.push(`정산 표본 0 — 라이브 검증 데이터 축적 중(진행 ${journal.open}건)`);
   }
 
-  return { generatedAt: now.toISOString(), catalog, journal, factors, evolution, backtest, issues };
+  // Edge-decay watch: when live (ticker-level, de-correlated) results fall far
+  // below what the backtest promises, the edge is being arbitraged away
+  // (signal crowding by other agents) or the regime shifted — either way the
+  // gates need review before more capital-relevant picks go out.
+  const minEdgeTickers = Number(process.env.EDGE_DECAY_MIN_TICKERS) || 8;
+  const decayGapPp = Number(process.env.EDGE_DECAY_GAP_PP) || 15;
+  if (journalByTicker.settledTickers >= minEdgeTickers && backtest.winRate != null) {
+    const winGap = backtest.winRate - journalByTicker.winRate;
+    const losingLive = journalByTicker.avgReturnPct < 0 && (backtest.avgReturnPct ?? 0) > 0;
+    if (winGap > decayGapPp || losingLive) {
+      issues.push(
+        `⚠ 엣지 괴리: 실측(종목단위) 승률 ${journalByTicker.winRate}%·평균 ${journalByTicker.avgReturnPct}% vs 백테스트 ${backtest.winRate}%·${backtest.avgReturnPct}% — 신호 군집화/레짐 변화 의심, 게이트 재검토 권고`
+      );
+    }
+  }
+
+  return {
+    generatedAt: now.toISOString(),
+    catalog,
+    journal,
+    journalByTicker,
+    factors,
+    evolution,
+    backtest,
+    issues,
+  };
 }
 
 function healthMark(health: SourceHealth): string {
@@ -219,6 +248,7 @@ export function toReport(analysis: SystemAnalysis): string {
     "",
     "## 라이브 성과 (저널)",
     `- 정산 ${analysis.journal.triggered} · 진행중 ${analysis.journal.open} · 승률 ${analysis.journal.winRate}% · 평균수익 ${analysis.journal.avgReturnPct}%`,
+    `- 종목단위(중복 제거): ${analysis.journalByTicker.settledTickers}종목 · 승률 ${analysis.journalByTicker.winRate}% · 평균 ${analysis.journalByTicker.avgReturnPct}%`,
     `- 수급: ${analysis.factors.supply.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
     `- 뉴스: ${analysis.factors.news.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
     "",
@@ -246,17 +276,20 @@ export async function runDataSteward(now = new Date()): Promise<SystemAnalysis> 
     }`
   );
 
-  // Alert only on durable (tracked) data problems — ephemeral .data being absent
-  // on a given CI run is expected, not an incident.
-  const criticalIssues = analysis.catalog
-    .filter(source => source.tracked && (source.health === "missing" || source.health === "stale"))
-    .map(source => `${source.key}: ${source.health}`);
+  // Alert on durable problems only: tracked-data health issues and edge-decay
+  // warnings. Ephemeral .data absence on a CI run is expected, not an incident.
+  const criticalIssues = [
+    ...analysis.catalog
+      .filter(source => source.tracked && (source.health === "missing" || source.health === "stale"))
+      .map(source => `${source.key}: ${source.health}`),
+    ...analysis.issues.filter(issue => issue.includes("엣지 괴리")),
+  ];
   if (criticalIssues.length) {
     await routeToCommander({
       ticker: "DATA",
       companyName: "데이터 총괄",
       kind: "high_risk",
-      headline: `추적 데이터 이상 ${criticalIssues.length}건`,
+      headline: `시스템 점검 경보 ${criticalIssues.length}건`,
       detail: criticalIssues,
     }).catch(error => console.warn("[Data Steward] commander notify failed:", error));
   }

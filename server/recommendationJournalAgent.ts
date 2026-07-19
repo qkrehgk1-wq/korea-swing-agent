@@ -208,6 +208,41 @@ export function summarizeJournal(entries: RecommendationEntry[]): JournalSummary
   };
 }
 
+export type TickerLevelSummary = {
+  settledTickers: number;
+  winRate: number;
+  avgReturnPct: number;
+};
+
+/**
+ * Ticker-level realized performance: each name counts ONCE (its settled picks
+ * averaged), so one stock that settled repeatedly (pre-cooldown duplicates)
+ * cannot dominate the sample. The honest basis for comparing live results
+ * against the backtest (edge-decay detection).
+ */
+export function summarizeJournalByTicker(entries: RecommendationEntry[]): TickerLevelSummary {
+  const settled = entries.filter(
+    entry => entry.status === "target" || entry.status === "stop" || entry.status === "time_exit"
+  );
+  const byTicker = new Map<string, number[]>();
+  for (const entry of settled) {
+    const list = byTicker.get(entry.ticker) ?? [];
+    list.push(entry.returnPct ?? 0);
+    byTicker.set(entry.ticker, list);
+  }
+  const perTicker = Array.from(byTicker.values()).map(
+    list => list.reduce((sum, value) => sum + value, 0) / list.length
+  );
+  const wins = perTicker.filter(value => value > 0).length;
+  return {
+    settledTickers: perTicker.length,
+    winRate: perTicker.length ? round((wins / perTicker.length) * 100, 1) : 0,
+    avgReturnPct: perTicker.length
+      ? round(perTicker.reduce((sum, value) => sum + value, 0) / perTicker.length)
+      : 0,
+  };
+}
+
 /** yyyy-mm-dd shifted back by `days` (pure, for the per-ticker cooldown window). */
 export function isoDateMinusDays(dateStr: string, days: number): string {
   const date = new Date(`${dateStr}T00:00:00Z`);

@@ -7,6 +7,7 @@ import {
   scoreEntry,
   summarizeByFactor,
   summarizeJournal,
+  summarizeJournalByTicker,
   type JournalConfig,
   type RecommendationEntry,
 } from "./recommendationJournalAgent";
@@ -132,6 +133,29 @@ describe("summarizeJournal", () => {
     expect(summary.total).toBe(0);
     expect(summary.winRate).toBe(0);
     expect(summary.avgReturnPct).toBe(0);
+  });
+});
+
+describe("summarizeJournalByTicker", () => {
+  it("counts each ticker once (averaged), de-correlating repeated settles", () => {
+    const entries: RecommendationEntry[] = [
+      openEntry({ ticker: "A", status: "stop", returnPct: -10 }),
+      openEntry({ ticker: "A", status: "stop", returnPct: -8 }),
+      openEntry({ ticker: "A", status: "target", returnPct: 20 }), // A 평균 +0.67 → 1승
+      openEntry({ ticker: "B", status: "target", returnPct: 22 }),
+      openEntry({ ticker: "C", status: "stop", returnPct: -9 }),
+      openEntry({ ticker: "D", status: "open" }), // 미정산 → 제외
+    ];
+    const summary = summarizeJournalByTicker(entries);
+    expect(summary.settledTickers).toBe(3);
+    expect(summary.winRate).toBe(66.7);
+    expect(summary.avgReturnPct).toBe(4.56);
+  });
+
+  it("handles an empty journal", () => {
+    const summary = summarizeJournalByTicker([]);
+    expect(summary.settledTickers).toBe(0);
+    expect(summary.winRate).toBe(0);
   });
 });
 
