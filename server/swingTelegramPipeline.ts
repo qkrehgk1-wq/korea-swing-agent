@@ -25,7 +25,12 @@ import {
   notifyDailySwingCandidates,
   notifyDailySwingFailure,
 } from "./notificationService";
-import { recordRecommendations } from "./recommendationJournalAgent";
+import {
+  loadRecommendationJournal,
+  recordRecommendations,
+  summarizeJournal,
+} from "./recommendationJournalAgent";
+import { routeToCommander } from "./commanderChannel";
 import {
   createSwingPipelineExecutionReport,
   createSwingPipelineSeed,
@@ -95,8 +100,29 @@ async function runSwingTelegramPipeline() {
     const firstLimitUpResult = await predictFirstLimitUpFollowThroughCandidates();
     const externalPlatformReport = await externalPlatformPromise;
     const { candidates, notes, scannedTickers, watchlist = [] } = result;
+    const dataDegraded = result.dataReliability?.degraded ?? false;
     const mergedSwingCandidates = uniqueByTicker([...kosdaqTeamResult.candidates, ...candidates]);
     await enrichSwingCandidates([...mergedSwingCandidates, ...watchlist]);
+
+    // 실측 성과 1줄(저널 정산 기반) — 표본이 최소치 이상일 때만 표기.
+    const journalSummary = summarizeJournal(await loadRecommendationJournal());
+    const performanceLine =
+      journalSummary.triggered >= Number(process.env.JOURNAL_MIN_REPORT_TRADES || 5)
+        ? `📈 실측 성과: 체결 ${journalSummary.triggered}건 · 승률 ${journalSummary.winRate}% · 평균 ${journalSummary.avgReturnPct}% (타겟 ${journalSummary.targetRate}%·손절 ${journalSummary.stopRate}%)`
+        : "";
+
+    if (dataDegraded) {
+      await routeToCommander({
+        ticker: "DATA",
+        companyName: "데이터 신뢰도",
+        kind: "high_risk",
+        headline: "수집 신뢰도 저하 — 신규 검토 후보 생성 중단",
+        detail: [
+          `수집 실패 ${result.dataReliability?.dataFailures ?? "?"}/${result.dataReliability?.scanned ?? "?"} · 거래정지 의심 ${result.dataReliability?.staleTickers ?? 0}`,
+          "이번 회차는 관찰 정보만 발송합니다.",
+        ],
+      }).catch(error => console.warn("[Swing Pipeline] degraded notify failed:", error));
+    }
 
     console.log(
       `[Swing Pipeline] Scanned ${scannedTickers.length} tickers, matched ${candidates.length} candidates`
@@ -175,7 +201,8 @@ async function runSwingTelegramPipeline() {
         externalPlatformReport,
         agentTeamReport,
         kosdaqTeamResult.candidates,
-        watchlist
+        watchlist,
+        { performanceLine, dataDegraded }
       );
       if (!delivery.primaryDelivered) {
         await persistSwingPipelineExecutionReport(

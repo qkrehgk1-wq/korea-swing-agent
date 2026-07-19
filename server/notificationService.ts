@@ -221,10 +221,11 @@ function inferHorizon(candidate: SwingCandidate): "단기" | "중기" | "장기"
   return "중기";
 }
 
+// 확정적 지시 표현(매수/ACT 등) 대신 검토·관찰 언어만 사용한다.
 function decisionLabel(candidate: SwingCandidate): string {
-  if (candidate.swingFit === "상" || candidate.swingScore >= 75) return "ACT";
-  if (candidate.swingFit === "중" || candidate.swingScore >= 60) return "PREPARE";
-  return "WATCH";
+  if (candidate.swingFit === "상" || candidate.swingScore >= 75) return "유력검토";
+  if (candidate.swingFit === "중" || candidate.swingScore >= 60) return "검토";
+  return "관찰";
 }
 
 function expectedReturnPct(candidate: SwingCandidate, rMultiple: number): number {
@@ -273,7 +274,7 @@ function formatPick(candidate: SwingCandidate, rMultiple: number): string {
   const detail = [rs, confluence].filter(Boolean).join(" · ");
   return [
     `${candidate.companyName} ${candidate.ticker} · ${decisionLabel(candidate)} ${candidate.swingScore}${supplyMark(candidate)}${newsMark(candidate)}`,
-    `  진입 ${won(candidate.triggerPrice)} · 손절 ${won(candidate.stopLossPrice)} · 기대 +${pct}%`,
+    `  기준가 ${won(candidate.triggerPrice)} · 손실관리 ${won(candidate.stopLossPrice)} · 목표범위 +${pct}%`,
     detail ? `  ${detail}` : "",
   ]
     .filter(Boolean)
@@ -291,7 +292,8 @@ export function buildDailySwingMessage(
   limitUpCandidates: LimitUpPredictionCandidate[] = [],
   firstLimitUpCandidates: FirstLimitUpFollowThroughCandidate[] = [],
   now: Date = new Date(),
-  watchlist: SwingCandidate[] = []
+  watchlist: SwingCandidate[] = [],
+  options: { performanceLine?: string; dataDegraded?: boolean } = {}
 ): { title: string; body: string } {
   const title = `📊 한국 스윙 · ${kstDateLabel(now)}`;
   const ranked = [...candidates].sort((a, b) => b.swingScore - a.swingScore);
@@ -316,17 +318,22 @@ export function buildDailySwingMessage(
     .map(c => c.companyName);
 
   const footer: string[] = [];
-  if (limitUpNames.length) footer.push(`⚡ 상한가 후보: ${limitUpNames.join(" · ")}`);
+  if (limitUpNames.length) footer.push(`⚡ 상한가 관찰: ${limitUpNames.join(" · ")}`);
+  if (options.performanceLine) footer.push(options.performanceLine);
   footer.push("🔒 전체 근거·차트 → 대시보드");
 
+  const dataBanner = options.dataDegraded
+    ? "🛑 데이터 신뢰도 저하 — 이번 회차는 관찰 정보만 제공(검토 판단 보류)"
+    : "";
   const regimeBanner = riskOff
-    ? "⚠️ 시장 약세 — 신규 진입 신중·비중 축소·현금 권고"
+    ? "⚠️ 시장 약세 — 신규 검토 축소·현금 비중 고려"
     : regime === "강세"
       ? "🟢 시장 강세 — 추세 우호적"
       : "";
   const body =
     sections.length || watchSection
       ? [
+          dataBanner,
           regimeBanner,
           `KOSPI·KOSDAQ 자동 스캔 · 후보 ${ranked.length} · 관찰 ${watchlist.length}`,
           "",
@@ -337,7 +344,7 @@ export function buildDailySwingMessage(
         ]
           .filter(Boolean)
           .join("\n")
-      : "오늘은 조건에 맞는 스윙 후보가 없습니다.";
+      : [dataBanner, "오늘은 조건에 맞는 스윙 후보가 없습니다."].filter(Boolean).join("\n");
   return { title, body };
 }
 
@@ -348,14 +355,16 @@ export async function notifyDailySwingCandidates(
   _externalPlatformReport?: ExternalPlatformReport,
   _agentTeamReport?: AgentTeamReport,
   _kosdaqFocusCandidates: SwingCandidate[] = [],
-  watchlist: SwingCandidate[] = []
+  watchlist: SwingCandidate[] = [],
+  options: { performanceLine?: string; dataDegraded?: boolean } = {}
 ): Promise<NotificationDeliveryResult> {
   const { title, body } = buildDailySwingMessage(
     candidates,
     limitUpCandidates,
     firstLimitUpCandidates,
     new Date(),
-    watchlist
+    watchlist,
+    options
   );
 
   try {

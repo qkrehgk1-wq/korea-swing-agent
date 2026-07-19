@@ -61,7 +61,21 @@ type ScreenerResult = {
   watchlist?: Candidate[];
   scannedTickers: string[];
   notes: string[];
+  dataReliability?: {
+    scanned: number;
+    dataFailures: number;
+    staleTickers: number;
+    degraded: boolean;
+  };
 };
+
+/** Calendar-day gap between two yyyy-mm-dd strings (to − from); 0 on bad input. */
+export function isoDaysBetween(fromDate: string, toDate: string): number {
+  const from = new Date(`${fromDate}T00:00:00Z`).getTime();
+  const to = new Date(`${toDate}T00:00:00Z`).getTime();
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return 0;
+  return Math.round((to - from) / 86400000);
+}
 
 export type TechnicalSwingRowsByTicker = Record<string, OhlcvRow[] | null>;
 export type TechnicalSwingScreenerResult = ScreenerResult;
@@ -987,6 +1001,9 @@ export async function screenTechnicalSwingCandidatesFromRows(
     kospiRegime.score <= kosdaqRegime.score ? kospiRegime : kosdaqRegime;
   const kospiBars = toBars(kospiRows);
   const kosdaqBars = toBars(kosdaqRows);
+  const benchLastDate =
+    kospiRows?.[kospiRows.length - 1]?.날짜 ?? kosdaqRows?.[kosdaqRows.length - 1]?.날짜 ?? null;
+  const haltStaleDays = Number(process.env.HALT_STALE_DAYS) || 7;
 
   const scanned = await mapWithConcurrency(
     tickers,
@@ -998,6 +1015,19 @@ export async function screenTechnicalSwingCandidatesFromRows(
           candidate: null,
           watchOnly: false,
           skipReason: "OHLCV 데이터를 가져오지 못했습니다.",
+        };
+      }
+
+      // Trading-halt / delisting guard: a name whose last bar lags the benchmark
+      // by 7+ calendar days is effectively 거래정지/관리종목 — never a candidate.
+      const lastDate = rows[rows.length - 1]?.날짜;
+      const staleGap = benchLastDate && lastDate ? isoDaysBetween(lastDate, benchLastDate) : 0;
+      if (staleGap > haltStaleDays) {
+        return {
+          ticker,
+          candidate: null,
+          watchOnly: false,
+          skipReason: `최근 ${staleGap}일 시세 없음(거래정지·관리종목 가능성) — 제외`,
         };
       }
 
@@ -1060,9 +1090,20 @@ export async function screenTechnicalSwingCandidatesFromRows(
     .sort((a, b) => b.swingScore - a.swingScore)
     .slice(0, 3);
   const earlyBowlCandidates = candidates.filter(candidate => hasEarlyBowlPattern(candidate.patterns));
-  const finalCandidates = rankBowlFocusedCandidates(candidates, 5);
+  const rankedCandidates = rankBowlFocusedCandidates(candidates, 5);
   const dataFailureCount = skipped.filter(item => item.skipReason.includes("OHLCV")).length;
+  const staleTickerCount = skipped.filter(item => item.skipReason.includes("시세 없음")).length;
   const shortHistoryCount = skipped.filter(item => item.skipReason.includes("140봉")).length;
+
+  // Data-degradation protocol: when the feed is unreliable (benchmark missing or
+  // too many fetch failures) we say so explicitly and stop issuing 검토 후보 —
+  // survivors are demoted to watch-only, same stance as a RED market state.
+  const degradedRatio = Number(process.env.DATA_DEGRADED_RATIO) || 0.2;
+  const benchmarkMissing = !kospiRows?.length || !kosdaqRows?.length;
+  const degraded =
+    benchmarkMissing || (tickers.length > 0 && dataFailureCount / tickers.length > degradedRatio);
+  const finalCandidates = degraded ? [] : rankedCandidates;
+  const finalWatchlist = degraded ? [...rankedCandidates, ...watchlist].slice(0, 5) : watchlist;
   const skippedSummary = skipped
     .slice(0, 5)
     .map(item => `${nameFor(item.ticker)}: ${item.skipReason}`)
@@ -1071,9 +1112,20 @@ export async function screenTechnicalSwingCandidatesFromRows(
   return {
     bible: buildTechnicalSwingBible(),
     candidates: finalCandidates,
-    watchlist,
+    watchlist: finalWatchlist,
     scannedTickers: tickers,
+    dataReliability: {
+      scanned: tickers.length,
+      dataFailures: dataFailureCount,
+      staleTickers: staleTickerCount,
+      degraded,
+    },
     notes: [
+      ...(degraded
+        ? [
+            `⚠ 데이터 신뢰도 저하: 수집 실패 ${dataFailureCount}/${tickers.length}${benchmarkMissing ? " + 벤치마크 누락" : ""} — 신규 검토 후보 생성 중단(관찰만 제공)`,
+          ]
+        : []),
       `시장 요약: 코스피 ${kospiRegime.label} / 코스닥 ${kosdaqRegime.label}`,
       `시장 레짐: ${marketRegime.label} (${marketRegime.score}점)`,
       `코스피 레짐: ${kospiRegime.label} (${kospiRegime.score}점)`,
@@ -1085,7 +1137,7 @@ export async function screenTechnicalSwingCandidatesFromRows(
       earlyBowlCandidates.length
         ? `밥그릇 1번/2번자리 후보 우선선정: ${earlyBowlCandidates.map(candidate => `${candidate.companyName}(${candidate.ticker})`).join(", ")}`
         : "밥그릇 1번/2번자리 후보 포함: 조건 통과 종목 없음",
-      `데이터 수집 실패 ${dataFailureCount}개, 히스토리 부족 ${shortHistoryCount}개`,
+      `데이터 수집 실패 ${dataFailureCount}개, 히스토리 부족 ${shortHistoryCount}개, 거래정지 의심 제외 ${staleTickerCount}개`,
       skippedSummary ? `제외 종목 메모: ${skippedSummary}` : "제외 종목 메모: 없음",
       "현재 스캐너는 기술적 스윙 전용이며, 차트·거래량·RSI·이평선만 사용합니다.",
       "밥그릇 1번/2번자리를 우선 랭킹하고, 과열 돌파·하이힐 단일 신호는 강하게 감점합니다.",

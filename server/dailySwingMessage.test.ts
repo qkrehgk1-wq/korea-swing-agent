@@ -66,6 +66,30 @@ describe("buildDailySwingMessage", () => {
     expect(buildDailySwingMessage([], [], [], NOW).body).toContain("후보가 없습니다");
   });
 
+  it("uses review language (no directive terms) with 기준가/손실관리 wording", () => {
+    const { body } = buildDailySwingMessage([cand({ swingScore: 80 })], [], [], NOW);
+    expect(body).toContain("유력검토");
+    expect(body).toContain("기준가 ");
+    expect(body).toContain("손실관리 ");
+    expect(body).not.toContain("ACT");
+    expect(body).not.toContain("진입 ");
+  });
+
+  it("shows the data-degradation banner and realized performance line", () => {
+    const { body } = buildDailySwingMessage([cand()], [], [], NOW, [], {
+      dataDegraded: true,
+      performanceLine: "📈 실측 성과: 체결 12건 · 승률 58.3% · 평균 2.1% (타겟 41.7%·손절 16.7%)",
+    });
+    expect(body).toContain("데이터 신뢰도 저하");
+    expect(body).toContain("실측 성과");
+  });
+
+  it("keeps the degradation banner even when there is nothing to show", () => {
+    const { body } = buildDailySwingMessage([], [], [], NOW, [], { dataDegraded: true });
+    expect(body).toContain("데이터 신뢰도 저하");
+    expect(body).toContain("후보가 없습니다");
+  });
+
   it("surfaces a watch-only floor instead of going silent", () => {
     const { body } = buildDailySwingMessage([], [], [], NOW, [
       cand({
