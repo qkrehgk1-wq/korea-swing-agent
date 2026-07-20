@@ -247,9 +247,13 @@ async function runSwingTelegramPipeline() {
           telegramDelivered: true,
         })
       );
-      await recordRecommendations(mergedSwingCandidates).catch(error =>
-        console.warn("[Swing Pipeline] Journal record failed:", error)
-      );
+      // 섀도 포함 기록: 관찰 후보도 채점 대상으로 남겨 약세장에도 검증이 굶지
+      // 않게 한다(장애 시엔 가격 신뢰 불가라 섀도 제외).
+      await recordRecommendations(
+        mergedSwingCandidates,
+        new Date(),
+        dataDegraded ? [] : watchlist
+      ).catch(error => console.warn("[Swing Pipeline] Journal record failed:", error));
       console.log("[Swing Pipeline] Telegram swing and limit-up alert sent");
     } else {
       await persistSwingPipelineExecutionReport(

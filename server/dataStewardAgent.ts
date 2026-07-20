@@ -10,6 +10,7 @@ import {
   summarizeByFactor,
   summarizeJournal,
   summarizeJournalByTicker,
+  summarizeShadowByTicker,
   type JournalSummary,
   type TickerLevelSummary,
 } from "./recommendationJournalAgent";
@@ -126,6 +127,7 @@ export type SystemAnalysis = {
   catalog: SourceStatus[];
   journal: JournalSummary;
   journalByTicker: TickerLevelSummary;
+  shadowByTicker: TickerLevelSummary;
   factors: ReturnType<typeof summarizeByFactor>;
   evolution: { championFitness: number | null; championAt: string | null; generations: number; promotions: number };
   backtest: {
@@ -153,6 +155,7 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
   const journalEntries = await loadRecommendationJournal();
   const journal = summarizeJournal(journalEntries);
   const journalByTicker = summarizeJournalByTicker(journalEntries);
+  const shadowByTicker = summarizeShadowByTicker(journalEntries);
   const factors = summarizeByFactor(journalEntries);
 
   const champion = await readJson<{ generatedAt?: string; fitness?: number }>(CHAMPION_PATH);
@@ -219,6 +222,7 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
     catalog,
     journal,
     journalByTicker,
+    shadowByTicker,
     factors,
     evolution,
     backtest,
@@ -249,6 +253,7 @@ export function toReport(analysis: SystemAnalysis): string {
     "## 라이브 성과 (저널)",
     `- 정산 ${analysis.journal.triggered} · 진행중 ${analysis.journal.open} · 승률 ${analysis.journal.winRate}% · 평균수익 ${analysis.journal.avgReturnPct}%`,
     `- 종목단위(중복 제거): ${analysis.journalByTicker.settledTickers}종목 · 승률 ${analysis.journalByTicker.winRate}% · 평균 ${analysis.journalByTicker.avgReturnPct}%`,
+    `- 관찰 섀도(억제 후보 검증): ${analysis.shadowByTicker.settledTickers}종목 · 승률 ${analysis.shadowByTicker.winRate}% · 평균 ${analysis.shadowByTicker.avgReturnPct}%`,
     `- 수급: ${analysis.factors.supply.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
     `- 뉴스: ${analysis.factors.news.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
     "",

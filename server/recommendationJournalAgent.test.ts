@@ -8,6 +8,7 @@ import {
   summarizeByFactor,
   summarizeJournal,
   summarizeJournalByTicker,
+  summarizeShadowByTicker,
   type JournalConfig,
   type RecommendationEntry,
 } from "./recommendationJournalAgent";
@@ -156,6 +157,19 @@ describe("summarizeJournalByTicker", () => {
     const summary = summarizeJournalByTicker([]);
     expect(summary.settledTickers).toBe(0);
     expect(summary.winRate).toBe(0);
+  });
+
+  it("separates shadow (watch-only) entries from headline stats", () => {
+    const entries: RecommendationEntry[] = [
+      openEntry({ ticker: "A", status: "target", returnPct: 20 }),
+      openEntry({ ticker: "B", status: "stop", returnPct: -9, watchOnly: true }),
+    ];
+    expect(summarizeJournal(entries).triggered).toBe(1);
+    expect(summarizeJournal(entries).winRate).toBe(100);
+    expect(summarizeJournalByTicker(entries).settledTickers).toBe(1);
+    const shadow = summarizeShadowByTicker(entries);
+    expect(shadow.settledTickers).toBe(1);
+    expect(shadow.winRate).toBe(0);
   });
 });
 

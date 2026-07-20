@@ -4,6 +4,7 @@ import type { BacktestSummary } from "./swingBacktestAgent";
 import {
   BASE_GENOME,
   clampGenome,
+  consistencyFactor,
   createRng,
   genomeFitness,
   mutateGenome,
@@ -108,6 +109,30 @@ describe("genomeFitness", () => {
     const lowSample = genomeFitness(summary({ totalTrades: 10, avgReturnPct: 2, winRate: 60 }));
     const fullSample = genomeFitness(summary({ totalTrades: 20, avgReturnPct: 2, winRate: 60 }));
     expect(fullSample).toBeGreaterThan(lowSample);
+  });
+});
+
+describe("consistencyFactor", () => {
+  const split = (aTrades: number, aAvg: number, bTrades: number, bAvg: number) => ({
+    splitDate: "2025-01-01" as string | null,
+    distinctTickers: 10,
+    inSample: { trades: aTrades, winRate: 50, avgReturnPct: aAvg },
+    outOfSample: { trades: bTrades, winRate: 50, avgReturnPct: bAvg },
+  });
+
+  it("returns 1 when either half lacks sample", () => {
+    expect(consistencyFactor(split(3, 5, 20, 5))).toBe(1);
+    expect(consistencyFactor({ ...split(10, 5, 10, 5), splitDate: null })).toBe(1);
+  });
+
+  it("halves fitness when one half loses money (bull-only genome)", () => {
+    expect(consistencyFactor(split(10, -1, 10, 5))).toBe(0.5);
+    expect(consistencyFactor(split(10, 5, 10, -0.5))).toBe(0.5);
+  });
+
+  it("rewards balanced halves, scales down imbalance", () => {
+    expect(consistencyFactor(split(10, 4, 10, 4))).toBe(1);
+    expect(consistencyFactor(split(10, 1, 10, 4))).toBe(0.7);
   });
 });
 

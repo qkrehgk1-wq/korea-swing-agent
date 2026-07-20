@@ -8,8 +8,10 @@ import { routeToCommander } from "./commanderChannel";
 import {
   collectBacktestTrades,
   fetchBacktestRows,
+  splitSampleStats,
   summarizeBacktestTrades,
   type BacktestSummary,
+  type SplitSample,
 } from "./swingBacktestAgent";
 import {
   SWING_LEARNED_OVERRIDES_PATH,
@@ -164,6 +166,22 @@ export function genomeFitness(summary: BacktestSummary): number {
   const sampleConfidence = Math.min(1, summary.totalTrades / targetTrades);
   const edge = summary.avgReturnPct + (summary.winRate - 50) * 0.04 - summary.stopRate * 0.02;
   return Number((edge * sampleConfidence).toFixed(4));
+}
+
+/**
+ * Consistency factor — anti bull-only-overfit. A genome must earn in BOTH time
+ * halves (walk-forward split): if either half loses money its fitness is halved,
+ * and imbalance between halves scales fitness down toward 0.6. This encodes the
+ * June lesson (a strategy that only works in one regime breaks live).
+ */
+export function consistencyFactor(split: SplitSample): number {
+  const a = split.inSample;
+  const b = split.outOfSample;
+  if (!split.splitDate || a.trades < 5 || b.trades < 5) return 1; // not enough to judge halves
+  if (a.avgReturnPct <= 0 || b.avgReturnPct <= 0) return 0.5;
+  const worse = Math.min(a.avgReturnPct, b.avgReturnPct);
+  const better = Math.max(a.avgReturnPct, b.avgReturnPct);
+  return Number(Math.max(0.6, 0.6 + 0.4 * (worse / better)).toFixed(3));
 }
 
 /**
@@ -343,6 +361,7 @@ async function liveFitnessForChampion(): Promise<number | null> {
   const journal = await loadRecommendationJournal();
   const settled = journal.filter(
     entry =>
+      !entry.watchOnly &&
       entry.championAt === champion.generatedAt &&
       (entry.status === "target" || entry.status === "stop" || entry.status === "time_exit")
   );
@@ -410,7 +429,10 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
   const evaluate = async (genome: Genome): Promise<Evaluation> => {
     const { trades } = await collectBacktestTrades(rows, genomeToInjected(genome));
     const summary = summarizeBacktestTrades(trades);
-    return { genome, summary, fitness: genomeFitness(summary) };
+    const base = genomeFitness(summary);
+    const fitness =
+      base > 0 ? Number((base * consistencyFactor(splitSampleStats(trades))).toFixed(4)) : base;
+    return { genome, summary, fitness };
   };
 
   const incumbentRaw = await evaluate(await loadChampionGenome());

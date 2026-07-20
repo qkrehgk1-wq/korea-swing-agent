@@ -25,6 +25,8 @@ export type RecommendationEntry = {
   market?: string;
   source: "swing";
   championAt?: string;
+  /** Shadow entry (suppressed/watch candidate) — scored but excluded from headline stats. */
+  watchOnly?: boolean;
   triggerPrice: number;
   stopLossPrice: number;
   targetPrice: number;
@@ -180,7 +182,8 @@ function settle(
   return { ...entry, status, entryDate, exitDate, exitPrice, returnPct, scoredAt: new Date().toISOString() };
 }
 
-export function summarizeJournal(entries: RecommendationEntry[]): JournalSummary {
+export function summarizeJournal(allEntries: RecommendationEntry[]): JournalSummary {
+  const entries = allEntries.filter(entry => !entry.watchOnly); // headline = real picks only
   const open = entries.filter(entry => entry.status === "open");
   const noEntry = entries.filter(entry => entry.status === "no_entry");
   const triggered = entries.filter(
@@ -220,7 +223,7 @@ export type TickerLevelSummary = {
  * cannot dominate the sample. The honest basis for comparing live results
  * against the backtest (edge-decay detection).
  */
-export function summarizeJournalByTicker(entries: RecommendationEntry[]): TickerLevelSummary {
+function summarizeByTickerCore(entries: RecommendationEntry[]): TickerLevelSummary {
   const settled = entries.filter(
     entry => entry.status === "target" || entry.status === "stop" || entry.status === "time_exit"
   );
@@ -243,6 +246,15 @@ export function summarizeJournalByTicker(entries: RecommendationEntry[]): Ticker
   };
 }
 
+export function summarizeJournalByTicker(entries: RecommendationEntry[]): TickerLevelSummary {
+  return summarizeByTickerCore(entries.filter(entry => !entry.watchOnly));
+}
+
+/** Shadow (watch-only) realized performance — validates what the gates suppressed. */
+export function summarizeShadowByTicker(entries: RecommendationEntry[]): TickerLevelSummary {
+  return summarizeByTickerCore(entries.filter(entry => entry.watchOnly === true));
+}
+
 /** yyyy-mm-dd shifted back by `days` (pure, for the per-ticker cooldown window). */
 export function isoDateMinusDays(dateStr: string, days: number): string {
   const date = new Date(`${dateStr}T00:00:00Z`);
@@ -251,15 +263,21 @@ export function isoDateMinusDays(dateStr: string, days: number): string {
 }
 
 /**
- * Append today's swing picks to the journal. A per-ticker cooldown (≈ holding
- * window) prevents the same name being re-recorded every day it keeps the setup,
- * so the journal holds roughly independent bets instead of correlated duplicates.
+ * Append today's swing picks — plus watch-only candidates as SHADOW entries —
+ * to the journal. Shadow entries are scored like real picks but excluded from
+ * headline stats; they keep live validation running through risk-off stretches
+ * (e.g., a long 약세 tape where the system correctly issues zero real picks)
+ * and let us verify whether suppressed candidates actually failed.
+ *
+ * Cooldown: a real pick is only blocked by recent real picks; a shadow record
+ * is blocked by anything recent (so a shadow never blocks a later real pick).
  */
 export async function recordRecommendations(
   candidates: TechnicalSwingCandidate[],
-  now = new Date()
+  now = new Date(),
+  watchCandidates: TechnicalSwingCandidate[] = []
 ): Promise<number> {
-  if (!candidates.length) {
+  if (!candidates.length && !watchCandidates.length) {
     return 0;
   }
   const journal = await readJournal();
@@ -267,19 +285,14 @@ export async function recordRecommendations(
   const recordedAt = now.toISOString();
   const cooldownDays = Number(process.env.JOURNAL_COOLDOWN_DAYS) || 20;
   const cooldownCutoff = isoDateMinusDays(date, cooldownDays);
-  // Names recorded within the cooldown window are still "in a position".
-  const onCooldown = new Set(
-    journal.filter(entry => entry.date > cooldownCutoff).map(entry => entry.ticker)
-  );
+  const recent = journal.filter(entry => entry.date > cooldownCutoff);
+  const pickCooldown = new Set(recent.filter(entry => !entry.watchOnly).map(entry => entry.ticker));
+  const anyCooldown = new Set(recent.map(entry => entry.ticker));
   const r = targetMultiple();
   const championAt = await readChampionFingerprint();
 
   let added = 0;
-  for (const candidate of candidates) {
-    if (onCooldown.has(candidate.ticker)) {
-      continue;
-    }
-    onCooldown.add(candidate.ticker);
+  const push = (candidate: TechnicalSwingCandidate, watchOnly: boolean) => {
     const targetPrice = Math.round(
       candidate.triggerPrice + r * (candidate.triggerPrice - candidate.stopLossPrice)
     );
@@ -289,6 +302,7 @@ export async function recordRecommendations(
       companyName: candidate.companyName,
       market: candidate.market,
       source: "swing",
+      ...(watchOnly ? { watchOnly: true } : {}),
       triggerPrice: candidate.triggerPrice,
       stopLossPrice: candidate.stopLossPrice,
       targetPrice,
@@ -302,6 +316,22 @@ export async function recordRecommendations(
       status: "open",
     });
     added += 1;
+  };
+
+  for (const candidate of candidates) {
+    if (pickCooldown.has(candidate.ticker)) {
+      continue;
+    }
+    pickCooldown.add(candidate.ticker);
+    anyCooldown.add(candidate.ticker);
+    push(candidate, false);
+  }
+  for (const candidate of watchCandidates) {
+    if (anyCooldown.has(candidate.ticker)) {
+      continue;
+    }
+    anyCooldown.add(candidate.ticker);
+    push(candidate, true);
   }
 
   if (added) {
@@ -377,7 +407,9 @@ export function summarizeByFactor(entries: RecommendationEntry[]): {
   news: FactorBucket[];
 } {
   const triggered = entries.filter(
-    entry => entry.status === "target" || entry.status === "stop" || entry.status === "time_exit"
+    entry =>
+      !entry.watchOnly &&
+      (entry.status === "target" || entry.status === "stop" || entry.status === "time_exit")
   );
   const supply = (["accumulating", "distributing", "neutral"] as const).map(state =>
     bucketStats(
