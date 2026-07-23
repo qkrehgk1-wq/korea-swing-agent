@@ -1247,5 +1247,43 @@
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-21T20:04:41.751Z",
     "status": "open"
+  },
+  {
+    "date": "2026-07-24",
+    "ticker": "161390",
+    "companyName": "한국타이어앤테크놀로지",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 76700,
+    "stopLossPrice": 64739,
+    "targetPrice": 106603,
+    "swingScore": 75,
+    "qualityScore": 62,
+    "relativeStrength": 4.35,
+    "supplyState": "accumulating",
+    "newsState": "negative",
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-23T19:58:29.441Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-07-24",
+    "ticker": "003380",
+    "companyName": "하림지주",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 10272,
+    "stopLossPrice": 9313,
+    "targetPrice": 12670,
+    "swingScore": 81,
+    "qualityScore": 60,
+    "relativeStrength": 8.41,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-23T19:58:29.441Z",
+    "status": "open"
   }
 ]
