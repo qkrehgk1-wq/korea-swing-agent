@@ -1285,5 +1285,41 @@
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-23T19:58:29.441Z",
     "status": "open"
+  },
+  {
+    "date": "2026-07-25",
+    "ticker": "138040",
+    "companyName": "메리츠금융지주",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 125149,
+    "stopLossPrice": 102612,
+    "targetPrice": 181492,
+    "swingScore": 80,
+    "qualityScore": 46,
+    "relativeStrength": -0.85,
+    "supplyState": "accumulating",
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-24T19:59:16.187Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-07-25",
+    "ticker": "001450",
+    "companyName": "현대해상",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 40631,
+    "stopLossPrice": 35038,
+    "targetPrice": 54614,
+    "swingScore": 74,
+    "qualityScore": 62,
+    "relativeStrength": 23.54,
+    "supplyState": "accumulating",
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-24T19:59:16.187Z",
+    "status": "open"
   }
 ]
