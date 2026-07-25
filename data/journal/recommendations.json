@@ -1321,5 +1321,23 @@
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-24T19:59:16.187Z",
     "status": "open"
+  },
+  {
+    "date": "2026-07-26",
+    "ticker": "207940",
+    "companyName": "삼성바이오로직스",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 1540770,
+    "stopLossPrice": 1267860,
+    "targetPrice": 2223045,
+    "swingScore": 75,
+    "qualityScore": 46,
+    "relativeStrength": -9.19,
+    "supplyState": "accumulating",
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-25T19:49:46.602Z",
+    "status": "open"
   }
 ]
