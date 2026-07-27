@@ -825,7 +825,12 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-01T20:28:11.971Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-07-03",
+    "exitDate": "2026-07-27",
+    "exitPrice": 38400,
+    "returnPct": 6.42,
+    "scoredAt": "2026-07-27T20:08:08.015Z"
   },
   {
     "date": "2026-07-02",
@@ -1338,6 +1343,25 @@
     "supplyState": "accumulating",
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-25T19:49:46.602Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-07-28",
+    "ticker": "041510",
+    "companyName": "에스엠",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 75516,
+    "stopLossPrice": 67830,
+    "targetPrice": 94731,
+    "swingScore": 73,
+    "qualityScore": 60,
+    "relativeStrength": 17.61,
+    "supplyState": "neutral",
+    "newsState": "negative",
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-27T20:08:06.426Z",
     "status": "open"
   }
 ]
