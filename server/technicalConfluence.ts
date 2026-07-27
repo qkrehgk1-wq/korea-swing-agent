@@ -6,7 +6,8 @@
  * Factors: relative strength vs the index (O'Neil/Minervini leadership), moving
  * average trend alignment (Dow/Stage analysis), ADX trend strength + MACD
  * momentum, Fibonacci golden-ratio retracement/extension, volatility
- * contraction (Minervini VCP) + volume dry-up, and an anti-extension guard that
+ * contraction (Minervini VCP) + volume dry-up, directional cumulative volume
+ * flow (CVD-style accumulation proxy), and an anti-extension guard that
  * encodes the behavioral rule "don't chase" (FOMO).
  */
 
@@ -25,6 +26,7 @@ export type ConfluenceResult = {
   fibExtensionTarget: number | null; // 1.618 projection of the up-leg
   volatilityContraction: boolean;
   volumeDryUp: boolean;
+  volumeFlowRising: boolean;
   overExtended: boolean;
   signals: string[];
 };
@@ -156,6 +158,40 @@ export function fibonacciLeg(bars: ConfluenceBar[], window = 80): {
 }
 
 /**
+ * OBV-style cumulative directional volume flow — a daily-bar proxy for the
+ * buy/sell-pressure concept popularized as CVD (Cumulative Volume Delta) by
+ * technical analysts (e.g., 치과아저씨의 투자 스케일링, whose stated method
+ * checks CVD flow before entries). True tick-level CVD needs trade-by-trade
+ * buy/sell classification we don't have from daily Naver OHLCV; this assigns
+ * each day's volume to the up/down side by its own close-vs-prior-close
+ * direction, cumulates it, and compares the recent slope to the prior slope.
+ * Rising flow means volume has concentrated on up days lately (accumulation),
+ * a different signal from volumeRatio (today vs its own 20d average).
+ */
+export function computeVolumeFlow(
+  bars: ConfluenceBar[],
+  window = 20
+): { flowRising: boolean; flowSlope: number } {
+  if (bars.length < window * 2 + 1) return { flowRising: false, flowSlope: 0 };
+  const cumulative: number[] = [0];
+  for (let i = 1; i < bars.length; i += 1) {
+    const direction = bars[i].close > bars[i - 1].close ? 1 : bars[i].close < bars[i - 1].close ? -1 : 0;
+    cumulative.push(cumulative[i - 1] + direction * bars[i].volume);
+  }
+  const recent = cumulative.slice(-window);
+  const prior = cumulative.slice(-window * 2, -window);
+  const slope = (values: number[]) =>
+    values.length > 1 ? (values[values.length - 1] - values[0]) / (values.length - 1) : 0;
+  const recentSlope = slope(recent);
+  const priorSlope = slope(prior);
+  const avgVolume = sma(bars.map(bar => bar.volume), window * 2) || 1;
+  return {
+    flowRising: recentSlope > 0 && recentSlope > priorSlope,
+    flowSlope: Number((recentSlope / avgVolume).toFixed(3)),
+  };
+}
+
+/**
  * Scores a stock against its index benchmark. Returns a 0-100 confluence quality
  * score plus the individual signals so the screener can gate and explain picks.
  */
@@ -187,6 +223,7 @@ export function analyzeTechnicalConfluence(
   const priorAtr = atr(bars, bars.length - 30, bars.length - 20);
   const volatilityContraction = priorAtr > 0 && recentAtr < priorAtr * 0.85;
   const volumeDryUp = sma(volumes, 5) > 0 && sma(volumes, 5) < sma(volumes, 20) * 0.85;
+  const volumeFlow = computeVolumeFlow(bars);
   const overExtended = ma20 > 0 && close > ma20 * 1.15;
 
   const rsi = computeRsi(closes);
@@ -224,6 +261,10 @@ export function analyzeTechnicalConfluence(
     score += 4;
     signals.push("거래량 마름(매물 소화)");
   }
+  if (volumeFlow.flowRising) {
+    score += 5;
+    signals.push("누적매수흐름 상승(CVD형 매집)");
+  }
   if (rsiHealthy) score += 6;
   if (!overExtended) {
     score += 6;
@@ -244,6 +285,7 @@ export function analyzeTechnicalConfluence(
     fibExtensionTarget: fib.extensionTarget,
     volatilityContraction,
     volumeDryUp,
+    volumeFlowRising: volumeFlow.flowRising,
     overExtended,
     signals,
   };

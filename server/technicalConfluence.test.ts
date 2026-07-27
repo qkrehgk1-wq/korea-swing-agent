@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   analyzeTechnicalConfluence,
   computeAdx,
+  computeVolumeFlow,
   fibonacciLeg,
   macdBullish,
   type ConfluenceBar,
@@ -41,6 +42,27 @@ describe("fibonacciLeg", () => {
     expect(leg.retracement).not.toBeNull();
     expect(leg.nearGolden).toBe(true);
     expect(leg.extensionTarget).toBeGreaterThan(130);
+  });
+});
+
+describe("computeVolumeFlow", () => {
+  it("detects rising accumulation when up-day volume outweighs down-day volume recently", () => {
+    // 40 flat/mixed bars, then 20 bars trending up on rising volume (accumulation).
+    const quiet = Array.from({ length: 40 }, (_, i) => bar(100 + (i % 2 === 0 ? 0.1 : -0.1), undefined, undefined, 500));
+    const accumulating = Array.from({ length: 20 }, (_, i) => bar(101 + i * 0.5, undefined, undefined, 800 + i * 40));
+    const result = computeVolumeFlow([...quiet, ...accumulating]);
+    expect(result.flowRising).toBe(true);
+    expect(result.flowSlope).toBeGreaterThan(0);
+  });
+
+  it("does not flag distribution (falling prices) as rising flow", () => {
+    const falling = trend(150, -0.5, 60).map(b => ({ ...b, volume: 1000 }));
+    const result = computeVolumeFlow(falling);
+    expect(result.flowRising).toBe(false);
+  });
+
+  it("returns a neutral result when there is not enough history", () => {
+    expect(computeVolumeFlow(trend(100, 1, 10))).toEqual({ flowRising: false, flowSlope: 0 });
   });
 });
 
