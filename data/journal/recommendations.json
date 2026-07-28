@@ -933,7 +933,12 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-02T20:06:24.146Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-07-06",
+    "exitDate": "2026-07-28",
+    "exitPrice": 36500,
+    "returnPct": 2.54,
+    "scoredAt": "2026-07-28T20:04:44.458Z"
   },
   {
     "date": "2026-07-03",
@@ -1076,7 +1081,12 @@
     "newsState": "positive",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-03T20:01:42.856Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-07-06",
+    "exitDate": "2026-07-28",
+    "exitPrice": 36500,
+    "returnPct": -0.74,
+    "scoredAt": "2026-07-28T20:04:44.459Z"
   },
   {
     "date": "2026-07-05",
@@ -1196,7 +1206,12 @@
     "newsState": "positive",
     "championAt": "2026-07-04T19:49:07.719Z",
     "recordedAt": "2026-07-04T19:49:34.502Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-07-06",
+    "exitDate": "2026-07-28",
+    "exitPrice": 36500,
+    "returnPct": -0.74,
+    "scoredAt": "2026-07-28T20:04:44.459Z"
   },
   {
     "date": "2026-07-21",
@@ -1214,7 +1229,12 @@
     "supplyState": "distributing",
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-20T20:10:36.950Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-07-22",
+    "exitDate": "2026-07-28",
+    "exitPrice": 5085,
+    "returnPct": -11.22,
+    "scoredAt": "2026-07-28T20:04:44.459Z"
   },
   {
     "date": "2026-07-21",
@@ -1362,6 +1382,26 @@
     "newsState": "negative",
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-27T20:08:06.426Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-07-29",
+    "ticker": "175330",
+    "companyName": "JB금융지주",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 27709,
+    "stopLossPrice": 23553,
+    "targetPrice": 38099,
+    "swingScore": 91,
+    "qualityScore": 66,
+    "relativeStrength": 4.99,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": false,
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-28T20:04:42.660Z",
     "status": "open"
   }
 ]
