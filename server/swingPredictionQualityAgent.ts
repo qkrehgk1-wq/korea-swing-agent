@@ -34,6 +34,7 @@ export type SwingPredictionQualityOverrides = {
   // rule-based derivations, so the screener falls back to env/defaults.
   minConfluenceScore?: number;
   minRelativeStrength?: number;
+  maxRiskPct?: number;
   notes: string[];
 };
 

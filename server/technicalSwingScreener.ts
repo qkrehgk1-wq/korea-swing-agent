@@ -144,6 +144,17 @@ export type SwingQualityParams = {
   // instead of leaving them as hand-picked constants.
   minConfluenceScore: number;
   minRelativeStrength: number;
+  /**
+   * Cap on planned risk (trigger→stop) as % of trigger — a guard against
+   * pathological stop placement, NOT a tuning lever.
+   *
+   * Measured on 1000d/51 trades: tightening HURTS. cap 6% ⇒ stop-rate 63%,
+   * expectancy 0.06R; cap 12-15% ⇒ expectancy ~0.18R (flat peak); uncapped
+   * ⇒ 0.17R. Tight stops convert shallow time-exit losses into full −1R losses
+   * faster than they win by making targets reachable. Default sits at the flat
+   * peak so the cap only bites on genuinely absurd distances.
+   */
+  maxRiskPct: number;
 };
 
 /**
@@ -849,10 +860,15 @@ function buildCandidate(
       ? Math.max(indicators.currentPrice * 1.015, indicators.ma20 * 1.01)
       : Math.max(indicators.currentPrice, indicators.annualHigh * 0.985)
   );
-  const stopLossPrice = Math.round(
+  const structuralStop =
     isEarlyBowl
       ? Math.min(indicators.currentPrice * 0.93, indicators.annualLow * 1.02)
-      : Math.min(indicators.ma20, indicators.ma60 * 0.98)
+      : Math.min(indicators.ma20, indicators.ma60 * 0.98);
+  // Guard against pathological stop distance only — measurements show tightening
+  // below ~12% degrades expectancy (see SwingQualityParams.maxRiskPct).
+  const maxRiskPct = qualityOverrides?.maxRiskPct ?? (Number(process.env.MAX_RISK_PCT) || 15);
+  const stopLossPrice = Math.round(
+    Math.max(structuralStop, triggerPrice * (1 - Math.max(1, maxRiskPct) / 100))
   );
 
   // Blend the pattern score with the multi-factor confluence quality so the final

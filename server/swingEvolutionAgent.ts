@@ -61,6 +61,7 @@ const QUALITY_KEYS: (keyof SwingQualityParams)[] = [
   "maxVolatility20",
   "minConfluenceScore",
   "minRelativeStrength",
+  "maxRiskPct",
 ];
 
 const WEIGHT_BOUNDS = { min: 3, max: 26 };
@@ -72,6 +73,7 @@ const QUALITY_BOUNDS: Record<keyof SwingQualityParams, { min: number; max: numbe
   maxVolatility20: { min: 30, max: 60, step: 2 },
   minConfluenceScore: { min: 35, max: 65, step: 3 },
   minRelativeStrength: { min: -16, max: -4, step: 2 },
+  maxRiskPct: { min: 8, max: 20, step: 1 },
 };
 
 export const BASE_GENOME: Genome = {
@@ -84,6 +86,7 @@ export const BASE_GENOME: Genome = {
     maxVolatility20: 45,
     minConfluenceScore: 50,
     minRelativeStrength: -10,
+    maxRiskPct: 15,
   },
 };
 
@@ -297,6 +300,7 @@ async function promoteToLiveOverrides(
     maxVolatility20: genome.quality.maxVolatility20,
     minConfluenceScore: genome.quality.minConfluenceScore,
     minRelativeStrength: genome.quality.minRelativeStrength,
+    maxRiskPct: genome.quality.maxRiskPct,
     notes: [`자동진화 에이전트가 승격한 품질 필터입니다 (적합도 ${fitness.toFixed(3)}).`],
   };
   await writeSwingPredictionQualityOverrides(quality);
