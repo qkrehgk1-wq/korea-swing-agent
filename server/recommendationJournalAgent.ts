@@ -179,7 +179,12 @@ function settle(
   exitPrice: number,
   status: Exclude<RecommendationStatus, "open" | "no_entry">
 ): RecommendationEntry {
-  const returnPct = round(((exitPrice - entry.triggerPrice) / entry.triggerPrice) * 100);
+  // Same round-trip friction the backtest charges, so live and backtest R are
+  // measured on one scale (tax + brokerage + slippage allowance).
+  const roundTripCost = Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
+  const returnPct = round(
+    ((exitPrice - entry.triggerPrice) / entry.triggerPrice) * 100 - roundTripCost
+  );
   return { ...entry, status, entryDate, exitDate, exitPrice, returnPct, scoredAt: new Date().toISOString() };
 }
 

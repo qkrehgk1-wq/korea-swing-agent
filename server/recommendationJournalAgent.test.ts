@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { OhlcvRow } from "./koreaStockMcp";
 import {
@@ -48,6 +48,20 @@ describe("kstDate", () => {
 });
 
 describe("scoreEntry", () => {
+  // Price math is asserted without friction; the cost deduction has its own test.
+  beforeEach(() => {
+    process.env.ROUND_TRIP_COST_PCT = "0";
+  });
+  afterEach(() => {
+    delete process.env.ROUND_TRIP_COST_PCT;
+  });
+
+  it("subtracts round-trip friction from the realized return", () => {
+    process.env.ROUND_TRIP_COST_PCT = "0.35";
+    const rows = [row("2026-01-02", 105, 98, 102), row("2026-01-03", 125, 119, 124)];
+    expect(scoreEntry(openEntry(), rows, config).returnPct).toBeCloseTo(20 - 0.35, 2);
+  });
+
   it("records a target hit", () => {
     const rows = [
       row("2026-01-02", 105, 98, 102), // triggers (high >= 100)

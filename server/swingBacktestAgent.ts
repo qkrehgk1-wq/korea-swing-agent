@@ -106,6 +106,14 @@ const ENTRY_LOOKAHEAD_DAYS = Number(process.env.SWING_BACKTEST_ENTRY_LOOKAHEAD_D
 const SIGNAL_STEP_DAYS = Number(process.env.SWING_BACKTEST_SIGNAL_STEP_DAYS ?? "5");
 const WARMUP_BARS = 160;
 const FORCE_RUN = process.env.SWING_BACKTEST_FORCE === "true";
+/**
+ * Round-trip friction charged to every backtest trade: securities transaction
+ * tax on the sale (~0.18% incl. rural tax), brokerage both ways (~0.03%), and a
+ * slippage allowance (~0.14%). Without this the harness overstates returns and
+ * — worse — systematically favours high-turnover settings, since a shorter
+ * holding period pays this cost far more often per unit of time.
+ */
+const ROUND_TRIP_COST_PCT = Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
 
 async function resolveBacktestUniverse(): Promise<string[]> {
   // Optimize on the SAME universe we trade live (dynamic top market-cap), capped
@@ -287,7 +295,7 @@ function evaluateTrade(
     exitDate: exitRow.날짜,
     exitPrice,
     outcome,
-    returnPct: round(percentChange(candidate.triggerPrice, exitPrice)),
+    returnPct: round(percentChange(candidate.triggerPrice, exitPrice) - ROUND_TRIP_COST_PCT),
     maxFavorableExcursionPct: round(maxFavorableExcursionPct),
     maxAdverseExcursionPct: round(maxAdverseExcursionPct),
     elliottLabel: elliottInsight?.label,
