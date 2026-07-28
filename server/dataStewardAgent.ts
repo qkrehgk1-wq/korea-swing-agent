@@ -15,6 +15,13 @@ import {
   type TickerLevelSummary,
 } from "./recommendationJournalAgent";
 import {
+  computeExpectancy,
+  computeRiskBudget,
+  formatExpectancy,
+  type ExpectancyStats,
+  type RiskBudget,
+} from "./expectancy";
+import {
   SWING_BACKTEST_REPORT_PATH,
   SWING_LEARNED_OVERRIDES_PATH,
   SWING_MAINTENANCE_HISTORY_PATH,
@@ -128,6 +135,7 @@ export type SystemAnalysis = {
   journal: JournalSummary;
   journalByTicker: TickerLevelSummary;
   shadowByTicker: TickerLevelSummary;
+  expectancy: { backtest: ExpectancyStats; live: ExpectancyStats; budget: RiskBudget };
   factors: ReturnType<typeof summarizeByFactor>;
   evolution: { championFitness: number | null; championAt: string | null; generations: number; promotions: number };
   backtest: {
@@ -172,6 +180,12 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
     avgReturnPct?: number;
     totalTrades?: number;
     generatedAt?: string;
+    trades?: Array<{
+      triggerPrice: number;
+      stopLossPrice: number;
+      returnPct: number;
+      outcome?: string;
+    }>;
     splitSample?: {
       distinctTickers?: number;
       inSample?: { winRate?: number };
@@ -189,6 +203,26 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
     outOfSampleWinRate: sample?.outOfSample?.winRate ?? null,
   };
 
+  // Expectancy in R — the risk-normalized edge. Live is the one that decides
+  // whether the strategy is actually worth running; backtest is the reference.
+  const backtestExpectancy = computeExpectancy(backtestReport?.trades ?? []);
+  const liveExpectancy = computeExpectancy(
+    journalEntries
+      .filter(
+        entry =>
+          !entry.watchOnly &&
+          (entry.status === "target" || entry.status === "stop" || entry.status === "time_exit")
+      )
+      .map(entry => ({
+        triggerPrice: entry.triggerPrice,
+        stopLossPrice: entry.stopLossPrice,
+        returnPct: entry.returnPct ?? 0,
+      }))
+  );
+  const budget = computeRiskBudget(
+    liveExpectancy.edgeVerdict === "insufficient" ? backtestExpectancy : liveExpectancy
+  );
+
   const issues: string[] = [];
   for (const source of catalog) {
     if (source.health === "missing" && source.tracked) {
@@ -199,6 +233,14 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
   }
   if (journal.triggered === 0 && journal.open > 0) {
     issues.push(`정산 표본 0 — 라이브 검증 데이터 축적 중(진행 ${journal.open}건)`);
+  }
+
+  // Negative measured expectancy is the one condition where continuing to size
+  // up is mathematically indefensible, regardless of how good the picks look.
+  if (liveExpectancy.edgeVerdict === "negative") {
+    issues.push(
+      `⚠ 기대값 음수: 라이브 ${liveExpectancy.expectancyR}R/거래(${liveExpectancy.trades}건) — 리스크 예산 0% 유지, 게이트 재검토 필요`
+    );
   }
 
   // Edge-decay watch: when live (ticker-level, de-correlated) results fall far
@@ -223,6 +265,7 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
     journal,
     journalByTicker,
     shadowByTicker,
+    expectancy: { backtest: backtestExpectancy, live: liveExpectancy, budget },
     factors,
     evolution,
     backtest,
@@ -254,6 +297,11 @@ export function toReport(analysis: SystemAnalysis): string {
     `- 정산 ${analysis.journal.triggered} · 진행중 ${analysis.journal.open} · 승률 ${analysis.journal.winRate}% · 평균수익 ${analysis.journal.avgReturnPct}%`,
     `- 종목단위(중복 제거): ${analysis.journalByTicker.settledTickers}종목 · 승률 ${analysis.journalByTicker.winRate}% · 평균 ${analysis.journalByTicker.avgReturnPct}%`,
     `- 관찰 섀도(억제 후보 검증): ${analysis.shadowByTicker.settledTickers}종목 · 승률 ${analysis.shadowByTicker.winRate}% · 평균 ${analysis.shadowByTicker.avgReturnPct}%`,
+    "",
+    "## 기대값 / 리스크 예산 (R 단위)",
+    `- 라이브: ${formatExpectancy(analysis.expectancy.live, analysis.expectancy.budget)}`,
+    `- 백테스트: ${formatExpectancy(analysis.expectancy.backtest, analysis.expectancy.budget)}`,
+    `- 사이징 근거: ${analysis.expectancy.budget.note}`,
     `- 수급: ${analysis.factors.supply.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
     `- 뉴스: ${analysis.factors.news.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
     "",
@@ -287,7 +335,7 @@ export async function runDataSteward(now = new Date()): Promise<SystemAnalysis> 
     ...analysis.catalog
       .filter(source => source.tracked && (source.health === "missing" || source.health === "stale"))
       .map(source => `${source.key}: ${source.health}`),
-    ...analysis.issues.filter(issue => issue.includes("엣지 괴리")),
+    ...analysis.issues.filter(issue => issue.includes("엣지 괴리") || issue.includes("기대값 음수")),
   ];
   if (criticalIssues.length) {
     await routeToCommander({

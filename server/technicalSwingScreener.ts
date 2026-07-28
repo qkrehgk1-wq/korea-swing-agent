@@ -47,6 +47,7 @@ export type TechnicalSwingCandidate = {
   relativeStrength?: number;
   fibExtensionTarget?: number | null;
   confluenceSignals?: string[];
+  volumeFlowRising?: boolean;
   supplyState?: "accumulating" | "distributing" | "neutral";
   supplyNote?: string;
   newsState?: "positive" | "negative" | "neutral";
@@ -900,6 +901,7 @@ function buildCandidate(
       relativeStrength: confluence.relativeStrength60,
       fibExtensionTarget: confluence.fibExtensionTarget,
       confluenceSignals: confluence.signals,
+      volumeFlowRising: confluence.volumeFlowRising,
     },
     watchOnly,
   };

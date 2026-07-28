@@ -35,6 +35,7 @@ export type RecommendationEntry = {
   relativeStrength?: number;
   supplyState?: "accumulating" | "distributing" | "neutral";
   newsState?: "positive" | "negative" | "neutral";
+  volumeFlowRising?: boolean;
   recordedAt: string;
   status: RecommendationStatus;
   entryDate?: string;
@@ -311,6 +312,7 @@ export async function recordRecommendations(
       relativeStrength: candidate.relativeStrength,
       supplyState: candidate.supplyState,
       newsState: candidate.newsState,
+      volumeFlowRising: candidate.volumeFlowRising,
       championAt,
       recordedAt,
       status: "open",
@@ -399,12 +401,14 @@ function bucketStats(label: string, subset: RecommendationEntry[]): FactorBucket
 
 /**
  * Realized performance bucketed by the factor snapshot recorded at signal time —
- * tells us whether supply (매집/분산) and news (호재/악재) actually predicted
- * outcomes. The validation loop the council asked for, made concrete.
+ * tells us whether supply (매집/분산), news (호재/악재) and cumulative volume
+ * flow actually predicted outcomes. Every factor we add must be attributable
+ * here, otherwise we can never tell if it earned its place.
  */
 export function summarizeByFactor(entries: RecommendationEntry[]): {
   supply: FactorBucket[];
   news: FactorBucket[];
+  volumeFlow: FactorBucket[];
 } {
   const triggered = entries.filter(
     entry =>
@@ -423,22 +427,27 @@ export function summarizeByFactor(entries: RecommendationEntry[]): {
       triggered.filter(entry => (entry.newsState ?? "neutral") === state)
     )
   );
-  return { supply, news };
+  const volumeFlow = [
+    bucketStats("누적매수흐름↑", triggered.filter(entry => entry.volumeFlowRising === true)),
+    bucketStats("흐름 비상승", triggered.filter(entry => entry.volumeFlowRising === false)),
+  ];
+  return { supply, news, volumeFlow };
 }
 
-function factorLines(factors: { supply: FactorBucket[]; news: FactorBucket[] }): string[] {
+function factorLines(factors: ReturnType<typeof summarizeByFactor>): string[] {
   const fmt = (bucket: FactorBucket) =>
     `${bucket.label} ${bucket.settled}건·승률 ${bucket.winRate}%·평균 ${bucket.avgReturnPct}%`;
   return [
     `- 수급: ${factors.supply.filter(b => b.settled).map(fmt).join(" / ") || "표본 없음"}`,
     `- 뉴스: ${factors.news.filter(b => b.settled).map(fmt).join(" / ") || "표본 없음"}`,
+    `- 거래흐름: ${factors.volumeFlow.filter(b => b.settled).map(fmt).join(" / ") || "표본 없음"}`,
   ];
 }
 
 function toMarkdown(
   summary: JournalSummary,
   recent: RecommendationEntry[],
-  factors: { supply: FactorBucket[]; news: FactorBucket[] }
+  factors: ReturnType<typeof summarizeByFactor>
 ): string {
   return [
     "# Live Recommendation Journal",
