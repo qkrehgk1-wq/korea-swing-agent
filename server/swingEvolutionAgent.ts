@@ -32,11 +32,8 @@ import {
   type PatternName,
   type SwingQualityParams,
 } from "./technicalSwingScreener";
-import {
-  isSettledStatus,
-  loadRecommendationJournal,
-  summarizeJournal,
-} from "./recommendationJournalAgent";
+import { isSettledStatus, loadRecommendationJournal } from "./recommendationJournalAgent";
+import { computeExpectancy, type ExpectancyStats } from "./expectancy";
 
 /**
  * Self-evolving strategy optimizer. Treats the screener's tunable parameters
@@ -196,17 +193,20 @@ export function genomeToInjected(genome: Genome): InjectedSwingOverrides {
  * rarely are disqualified (overfitting / no-signal guard) rather than rewarded
  * for a lucky high win-rate on a handful of trades.
  */
-export function genomeFitness(summary: BacktestSummary): number {
+export function genomeFitness(stats: ExpectancyStats): number {
   // Sample guard hardened after the 7/4 incident: a 12-trade genome out-scored a
   // 49-trade robust one and got promoted. Target 40 makes thin samples pay.
   const minTrades = Number(process.env.EVOLUTION_MIN_TRADES) || 10;
-  if (summary.totalTrades < minTrades) {
-    return -1000 + summary.totalTrades;
+  if (stats.trades < minTrades) {
+    return -1000 + stats.trades;
   }
   const targetTrades = Number(process.env.EVOLUTION_TARGET_TRADES) || 40;
-  const sampleConfidence = Math.min(1, summary.totalTrades / targetTrades);
-  const edge = summary.avgReturnPct + (summary.winRate - 50) * 0.04 - summary.stopRate * 0.02;
-  return Number((edge * sampleConfidence).toFixed(4));
+  const sampleConfidence = Math.min(1, stats.trades / targetTrades);
+  // Edge is expectancy per unit of RISK, not raw % — the previous
+  // (avgReturn + winRate − stopRate) blend over-rewarded "win small, win often"
+  // genomes, because a high hit-rate with a poor payoff still scored well.
+  // Mean R already prices payoff asymmetry, so that failure mode scores low.
+  return Number((stats.expectancyR * sampleConfidence).toFixed(4));
 }
 
 /**
@@ -234,20 +234,25 @@ export function shouldPromote(
   incumbent: Evaluation,
   challenger: Evaluation
 ): { promote: boolean; reason: string } {
-  const margin = Number(process.env.EVOLUTION_PROMOTE_MARGIN) || 0.15;
+  // Margin is RELATIVE (plus a small absolute floor) because fitness is now
+  // expectancy in R (~0.1–0.4), not the old blended score (~3–5). A fixed 0.15
+  // on this scale would demand a ~70% improvement and freeze evolution forever.
+  const relativeMargin = Number(process.env.EVOLUTION_PROMOTE_MARGIN_PCT) || 0.2;
+  const absoluteFloor = Number(process.env.EVOLUTION_PROMOTE_MARGIN) || 0.02;
+  const required = Math.max(absoluteFloor, Math.abs(incumbent.fitness) * relativeMargin);
   const minTrades = Number(process.env.EVOLUTION_MIN_PROMOTE_TRADES) || 15;
   if (challenger.summary.totalTrades < minTrades) {
     return { promote: false, reason: `표본 부족 (${challenger.summary.totalTrades} < ${minTrades})` };
   }
-  if (challenger.fitness <= incumbent.fitness + margin) {
+  if (challenger.fitness <= incumbent.fitness + required) {
     return {
       promote: false,
-      reason: `적합도 개선 부족 (${challenger.fitness.toFixed(3)} vs ${incumbent.fitness.toFixed(3)}, 마진 ${margin})`,
+      reason: `적합도 개선 부족 (${challenger.fitness.toFixed(3)} vs ${incumbent.fitness.toFixed(3)}, 요구 +${required.toFixed(3)})`,
     };
   }
-  if (challenger.summary.avgReturnPct < incumbent.summary.avgReturnPct) {
-    return { promote: false, reason: "평균수익 하락" };
-  }
+  // The old "avgReturnPct must not regress" guard is gone: fitness is now
+  // expectancy per unit risk, which already prices payoff quality, and the crude
+  // guard was vetoing clearly-better genomes over rounding-level differences.
   if (challenger.summary.winRate < incumbent.summary.winRate - 5) {
     return { promote: false, reason: "승률 급락 (>5%p)" };
   }
@@ -411,19 +416,16 @@ async function liveFitnessForChampion(): Promise<number | null> {
       isSettledStatus(entry.status)
   );
   if (settled.length < minSamples) return null;
-  const summary = summarizeJournal(settled);
-  return genomeFitness({
-    totalSignals: settled.length,
-    totalTrades: summary.triggered,
-    winRate: summary.winRate,
-    avgReturnPct: summary.avgReturnPct,
-    medianReturnPct: 0,
-    stopRate: summary.stopRate,
-    targetRate: summary.targetRate,
-    noTriggerRate: 0,
-    patternStats: [],
-    elliottLabelStats: [],
-  });
+  // Same R-based measure as the backtest, computed from the live prices we scored.
+  return genomeFitness(
+    computeExpectancy(
+      settled.map(entry => ({
+        triggerPrice: entry.triggerPrice,
+        stopLossPrice: entry.stopLossPrice,
+        returnPct: entry.returnPct ?? 0,
+      }))
+    )
+  );
 }
 
 function shouldRunFullEvolution(): boolean {
@@ -474,7 +476,7 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
   const evaluate = async (genome: Genome): Promise<Evaluation> => {
     const { trades } = await collectBacktestTrades(rows, genomeToInjected(genome), genome.exit);
     const summary = summarizeBacktestTrades(trades);
-    const base = genomeFitness(summary);
+    const base = genomeFitness(computeExpectancy(trades));
     const fitness =
       base > 0 ? Number((base * consistencyFactor(splitSampleStats(trades))).toFixed(4)) : base;
     return { genome, summary, fitness };

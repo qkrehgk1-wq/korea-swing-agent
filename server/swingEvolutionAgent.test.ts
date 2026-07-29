@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { computeExpectancy } from "./expectancy";
 import type { BacktestSummary } from "./swingBacktestAgent";
 import {
   BASE_GENOME,
@@ -112,20 +113,38 @@ describe("mutateGenome", () => {
 });
 
 describe("genomeFitness", () => {
+  /** trigger 100 / stop 90 ⇒ risk 10% ⇒ returnPct N is N/10 R. */
+  const trades = (spec: Array<[count: number, returnPct: number]>) =>
+    spec.flatMap(([count, returnPct]) =>
+      Array.from({ length: count }, () => ({
+        triggerPrice: 100,
+        stopLossPrice: 90,
+        returnPct,
+        outcome: returnPct > 0 ? "target" : "stop",
+      }))
+    );
+
   it("disqualifies strategies that trade too rarely", () => {
-    expect(genomeFitness(summary({ totalTrades: 5, avgReturnPct: 9, winRate: 100 }))).toBeLessThan(-900);
+    expect(genomeFitness(computeExpectancy(trades([[5, 30]])))).toBeLessThan(-900);
   });
 
-  it("rewards higher realized edge", () => {
-    const weak = genomeFitness(summary({ avgReturnPct: 0.4, winRate: 48 }));
-    const strong = genomeFitness(summary({ avgReturnPct: 2.5, winRate: 66 }));
+  it("rewards higher realized edge per unit of risk", () => {
+    const weak = genomeFitness(computeExpectancy(trades([[20, 3], [20, -3]])));
+    const strong = genomeFitness(computeExpectancy(trades([[20, 25], [20, -10]])));
     expect(strong).toBeGreaterThan(weak);
   });
 
   it("scales down low-sample strong runs via sample confidence", () => {
-    const lowSample = genomeFitness(summary({ totalTrades: 10, avgReturnPct: 2, winRate: 60 }));
-    const fullSample = genomeFitness(summary({ totalTrades: 20, avgReturnPct: 2, winRate: 60 }));
+    const lowSample = genomeFitness(computeExpectancy(trades([[10, 20]])));
+    const fullSample = genomeFitness(computeExpectancy(trades([[40, 20]])));
     expect(fullSample).toBeGreaterThan(lowSample);
+  });
+
+  it("does not reward 'win small, win often' over a genuine payoff edge", () => {
+    // 80% hit rate but tiny wins vs 45% hit rate with a 3:1 payoff.
+    const winSmallOften = genomeFitness(computeExpectancy(trades([[32, 1.5], [8, -10]])));
+    const realPayoff = genomeFitness(computeExpectancy(trades([[18, 30], [22, -10]])));
+    expect(realPayoff).toBeGreaterThan(winSmallOften);
   });
 });
 
@@ -166,14 +185,25 @@ describe("shouldPromote", () => {
     expect(shouldPromote(incumbent, challenger).promote).toBe(false);
   });
 
+  it("scales the margin to the fitness level (R-scale safe)", () => {
+    // Expectancy-scale incumbent: 0.20 needs ~+0.04 (20%), not a fixed +0.15.
+    const small = evaluation(0.20, { totalTrades: 45, avgReturnPct: 1.5, winRate: 55 });
+    const betterEnough = evaluation(0.26, { totalTrades: 45, avgReturnPct: 1.6, winRate: 56 });
+    const notEnough = evaluation(0.22, { totalTrades: 45, avgReturnPct: 1.6, winRate: 56 });
+    expect(shouldPromote(small, betterEnough).promote).toBe(true);
+    expect(shouldPromote(small, notEnough).promote).toBe(false);
+  });
+
   it("holds when the challenger has too few trades", () => {
     const challenger = evaluation(2.0, { totalTrades: 6, avgReturnPct: 3, winRate: 70 });
     expect(shouldPromote(incumbent, challenger).promote).toBe(false);
   });
 
-  it("holds when average return regresses", () => {
-    const challenger = evaluation(1.4, { totalTrades: 45, avgReturnPct: 1.2, winRate: 70 });
-    expect(shouldPromote(incumbent, challenger).promote).toBe(false);
+  it("no longer vetoes on a rounding-level average-return dip (fitness governs)", () => {
+    // Real 7/19 case: clearly better fitness, higher win rate, lower stop rate,
+    // but avgReturnPct 0.06pp lower — the old guard killed it.
+    const challenger = evaluation(1.4, { totalTrades: 45, avgReturnPct: 1.44, winRate: 60 });
+    expect(shouldPromote(incumbent, challenger).promote).toBe(true);
   });
 
   it("holds when win-rate collapses", () => {
