@@ -179,9 +179,35 @@ export async function writeSwingPredictionQualityOverrides(
   await writeFile(outputPath, `${JSON.stringify(overrides, null, 2)}\n`, "utf8");
 }
 
+const PROMOTED_CHAMPION_PATH = path.join(process.cwd(), "data", "evolution", "champion.json");
+
+/** A champion counts as promoted once evolution has scored it (has a summary). */
+async function hasPromotedChampion(): Promise<boolean> {
+  try {
+    const champion = JSON.parse(await readFile(PROMOTED_CHAMPION_PATH, "utf8"));
+    return Boolean(champion?.genome?.quality && champion?.summary);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Rule-based quality thresholds. This is the BOOTSTRAP path: once evolution has
+ * a promoted champion, that genome is the single source of truth for strategy
+ * parameters and this agent must not overwrite it. Previously both wrote the
+ * same file and only CI step ordering kept the champion's genes alive — if the
+ * evolve step failed, the champion's confluence/risk/exit genes silently
+ * reverted to rule-derived values.
+ */
 export async function runSwingPredictionQualityAgent(reportPath = REPORT_PATH) {
   const report = await loadLatestBacktestReport(reportPath);
   const overrides = deriveSwingPredictionQualityOverrides(report, reportPath);
+  if (await hasPromotedChampion()) {
+    console.log(
+      "[Swing Prediction Quality Agent] 승격된 챔피언이 있어 오버라이드 파일을 보존합니다(규칙값은 참고용)."
+    );
+    return overrides;
+  }
   await writeSwingPredictionQualityOverrides(overrides);
   return overrides;
 }

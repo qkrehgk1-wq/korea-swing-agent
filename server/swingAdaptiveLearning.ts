@@ -293,10 +293,39 @@ export async function writeSwingLearnedOverrides(overrides: SwingLearnedOverride
   await writeFile(OVERRIDES_PATH, `${JSON.stringify(overrides, null, 2)}\n`, "utf8");
 }
 
+const PROMOTED_CHAMPION_PATH = path.join(process.cwd(), "data", "evolution", "champion.json");
+
+async function readJsonFile<T>(filePath: string): Promise<T | null> {
+  try {
+    return JSON.parse(await readFile(filePath, "utf8")) as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Rule-based learning pass. Pattern weights belong to the promoted champion once
+ * evolution has one — this agent keeps deriving the workflow approval policy
+ * (which adapts to maintenance history) but must not clobber the genome's
+ * weights, or the champion silently degrades whenever the evolve step fails.
+ */
 export async function runSwingAdaptiveLearning(reportPath = REPORT_PATH) {
   const report = await loadLatestBacktestReport(reportPath);
   const maintenanceContext = await loadMaintenanceHistory();
   const overrides = deriveSwingLearnedOverrides(report, reportPath, maintenanceContext);
+
+  const champion = await readJsonFile<{ genome?: { quality?: unknown }; summary?: unknown }>(
+    PROMOTED_CHAMPION_PATH
+  );
+  const existing = await readJsonFile<SwingLearnedOverrides>(OVERRIDES_PATH);
+  if (champion?.genome?.quality && champion.summary && existing?.effectivePatternWeights) {
+    overrides.patternWeightAdjustments = existing.patternWeightAdjustments;
+    overrides.effectivePatternWeights = existing.effectivePatternWeights;
+    overrides.notes.push(
+      "승격된 챔피언의 패턴 가중치를 보존했습니다(규칙 학습은 승인 정책만 갱신)."
+    );
+  }
+
   await writeSwingLearnedOverrides(overrides);
   return overrides;
 }
