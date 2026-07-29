@@ -62,6 +62,30 @@ describe("scoreEntry", () => {
     expect(scoreEntry(openEntry(), rows, config).returnPct).toBeCloseTo(20 - 0.35, 2);
   });
 
+  it("protects profit with the trailing ladder instead of round-tripping", () => {
+    // risk = 10 (100→90). Peak +1.2R arms the trail at 100 + (1.2−0.5)×10 = 107.
+    const rows = [
+      row("2026-01-02", 105, 98, 102), // entry triggers at 100
+      row("2026-01-03", 112, 105, 110), // peak 1.2R → stop ratchets to 107
+      row("2026-01-04", 109, 106, 107), // dips into the trail
+    ];
+    const scored = scoreEntry(openEntry(), rows, config);
+    expect(scored.status).toBe("trail_exit");
+    expect(scored.exitPrice).toBeCloseTo(107, 1);
+    expect(scored.returnPct).toBeCloseTo(7, 1);
+  });
+
+  it("does not arm the ladder before the breakeven trigger is reached", () => {
+    // Peak is only +0.4R (<0.6R), so the original stop still governs.
+    const rows = [
+      row("2026-01-02", 104, 98, 102),
+      row("2026-01-03", 104, 89, 90), // hits the original stop at 90
+    ];
+    const scored = scoreEntry(openEntry(), rows, config);
+    expect(scored.status).toBe("stop");
+    expect(scored.returnPct).toBeCloseTo(-10, 1);
+  });
+
   it("records a target hit", () => {
     const rows = [
       row("2026-01-02", 105, 98, 102), // triggers (high >= 100)
@@ -84,16 +108,17 @@ describe("scoreEntry", () => {
     expect(scored.returnPct).toBe(-10);
   });
 
-  it("records a time exit at the last close", () => {
+  it("records a time exit at the last close when the ladder never arms", () => {
+    // Peak stays at +0.5R (<0.6R trigger), so no trailing — plain time exit.
     const rows = [
-      row("2026-01-02", 105, 98, 100), // triggers
-      row("2026-01-03", 110, 96, 105),
-      row("2026-01-04", 112, 99, 107),
-      row("2026-01-05", 111, 98, 108), // last close
+      row("2026-01-02", 104, 98, 102), // triggers at 100
+      row("2026-01-03", 105, 99, 103),
+      row("2026-01-04", 105, 100, 104),
+      row("2026-01-05", 105, 100, 104), // last close
     ];
     const scored = scoreEntry(openEntry(), rows, { entryWindow: 5, holdingDays: 3 });
     expect(scored.status).toBe("time_exit");
-    expect(scored.returnPct).toBe(8);
+    expect(scored.returnPct).toBeCloseTo(4, 1);
   });
 
   it("marks no-entry once the entry window passes without triggering", () => {

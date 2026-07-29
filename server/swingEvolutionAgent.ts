@@ -30,7 +30,11 @@ import {
   type PatternName,
   type SwingQualityParams,
 } from "./technicalSwingScreener";
-import { loadRecommendationJournal, summarizeJournal } from "./recommendationJournalAgent";
+import {
+  isSettledStatus,
+  loadRecommendationJournal,
+  summarizeJournal,
+} from "./recommendationJournalAgent";
 
 /**
  * Self-evolving strategy optimizer. Treats the screener's tunable parameters
@@ -367,7 +371,7 @@ async function liveFitnessForChampion(): Promise<number | null> {
     entry =>
       !entry.watchOnly &&
       entry.championAt === champion.generatedAt &&
-      (entry.status === "target" || entry.status === "stop" || entry.status === "time_exit")
+      isSettledStatus(entry.status)
   );
   if (settled.length < minSamples) return null;
   const summary = summarizeJournal(settled);

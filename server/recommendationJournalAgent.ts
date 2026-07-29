@@ -16,7 +16,18 @@ import type { TechnicalSwingCandidate } from "./technicalSwingScreener";
  * just historical backtests.
  */
 
-export type RecommendationStatus = "open" | "target" | "stop" | "time_exit" | "no_entry";
+export type RecommendationStatus =
+  | "open"
+  | "target"
+  | "stop"
+  | "trail_exit"
+  | "time_exit"
+  | "no_entry";
+
+/** A pick whose outcome is decided and priced (excludes open / no_entry). */
+export function isSettledStatus(status: RecommendationStatus): boolean {
+  return status === "target" || status === "stop" || status === "trail_exit" || status === "time_exit";
+}
 
 export type RecommendationEntry = {
   date: string; // signal date, KST yyyy-mm-dd
@@ -155,12 +166,34 @@ export function scoreEntry(
   const entryRow = entrySlice[triggeredIndex];
   const holdingRows = rows.slice(triggeredIndex + 1, triggeredIndex + 1 + config.holdingDays);
 
+  // Profit-protection ladder — must mirror the backtest's evaluateTrade exactly,
+  // or live and backtest stop measuring the same strategy.
+  const breakevenAtR = Number(process.env.EXIT_BREAKEVEN_AT_R ?? "0.6");
+  const trailGivebackR = Number(process.env.EXIT_TRAIL_GIVEBACK_R ?? "0.5");
+  const roundTripCost = Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
+  const riskPerShare = entry.triggerPrice - entry.stopLossPrice;
+  let effectiveStop = entry.stopLossPrice;
+  let peakR = 0;
+
   for (const row of holdingRows) {
-    if (row.저가 <= entry.stopLossPrice) {
-      return settle(entry, entryRow.날짜, row.날짜, entry.stopLossPrice, "stop");
+    // Tested against the level carried into this bar (never assume high before low).
+    if (row.저가 <= effectiveStop) {
+      const status = effectiveStop > entry.stopLossPrice ? "trail_exit" : "stop";
+      return settle(entry, entryRow.날짜, row.날짜, effectiveStop, status);
     }
     if (row.고가 >= entry.targetPrice) {
       return settle(entry, entryRow.날짜, row.날짜, entry.targetPrice, "target");
+    }
+    if (riskPerShare > 0 && breakevenAtR > 0) {
+      peakR = Math.max(peakR, (row.고가 - entry.triggerPrice) / riskPerShare);
+      if (peakR >= breakevenAtR) {
+        const breakeven = entry.triggerPrice * (1 + roundTripCost / 100);
+        const trailed =
+          trailGivebackR > 0
+            ? entry.triggerPrice + (peakR - trailGivebackR) * riskPerShare
+            : 0;
+        effectiveStop = Math.max(effectiveStop, breakeven, trailed);
+      }
     }
   }
 
@@ -193,7 +226,7 @@ export function summarizeJournal(allEntries: RecommendationEntry[]): JournalSumm
   const open = entries.filter(entry => entry.status === "open");
   const noEntry = entries.filter(entry => entry.status === "no_entry");
   const triggered = entries.filter(
-    entry => entry.status === "target" || entry.status === "stop" || entry.status === "time_exit"
+    entry => isSettledStatus(entry.status)
   );
   const wins = triggered.filter(entry => (entry.returnPct ?? 0) > 0);
   const targets = triggered.filter(entry => entry.status === "target");
@@ -231,7 +264,7 @@ export type TickerLevelSummary = {
  */
 function summarizeByTickerCore(entries: RecommendationEntry[]): TickerLevelSummary {
   const settled = entries.filter(
-    entry => entry.status === "target" || entry.status === "stop" || entry.status === "time_exit"
+    entry => isSettledStatus(entry.status)
   );
   const byTicker = new Map<string, number[]>();
   for (const entry of settled) {
@@ -416,9 +449,7 @@ export function summarizeByFactor(entries: RecommendationEntry[]): {
   volumeFlow: FactorBucket[];
 } {
   const triggered = entries.filter(
-    entry =>
-      !entry.watchOnly &&
-      (entry.status === "target" || entry.status === "stop" || entry.status === "time_exit")
+    entry => !entry.watchOnly && isSettledStatus(entry.status)
   );
   const supply = (["accumulating", "distributing", "neutral"] as const).map(state =>
     bucketStats(

@@ -6,6 +6,7 @@ import path from "node:path";
 
 import { routeToCommander } from "./commanderChannel";
 import {
+  isSettledStatus,
   loadRecommendationJournal,
   summarizeByFactor,
   summarizeJournal,
@@ -209,9 +210,7 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
   const liveExpectancy = computeExpectancy(
     journalEntries
       .filter(
-        entry =>
-          !entry.watchOnly &&
-          (entry.status === "target" || entry.status === "stop" || entry.status === "time_exit")
+        entry => !entry.watchOnly && isSettledStatus(entry.status)
       )
       .map(entry => ({
         triggerPrice: entry.triggerPrice,

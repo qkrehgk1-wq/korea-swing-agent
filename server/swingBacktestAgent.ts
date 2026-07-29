@@ -31,7 +31,7 @@ type BacktestTrade = {
   entryPrice?: number;
   exitDate?: string;
   exitPrice?: number;
-  outcome: "target" | "stop" | "time_exit" | "not_triggered";
+  outcome: "target" | "stop" | "trail_exit" | "time_exit" | "not_triggered";
   returnPct: number;
   maxFavorableExcursionPct: number;
   maxAdverseExcursionPct: number;
@@ -114,6 +114,20 @@ const FORCE_RUN = process.env.SWING_BACKTEST_FORCE === "true";
  * holding period pays this cost far more often per unit of time.
  */
 const ROUND_TRIP_COST_PCT = Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
+/**
+ * Profit-protection ladder, designed from the trade tape rather than guessed.
+ * Measured on 49 trades: losing trades NEVER reached +1R (0/23) and only 9%
+ * reached +0.75R, while the 75% of trades that ended at time-exit ran to +0.81R
+ * MFE and realised just +0.18R — i.e. ~0.63R of unrealised profit evaporated per
+ * trade, several times the entire realised edge. Fixed stop + fixed target has
+ * no mechanism to keep any of it.
+ *
+ * EXIT_BREAKEVEN_AT_R: peak R at which the stop ratchets to break-even (+cost).
+ * EXIT_TRAIL_GIVEBACK_R: once armed, also trail at (peak − giveback) in R.
+ * Both 0 ⇒ legacy behaviour (fixed stop only).
+ */
+const EXIT_BREAKEVEN_AT_R = Number(process.env.EXIT_BREAKEVEN_AT_R ?? "0.6");
+const EXIT_TRAIL_GIVEBACK_R = Number(process.env.EXIT_TRAIL_GIVEBACK_R ?? "0.5");
 
 async function resolveBacktestUniverse(): Promise<string[]> {
   // Optimize on the SAME universe we trade live (dynamic top market-cap), capped
@@ -254,8 +268,13 @@ function evaluateTrade(
   let outcome: BacktestTrade["outcome"] = "time_exit";
   let maxFavorableExcursionPct = 0;
   let maxAdverseExcursionPct = 0;
+  // Profit-protection ladder (see EXIT_* consts). The stop only ever ratchets up.
+  const riskPerShare = candidate.triggerPrice - candidate.stopLossPrice;
+  let effectiveStop = candidate.stopLossPrice;
+  let peakR = 0;
 
-  for (const row of holdingRows) {
+  for (let barIndex = 0; barIndex < holdingRows.length; barIndex += 1) {
+    const row = holdingRows[barIndex];
     maxFavorableExcursionPct = Math.max(
       maxFavorableExcursionPct,
       percentChange(candidate.triggerPrice, row.고가)
@@ -265,9 +284,11 @@ function evaluateTrade(
       percentChange(candidate.triggerPrice, row.저가)
     );
 
-    if (row.저가 <= candidate.stopLossPrice) {
+    // Stop is tested against the level carried INTO this bar — we never assume
+    // the day's high registered before its low.
+    if (row.저가 <= effectiveStop) {
       exitRow = row;
-      outcome = "stop";
+      outcome = effectiveStop > candidate.stopLossPrice ? "trail_exit" : "stop";
       break;
     }
     if (row.고가 >= targetPrice) {
@@ -275,10 +296,25 @@ function evaluateTrade(
       outcome = "target";
       break;
     }
+
+    // Ratchet using this bar's high, for the NEXT bar. The entry bar is skipped:
+    // its high may have printed before our fill, and the live journal scores the
+    // same way — the two must model one strategy.
+    if (barIndex > 0 && riskPerShare > 0 && EXIT_BREAKEVEN_AT_R > 0) {
+      peakR = Math.max(peakR, (row.고가 - candidate.triggerPrice) / riskPerShare);
+      if (peakR >= EXIT_BREAKEVEN_AT_R) {
+        const breakeven = candidate.triggerPrice * (1 + ROUND_TRIP_COST_PCT / 100);
+        const trailed =
+          EXIT_TRAIL_GIVEBACK_R > 0
+            ? candidate.triggerPrice + (peakR - EXIT_TRAIL_GIVEBACK_R) * riskPerShare
+            : 0;
+        effectiveStop = Math.max(effectiveStop, breakeven, trailed);
+      }
+    }
   }
 
   const exitPrice =
-    outcome === "stop" ? candidate.stopLossPrice :
+    outcome === "stop" || outcome === "trail_exit" ? effectiveStop :
     outcome === "target" ? targetPrice :
     exitRow.종가;
 
