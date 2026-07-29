@@ -1043,7 +1043,12 @@
     "newsState": "negative",
     "championAt": "2026-06-27T19:55:20.722Z",
     "recordedAt": "2026-07-03T20:01:42.856Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-07-07",
+    "exitDate": "2026-07-29",
+    "exitPrice": 391000,
+    "returnPct": 12.62,
+    "scoredAt": "2026-07-29T19:55:44.194Z"
   },
   {
     "date": "2026-07-04",
@@ -1168,7 +1173,12 @@
     "newsState": "negative",
     "championAt": "2026-07-04T19:49:07.719Z",
     "recordedAt": "2026-07-04T19:49:34.502Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-07-07",
+    "exitDate": "2026-07-29",
+    "exitPrice": 391000,
+    "returnPct": 12.62,
+    "scoredAt": "2026-07-29T19:55:44.194Z"
   },
   {
     "date": "2026-07-05",
@@ -1252,7 +1262,12 @@
     "supplyState": "neutral",
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-20T20:10:36.950Z",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-07-22",
+    "exitDate": "2026-07-27",
+    "exitPrice": 29746.5,
+    "returnPct": 10.57,
+    "scoredAt": "2026-07-29T19:55:44.194Z"
   },
   {
     "date": "2026-07-22",
@@ -1402,6 +1417,25 @@
     "volumeFlowRising": false,
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-28T20:04:42.660Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-07-30",
+    "ticker": "011200",
+    "companyName": "HMM",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 20554,
+    "stopLossPrice": 18676,
+    "targetPrice": 25249,
+    "swingScore": 95,
+    "qualityScore": 79,
+    "relativeStrength": 8.91,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-29T19:55:42.546Z",
     "status": "open"
   }
 ]
