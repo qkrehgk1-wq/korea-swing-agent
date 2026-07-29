@@ -7,10 +7,12 @@ import path from "node:path";
 import { routeToCommander } from "./commanderChannel";
 import {
   collectBacktestTrades,
+  DEFAULT_EXIT_POLICY,
   fetchBacktestRows,
   splitSampleStats,
   summarizeBacktestTrades,
   type BacktestSummary,
+  type ExitPolicy,
   type SplitSample,
 } from "./swingBacktestAgent";
 import {
@@ -48,6 +50,16 @@ import {
 export type Genome = {
   patternWeights: Record<PatternName, number>;
   quality: SwingQualityParams;
+  /** Profit-protection ladder — evolvable so the GA keeps re-deriving it. */
+  exit: ExitPolicy;
+};
+
+const EXIT_KEYS: (keyof ExitPolicy)[] = ["breakevenAtR", "trailGivebackR"];
+const EXIT_BOUNDS: Record<keyof ExitPolicy, { min: number; max: number; step: number }> = {
+  // Measured plateau sits at 0.3–0.6 on both axes; bounds extend past it so the
+  // GA can walk out if the market changes, including 0 (= ladder off).
+  breakevenAtR: { min: 0, max: 1.5, step: 0.1 },
+  trailGivebackR: { min: 0, max: 1.2, step: 0.1 },
 };
 
 export type Evaluation = {
@@ -92,6 +104,7 @@ export const BASE_GENOME: Genome = {
     minRelativeStrength: -10,
     maxRiskPct: 15,
   },
+  exit: { ...DEFAULT_EXIT_POLICY },
 };
 
 const EVOLUTION_DIR = path.join(process.cwd(), ".data", "evolution");
@@ -118,7 +131,14 @@ export function createRng(seed: number): () => number {
   };
 }
 
-export function clampGenome(genome: Genome): Genome {
+/** Loose shape accepted by clampGenome — older champion files predate newer genes. */
+export type GenomeInput = {
+  patternWeights: Partial<Record<PatternName, number>>;
+  quality: Partial<SwingQualityParams>;
+  exit?: Partial<ExitPolicy>;
+};
+
+export function clampGenome(genome: GenomeInput): Genome {
   const patternWeights = {} as Record<PatternName, number>;
   for (const name of PATTERN_NAMES) {
     const raw = genome.patternWeights[name] ?? SWING_PATTERN_BASE_WEIGHTS[name];
@@ -131,7 +151,13 @@ export function clampGenome(genome: Genome): Genome {
     const clamped = clamp(raw, bounds.min, bounds.max);
     quality[key] = key === "minVolumeRatio" ? Number(clamped.toFixed(2)) : Math.round(clamped);
   }
-  return { patternWeights, quality };
+  const exit = {} as ExitPolicy;
+  for (const key of EXIT_KEYS) {
+    const bounds = EXIT_BOUNDS[key];
+    const raw = genome.exit?.[key] ?? BASE_GENOME.exit[key];
+    exit[key] = Number(clamp(raw, bounds.min, bounds.max).toFixed(2));
+  }
+  return { patternWeights, quality, exit };
 }
 
 export function mutateGenome(genome: Genome, rng: () => number, rate = 0.5): Genome {
@@ -148,6 +174,14 @@ export function mutateGenome(genome: Genome, rng: () => number, rate = 0.5): Gen
       const dir = rng() < 0.5 ? -1 : 1;
       const steps = 1 + Math.floor(rng() * 2); // 1..2 steps
       next.quality[key] = Number((next.quality[key] + dir * step * steps).toFixed(2));
+    }
+  }
+  for (const key of EXIT_KEYS) {
+    if (rng() < rate) {
+      const { step } = EXIT_BOUNDS[key];
+      const dir = rng() < 0.5 ? -1 : 1;
+      const steps = 1 + Math.floor(rng() * 2);
+      next.exit[key] = Number((next.exit[key] + dir * step * steps).toFixed(2));
     }
   }
   return clampGenome(next);
@@ -305,6 +339,9 @@ async function promoteToLiveOverrides(
     minConfluenceScore: genome.quality.minConfluenceScore,
     minRelativeStrength: genome.quality.minRelativeStrength,
     maxRiskPct: genome.quality.maxRiskPct,
+    // Live journal reads these back so its scoring matches the promoted genome.
+    exitBreakevenAtR: genome.exit.breakevenAtR,
+    exitTrailGivebackR: genome.exit.trailGivebackR,
     notes: [`자동진화 에이전트가 승격한 품질 필터입니다 (적합도 ${fitness.toFixed(3)}).`],
   };
   await writeSwingPredictionQualityOverrides(quality);
@@ -435,7 +472,7 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
 
   const rows = await fetchBacktestRows();
   const evaluate = async (genome: Genome): Promise<Evaluation> => {
-    const { trades } = await collectBacktestTrades(rows, genomeToInjected(genome));
+    const { trades } = await collectBacktestTrades(rows, genomeToInjected(genome), genome.exit);
     const summary = summarizeBacktestTrades(trades);
     const base = genomeFitness(summary);
     const fitness =

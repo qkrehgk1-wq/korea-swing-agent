@@ -35,6 +35,9 @@ export type SwingPredictionQualityOverrides = {
   minConfluenceScore?: number;
   minRelativeStrength?: number;
   maxRiskPct?: number;
+  /** Promoted profit-protection ladder; the live journal scores with these. */
+  exitBreakevenAtR?: number;
+  exitTrailGivebackR?: number;
   notes: string[];
 };
 

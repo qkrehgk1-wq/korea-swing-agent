@@ -87,6 +87,23 @@ describe("mutateGenome", () => {
     }
   });
 
+  it("keeps the evolvable exit ladder inside bounds", () => {
+    const rng = createRng(13);
+    let genome = BASE_GENOME;
+    for (let i = 0; i < 200; i += 1) {
+      genome = mutateGenome(genome, rng, 0.9);
+      expect(genome.exit.breakevenAtR).toBeGreaterThanOrEqual(0);
+      expect(genome.exit.breakevenAtR).toBeLessThanOrEqual(1.5);
+      expect(genome.exit.trailGivebackR).toBeGreaterThanOrEqual(0);
+      expect(genome.exit.trailGivebackR).toBeLessThanOrEqual(1.2);
+    }
+  });
+
+  it("restores a missing exit ladder from the base genome", () => {
+    const legacy = { patternWeights: BASE_GENOME.patternWeights, quality: BASE_GENOME.quality };
+    expect(clampGenome(legacy).exit).toEqual(BASE_GENOME.exit);
+  });
+
   it("is reproducible for the same seed", () => {
     expect(mutateGenome(BASE_GENOME, createRng(99), 0.7)).toEqual(
       mutateGenome(BASE_GENOME, createRng(99), 0.7)

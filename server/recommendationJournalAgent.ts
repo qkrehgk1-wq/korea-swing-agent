@@ -56,7 +56,14 @@ export type RecommendationEntry = {
   scoredAt?: string;
 };
 
-export type JournalConfig = { entryWindow: number; holdingDays: number };
+export type JournalConfig = {
+  entryWindow: number;
+  holdingDays: number;
+  /** Profit-protection ladder; mirrors the backtest so both score one strategy. */
+  breakevenAtR?: number;
+  trailGivebackR?: number;
+  roundTripCostPct?: number;
+};
 
 export type JournalSummary = {
   total: number;
@@ -77,10 +84,30 @@ const REPORT_DIR = path.join(process.cwd(), ".data", "journal");
 const REPORT_JSON_PATH = path.join(REPORT_DIR, "latest-report.json");
 const REPORT_MD_PATH = path.join(REPORT_DIR, "latest-report.md");
 
-function journalConfig(): JournalConfig {
+const PROMOTED_QUALITY_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "backtests",
+  "prediction-quality-overrides.json"
+);
+
+/**
+ * Scoring config. The exit ladder is read from the promoted genome first, so a
+ * champion promoted by evolution is scored live with the exact parameters it
+ * was optimized under; env/defaults only fill gaps.
+ */
+async function journalConfig(): Promise<JournalConfig> {
+  let promoted: { exitBreakevenAtR?: number; exitTrailGivebackR?: number } | null = null;
+  try {
+    promoted = JSON.parse(await readFile(PROMOTED_QUALITY_PATH, "utf8"));
+  } catch {
+    promoted = null;
+  }
   return {
     entryWindow: Number(process.env.JOURNAL_ENTRY_WINDOW) || 5,
     holdingDays: Number(process.env.JOURNAL_HOLDING_DAYS) || 15,
+    breakevenAtR: promoted?.exitBreakevenAtR,
+    trailGivebackR: promoted?.exitTrailGivebackR,
   };
 }
 
@@ -168,9 +195,9 @@ export function scoreEntry(
 
   // Profit-protection ladder — must mirror the backtest's evaluateTrade exactly,
   // or live and backtest stop measuring the same strategy.
-  const breakevenAtR = Number(process.env.EXIT_BREAKEVEN_AT_R ?? "0.6");
-  const trailGivebackR = Number(process.env.EXIT_TRAIL_GIVEBACK_R ?? "0.5");
-  const roundTripCost = Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
+  const breakevenAtR = config.breakevenAtR ?? Number(process.env.EXIT_BREAKEVEN_AT_R ?? "0.6");
+  const trailGivebackR = config.trailGivebackR ?? Number(process.env.EXIT_TRAIL_GIVEBACK_R ?? "0.5");
+  const roundTripCost = config.roundTripCostPct ?? Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
   const riskPerShare = entry.triggerPrice - entry.stopLossPrice;
   let effectiveStop = entry.stopLossPrice;
   let peakR = 0;
@@ -179,10 +206,10 @@ export function scoreEntry(
     // Tested against the level carried into this bar (never assume high before low).
     if (row.저가 <= effectiveStop) {
       const status = effectiveStop > entry.stopLossPrice ? "trail_exit" : "stop";
-      return settle(entry, entryRow.날짜, row.날짜, effectiveStop, status);
+      return settle(entry, entryRow.날짜, row.날짜, effectiveStop, status, roundTripCost);
     }
     if (row.고가 >= entry.targetPrice) {
-      return settle(entry, entryRow.날짜, row.날짜, entry.targetPrice, "target");
+      return settle(entry, entryRow.날짜, row.날짜, entry.targetPrice, "target", roundTripCost);
     }
     if (riskPerShare > 0 && breakevenAtR > 0) {
       peakR = Math.max(peakR, (row.고가 - entry.triggerPrice) / riskPerShare);
@@ -199,7 +226,7 @@ export function scoreEntry(
 
   if (holdingRows.length >= config.holdingDays) {
     const last = holdingRows[holdingRows.length - 1];
-    return settle(entry, entryRow.날짜, last.날짜, last.종가, "time_exit");
+    return settle(entry, entryRow.날짜, last.날짜, last.종가, "time_exit", roundTripCost);
   }
 
   return entry; // triggered but still within the holding window — keep open
@@ -210,11 +237,11 @@ function settle(
   entryDate: string,
   exitDate: string,
   exitPrice: number,
-  status: Exclude<RecommendationStatus, "open" | "no_entry">
-): RecommendationEntry {
+  status: Exclude<RecommendationStatus, "open" | "no_entry">,
   // Same round-trip friction the backtest charges, so live and backtest R are
   // measured on one scale (tax + brokerage + slippage allowance).
-  const roundTripCost = Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
+  roundTripCost: number
+): RecommendationEntry {
   const returnPct = round(
     ((exitPrice - entry.triggerPrice) / entry.triggerPrice) * 100 - roundTripCost
   );
@@ -386,7 +413,7 @@ export async function scoreMaturedRecommendations(now = new Date()): Promise<{
   summary: JournalSummary;
 }> {
   const journal = await readJournal();
-  const config = journalConfig();
+  const config = await journalConfig();
   const openEntries = journal.filter(entry => entry.status === "open");
 
   if (!openEntries.length) {

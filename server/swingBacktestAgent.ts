@@ -126,8 +126,12 @@ const ROUND_TRIP_COST_PCT = Number(process.env.ROUND_TRIP_COST_PCT ?? "0.35");
  * EXIT_TRAIL_GIVEBACK_R: once armed, also trail at (peak − giveback) in R.
  * Both 0 ⇒ legacy behaviour (fixed stop only).
  */
-const EXIT_BREAKEVEN_AT_R = Number(process.env.EXIT_BREAKEVEN_AT_R ?? "0.6");
-const EXIT_TRAIL_GIVEBACK_R = Number(process.env.EXIT_TRAIL_GIVEBACK_R ?? "0.5");
+export type ExitPolicy = { breakevenAtR: number; trailGivebackR: number };
+
+export const DEFAULT_EXIT_POLICY: ExitPolicy = {
+  breakevenAtR: Number(process.env.EXIT_BREAKEVEN_AT_R ?? "0.6"),
+  trailGivebackR: Number(process.env.EXIT_TRAIL_GIVEBACK_R ?? "0.5"),
+};
 
 async function resolveBacktestUniverse(): Promise<string[]> {
   // Optimize on the SAME universe we trade live (dynamic top market-cap), capped
@@ -212,6 +216,7 @@ function evaluateTrade(
   candidate: TechnicalSwingCandidate,
   signalDate: string,
   futureRows: OhlcvRow[],
+  exitPolicy: ExitPolicy,
   elliottInsight?: {
     label: string;
     score: number;
@@ -300,13 +305,13 @@ function evaluateTrade(
     // Ratchet using this bar's high, for the NEXT bar. The entry bar is skipped:
     // its high may have printed before our fill, and the live journal scores the
     // same way — the two must model one strategy.
-    if (barIndex > 0 && riskPerShare > 0 && EXIT_BREAKEVEN_AT_R > 0) {
+    if (barIndex > 0 && riskPerShare > 0 && exitPolicy.breakevenAtR > 0) {
       peakR = Math.max(peakR, (row.고가 - candidate.triggerPrice) / riskPerShare);
-      if (peakR >= EXIT_BREAKEVEN_AT_R) {
+      if (peakR >= exitPolicy.breakevenAtR) {
         const breakeven = candidate.triggerPrice * (1 + ROUND_TRIP_COST_PCT / 100);
         const trailed =
-          EXIT_TRAIL_GIVEBACK_R > 0
-            ? candidate.triggerPrice + (peakR - EXIT_TRAIL_GIVEBACK_R) * riskPerShare
+          exitPolicy.trailGivebackR > 0
+            ? candidate.triggerPrice + (peakR - exitPolicy.trailGivebackR) * riskPerShare
             : 0;
         effectiveStop = Math.max(effectiveStop, breakeven, trailed);
       }
@@ -441,7 +446,8 @@ export async function fetchBacktestRows(): Promise<TechnicalSwingRowsByTicker> {
  */
 export async function collectBacktestTrades(
   rowsByTicker: TechnicalSwingRowsByTicker,
-  injected?: InjectedSwingOverrides
+  injected?: InjectedSwingOverrides,
+  exitPolicy: ExitPolicy = DEFAULT_EXIT_POLICY
 ): Promise<{ trades: BacktestTrade[]; signalWindows: number }> {
   const benchmarkRows = rowsByTicker["069500"] ?? rowsByTicker["229200"] ?? [];
   const maxSignalIndex = Math.max(0, benchmarkRows.length - HOLDING_DAYS - 1);
@@ -490,6 +496,7 @@ export async function collectBacktestTrades(
         candidate,
         signalDate,
         futureRows,
+        exitPolicy,
         elliottInsight
           ? {
               label: elliottInsight.label,
