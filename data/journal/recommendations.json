@@ -1437,5 +1437,25 @@
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-29T19:55:42.546Z",
     "status": "open"
+  },
+  {
+    "date": "2026-07-31",
+    "ticker": "316140",
+    "companyName": "우리금융지주",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 33191,
+    "stopLossPrice": 28917,
+    "targetPrice": 43876,
+    "swingScore": 91,
+    "qualityScore": 67,
+    "relativeStrength": 10.16,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": true,
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-30T20:05:03.741Z",
+    "status": "open"
   }
 ]
