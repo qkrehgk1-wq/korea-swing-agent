@@ -1305,7 +1305,9 @@
     "newsState": "negative",
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-23T19:58:29.441Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-31T20:06:24.622Z"
   },
   {
     "date": "2026-07-24",
@@ -1324,7 +1326,9 @@
     "newsState": "positive",
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-23T19:58:29.441Z",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-07-31T20:06:24.622Z"
   },
   {
     "date": "2026-07-25",
@@ -1456,6 +1460,26 @@
     "volumeFlowRising": true,
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-30T20:05:03.741Z",
+    "status": "open"
+  },
+  {
+    "date": "2026-08-01",
+    "ticker": "068270",
+    "companyName": "셀트리온",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "triggerPrice": 189500,
+    "stopLossPrice": 162588,
+    "targetPrice": 256780,
+    "swingScore": 80,
+    "qualityScore": 59,
+    "relativeStrength": -4.53,
+    "supplyState": "accumulating",
+    "newsState": "negative",
+    "volumeFlowRising": true,
+    "championAt": "2026-07-18T19:47:23.643Z",
+    "recordedAt": "2026-07-31T20:06:22.700Z",
     "status": "open"
   }
 ]
