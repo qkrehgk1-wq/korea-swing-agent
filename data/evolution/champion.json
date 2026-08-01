@@ -1,119 +1,124 @@
 {
-  "generatedAt": "2026-07-18T19:47:23.643Z",
-  "seed": 1992598509,
-  "fitness": 5.096,
+  "generatedAt": "2026-08-01T19:48:40.134Z",
+  "seed": 1054793755,
+  "fitness": 0.238,
   "summary": {
-    "totalSignals": 61,
-    "totalTrades": 46,
-    "winRate": 56.5,
-    "avgReturnPct": 5.01,
-    "medianReturnPct": 3.71,
-    "stopRate": 8.7,
-    "targetRate": 6.5,
-    "noTriggerRate": 24.6,
+    "totalSignals": 72,
+    "totalTrades": 55,
+    "winRate": 65.5,
+    "avgReturnPct": 4.63,
+    "medianReturnPct": 5.98,
+    "stopRate": 12.7,
+    "targetRate": 1.8,
+    "noTriggerRate": 23.6,
     "patternStats": [
       {
-        "pattern": "밥그릇 패턴",
-        "trades": 22,
-        "wins": 14,
-        "losses": 8,
-        "noTriggers": 9,
-        "winRate": 63.6,
-        "avgReturnPct": 5.7
+        "pattern": "하이힐 패턴",
+        "trades": 10,
+        "wins": 9,
+        "losses": 1,
+        "noTriggers": 3,
+        "winRate": 90,
+        "avgReturnPct": 11.96
       },
       {
-        "pattern": "하이힐 패턴",
-        "trades": 8,
-        "wins": 5,
-        "losses": 3,
-        "noTriggers": 3,
-        "winRate": 62.5,
-        "avgReturnPct": 10.82
+        "pattern": "밥그릇 패턴",
+        "trades": 25,
+        "wins": 19,
+        "losses": 6,
+        "noTriggers": 8,
+        "winRate": 76,
+        "avgReturnPct": 6.66
       },
       {
         "pattern": "돌파매매",
-        "trades": 17,
-        "wins": 10,
-        "losses": 7,
-        "noTriggers": 6,
-        "winRate": 58.8,
-        "avgReturnPct": 4.46
-      },
-      {
-        "pattern": "밥그릇 2번자리",
-        "trades": 12,
-        "wins": 6,
+        "trades": 21,
+        "wins": 15,
         "losses": 6,
-        "noTriggers": 0,
-        "winRate": 50,
-        "avgReturnPct": 3.59
+        "noTriggers": 5,
+        "winRate": 71.4,
+        "avgReturnPct": 3.95
       },
       {
         "pattern": "컵앤핸들",
-        "trades": 4,
-        "wins": 2,
+        "trades": 6,
+        "wins": 4,
         "losses": 2,
         "noTriggers": 2,
-        "winRate": 50,
-        "avgReturnPct": 2.22
+        "winRate": 66.7,
+        "avgReturnPct": 4.42
+      },
+      {
+        "pattern": "밥그릇 2번자리",
+        "trades": 16,
+        "wins": 9,
+        "losses": 7,
+        "noTriggers": 2,
+        "winRate": 56.3,
+        "avgReturnPct": 3.54
       },
       {
         "pattern": "밥그릇 1번자리",
-        "trades": 3,
+        "trades": 4,
         "wins": 1,
-        "losses": 2,
-        "noTriggers": 1,
-        "winRate": 33.3,
-        "avgReturnPct": -1
+        "losses": 3,
+        "noTriggers": 3,
+        "winRate": 25,
+        "avgReturnPct": -3.47
       }
     ],
     "elliottLabelStats": [
       {
         "label": "수렴 후 확장 대기",
-        "trades": 19,
-        "wins": 12,
+        "trades": 22,
+        "wins": 15,
         "losses": 7,
-        "noTriggers": 9,
-        "winRate": 63.2,
-        "avgReturnPct": 5.33
+        "noTriggers": 8,
+        "winRate": 68.2,
+        "avgReturnPct": 4.98
       },
       {
         "label": "교정/혼조",
-        "trades": 22,
-        "wins": 13,
+        "trades": 28,
+        "wins": 19,
         "losses": 9,
-        "noTriggers": 4,
-        "winRate": 59.1,
-        "avgReturnPct": 4.97
+        "noTriggers": 5,
+        "winRate": 67.9,
+        "avgReturnPct": 4.76
       },
       {
         "label": "강한 상승 5파 진행",
         "trades": 5,
-        "wins": 1,
-        "losses": 4,
-        "noTriggers": 2,
-        "winRate": 20,
-        "avgReturnPct": 3.97
+        "wins": 2,
+        "losses": 3,
+        "noTriggers": 4,
+        "winRate": 40,
+        "avgReturnPct": 2.34
       }
     ]
   },
   "genome": {
     "patternWeights": {
-      "밥그릇 2번자리": 20,
+      "밥그릇 2번자리": 18,
       "밥그릇 1번자리": 16,
       "밥그릇 패턴": 17,
       "컵앤핸들": 9,
       "하이힐 패턴": 3,
-      "돌파매매": 7
+      "돌파매매": 8
     },
     "quality": {
       "minDefaultSwingScore": 66,
       "minEarlyBowlSwingScore": 42,
       "minVolumeRatio": 0.8,
-      "maxRsi14": 75,
+      "maxRsi14": 77,
       "maxVolatility20": 55,
-      "minConfluenceScore": 53,
-      "minRelativeStrength": -6
+      "minConfluenceScore": 47,
+      "minRelativeStrength": -8,
+      "maxRiskPct": 15
+    },
+    "exit": {
+      "breakevenAtR": 0.8,
+      "trailGivebackR": 0.3
     }
   }
 }
