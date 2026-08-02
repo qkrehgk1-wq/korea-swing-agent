@@ -62,6 +62,7 @@ const EXIT_BOUNDS: Record<keyof ExitPolicy, { min: number; max: number; step: nu
 export type Evaluation = {
   genome: Genome;
   summary: BacktestSummary;
+  splitSample: SplitSample;
   fitness: number;
 };
 
@@ -244,6 +245,22 @@ export function shouldPromote(
   if (challenger.summary.totalTrades < minTrades) {
     return { promote: false, reason: `표본 부족 (${challenger.summary.totalTrades} < ${minTrades})` };
   }
+  const minOosTrades = Number(process.env.EVOLUTION_MIN_PROMOTE_OOS_TRADES) || 20;
+  if (challenger.splitSample.outOfSample.trades < minOosTrades) {
+    return {
+      promote: false,
+      reason: `OOS 표본 부족 (${challenger.splitSample.outOfSample.trades} < ${minOosTrades})`,
+    };
+  }
+  if (challenger.splitSample.outOfSample.avgReturnPct <= 0) {
+    return { promote: false, reason: "OOS 평균수익률 비양수" };
+  }
+  if (challenger.summary.profitFactor < incumbent.summary.profitFactor) {
+    return {
+      promote: false,
+      reason: `손익비 하락 (${challenger.summary.profitFactor.toFixed(2)} < ${incumbent.summary.profitFactor.toFixed(2)})`,
+    };
+  }
   if (challenger.fitness <= incumbent.fitness + required) {
     return {
       promote: false,
@@ -407,7 +424,8 @@ function toMarkdown(result: EvolutionRunResult): string {
 async function liveFitnessForChampion(): Promise<number | null> {
   const champion = await readJson<{ generatedAt?: string }>(CHAMPION_PATH);
   if (!champion?.generatedAt) return null;
-  const minSamples = Number(process.env.EVOLUTION_LIVE_MIN_SAMPLES) || 8;
+  const configuredMinSamples = Number(process.env.EVOLUTION_LIVE_MIN_SAMPLES) || 20;
+  const minSamples = Math.max(20, configuredMinSamples);
   const journal = await loadRecommendationJournal();
   const settled = journal.filter(
     entry =>
@@ -479,7 +497,12 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
     const base = genomeFitness(computeExpectancy(trades));
     const fitness =
       base > 0 ? Number((base * consistencyFactor(splitSampleStats(trades))).toFixed(4)) : base;
-    return { genome, summary, fitness };
+    return {
+      genome,
+      summary,
+      splitSample: splitSampleStats(trades),
+      fitness,
+    };
   };
 
   const incumbentRaw = await evaluate(await loadChampionGenome());
@@ -521,7 +544,17 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
   }
 
   const decision = shouldPromote(incumbent, best);
-  const promoted = autoPromote && decision.promote;
+  const liveGate = liveFit !== null && liveFit >= 0;
+  const finalDecision = liveGate
+    ? decision
+    : {
+        promote: false,
+        reason:
+          liveFit === null
+            ? "라이브 표본 부족 또는 챔피언 연결 없음"
+            : `라이브 기대값 음수 (${liveFit.toFixed(3)}R)`,
+      };
+  const promoted = autoPromote && finalDecision.promote;
   const generatedAt = new Date().toISOString();
 
   await mkdir(EVOLUTION_DIR, { recursive: true });
@@ -555,7 +588,7 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
     generatedAt,
     seed,
     promoted,
-    reason: decision.reason,
+    reason: finalDecision.reason,
     incumbentFitness: incumbent.fitness,
     challengerFitness: best.fitness,
     totalTrades: best.summary.totalTrades,
@@ -568,7 +601,7 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
     generatedAt,
     seed,
     promoted,
-    reason: decision.reason,
+    reason: finalDecision.reason,
     autoPromote,
     incumbent: { fitness: incumbent.fitness, summary: incumbent.summary },
     challenger: { genome: best.genome, fitness: best.fitness, summary: best.summary },
@@ -586,7 +619,7 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
     kind: "high_conviction",
     headline: promoted
       ? `전략 진화 승격: 적합도 ${incumbent.fitness.toFixed(2)} → ${best.fitness.toFixed(2)}`
-      : `진화 후보 보류 (${decision.reason})`,
+      : `진화 후보 보류 (${finalDecision.reason})`,
     detail: [
       `체결 ${best.summary.totalTrades}건 · 승률 ${best.summary.winRate.toFixed(1)}% · 평균수익 ${best.summary.avgReturnPct.toFixed(2)}%`,
       `자동승격 ${autoPromote ? "ON" : "OFF"} · seed ${seed} · ${generations}세대×${population}개체`,

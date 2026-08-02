@@ -1,10 +1,10 @@
 /**
  * Notification Service — owner / Telegram / Kakao alerts.
  *
- * The daily swing push is intentionally compact: candidates are grouped by
- * holding horizon (단기/중기/장기), 3 lines each. Heavy detail (Elliott, Dante,
- * external platforms, agent-team review) is persisted to the execution report
- * file, not dumped into the message.
+ * The daily swing push is intentionally simple: only market mood, candidates,
+ * prices, and a short watch list are sent. Heavy detail (Elliott, Dante,
+ * external platforms, agent-team review) stays in the execution report and
+ * dashboard instead of being dumped into the message.
  */
 
 import { notifyOwner } from "./_core/notification";
@@ -196,35 +196,12 @@ export async function notifyDailyMarketSummary(
   }
 }
 
-// ── Daily swing push (compact, horizon-grouped) ──
+// ── Daily swing push (simple, ranked) ──
 
 // 기대수익 표기는 저널·백테스트가 실제로 채점하는 2.5R로 통일(정직한 표기).
-const HORIZONS: Array<{ key: "단기" | "중기" | "장기"; header: string; rMultiple: number }> = [
-  { key: "단기", header: "🔴 단기 (1~5일)", rMultiple: 2.5 },
-  { key: "중기", header: "🟡 중기 (1~4주)", rMultiple: 2.5 },
-  { key: "장기", header: "🟢 장기 (1~3개월)", rMultiple: 2.5 },
-];
-
-function inferHorizon(candidate: SwingCandidate): "단기" | "중기" | "장기" {
-  const patterns = candidate.patterns ?? [];
-  const volumeRatio = candidate.volumeRatio ?? 1;
-  const rsi = candidate.rsi14 ?? 50;
-  // 단기: 돌파/모멘텀/거래량 급등/과열 직전
-  if (patterns.some(p => p.includes("돌파")) || volumeRatio >= 2.0 || rsi >= 68) {
-    return "단기";
-  }
-  // 장기: 바닥 다지기 베이스(밥그릇 1번자리·컵앤핸들) + 거래량 과열 아님
-  if (patterns.some(p => p.includes("밥그릇 1번") || p.includes("컵앤핸들")) && volumeRatio < 1.6) {
-    return "장기";
-  }
-  // 중기: 그 외 (밥그릇 2번자리·하이힐·눌림목)
-  return "중기";
-}
-
-// 확정적 지시 표현(매수/ACT 등) 대신 검토·관찰 언어만 사용한다.
 function decisionLabel(candidate: SwingCandidate): string {
-  if (candidate.swingFit === "상" || candidate.swingScore >= 75) return "유력검토";
-  if (candidate.swingFit === "중" || candidate.swingScore >= 60) return "검토";
+  if (candidate.swingFit === "상" || candidate.swingScore >= 75) return "우선 확인";
+  if (candidate.swingFit === "중" || candidate.swingScore >= 60) return "확인";
   return "관찰";
 }
 
@@ -239,46 +216,17 @@ function won(value: number): string {
   return Math.round(value).toLocaleString("ko-KR");
 }
 
-function supplyMark(candidate: SwingCandidate): string {
-  if (candidate.supplyState === "accumulating") return " 🟢매집";
-  if (candidate.supplyState === "distributing") return " 🔴분산";
-  return "";
-}
-
-function newsMark(candidate: SwingCandidate): string {
-  if (candidate.newsState === "negative") return " 🔴악재";
-  if (candidate.newsState === "positive") return " 🟢호재";
-  return "";
-}
-
 function formatWatch(candidate: SwingCandidate): string {
-  const confluence =
-    candidate.reason?.find(r => r.includes("황금비") || r.includes("VCP") || r.includes("ADX")) ??
-    candidate.patterns?.[0] ??
-    "";
-  return `${candidate.companyName} ${candidate.ticker} · ${candidate.swingScore}${supplyMark(candidate)}${newsMark(candidate)}${
-    confluence ? ` · ${confluence}` : ""
-  }`;
+  return `${candidate.companyName} (${candidate.ticker}) · ${candidate.swingScore}점`;
 }
 
-function formatPick(candidate: SwingCandidate, rMultiple: number): string {
+function formatPick(candidate: SwingCandidate, rMultiple: number, rank: number): string {
   const pct = expectedReturnPct(candidate, rMultiple);
-  const rs =
-    typeof candidate.relativeStrength === "number"
-      ? `RS${candidate.relativeStrength >= 0 ? "+" : ""}${candidate.relativeStrength}`
-      : "";
-  const confluence =
-    candidate.reason?.find(r => r.includes("황금비") || r.includes("VCP") || r.includes("ADX")) ??
-    candidate.patterns?.[0] ??
-    "";
-  const detail = [rs, confluence].filter(Boolean).join(" · ");
   return [
-    `${candidate.companyName} ${candidate.ticker} · ${decisionLabel(candidate)} ${candidate.swingScore}${supplyMark(candidate)}${newsMark(candidate)}`,
-    `  기준가 ${won(candidate.triggerPrice)} · 손실관리 ${won(candidate.stopLossPrice)} · 목표범위 +${pct}%`,
-    detail ? `  ${detail}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+    `${rank}. ${candidate.companyName} (${candidate.ticker}) · ${decisionLabel(candidate)} · ${candidate.swingScore}점`,
+    `   현재가 ${won(candidate.currentPrice)} · 기준가 ${won(candidate.triggerPrice)}`,
+    `   주의가격 ${won(candidate.stopLossPrice)} · 목표 +${pct}%`,
+  ].join("\n");
 }
 
 function kstDateLabel(now: Date): string {
@@ -293,24 +241,16 @@ export function buildDailySwingMessage(
   firstLimitUpCandidates: FirstLimitUpFollowThroughCandidate[] = [],
   now: Date = new Date(),
   watchlist: SwingCandidate[] = [],
-  options: { performanceLine?: string; dataDegraded?: boolean } = {}
+  options: { performanceLine?: string; dataDegraded?: boolean; accuracyLine?: string } = {}
 ): { title: string; body: string } {
-  const title = `📊 한국 스윙 · ${kstDateLabel(now)}`;
+  const title = `📊 오늘의 주식 후보 · ${kstDateLabel(now)}`;
   const ranked = [...candidates].sort((a, b) => b.swingScore - a.swingScore);
   const regime = (ranked[0] ?? watchlist[0])?.marketRegimeLabel;
   const riskOff = regime === "약세";
-  const picksPerGroup = riskOff ? 1 : 2;
-
-  const sections: string[] = [];
-  for (const horizon of HORIZONS) {
-    const picks = ranked.filter(c => inferHorizon(c) === horizon.key).slice(0, picksPerGroup);
-    if (!picks.length) continue;
-    sections.push([horizon.header, ...picks.map(c => formatPick(c, horizon.rMultiple))].join("\n"));
-  }
-  // Watch-only floor — keeps the alert informative (never silent) without
-  // presenting sub-conviction names as ACT signals.
+  const maxPicks = riskOff ? 3 : 5;
+  const picks = ranked.slice(0, maxPicks);
   const watchSection = watchlist.length
-    ? ["👀 관찰 (조건 미달·참고용)", ...watchlist.slice(0, 3).map(formatWatch)].join("\n")
+    ? ["👀 관찰", ...watchlist.slice(0, 3).map(formatWatch)].join("\n")
     : "";
 
   const limitUpNames = [...limitUpCandidates, ...firstLimitUpCandidates]
@@ -318,33 +258,37 @@ export function buildDailySwingMessage(
     .map(c => c.companyName);
 
   const footer: string[] = [];
-  if (limitUpNames.length) footer.push(`⚡ 상한가 관찰: ${limitUpNames.join(" · ")}`);
+  if (limitUpNames.length) footer.push(`⚡ 급등 관심: ${limitUpNames.join(" · ")}`);
   if (options.performanceLine) footer.push(options.performanceLine);
-  footer.push("🔒 전체 근거·차트 → 대시보드");
+  if (options.accuracyLine) footer.push(options.accuracyLine);
+  footer.push("자세한 근거와 차트는 대시보드에서 확인하세요.");
 
   const dataBanner = options.dataDegraded
-    ? "🛑 데이터 신뢰도 저하 — 이번 회차는 관찰 정보만 제공(검토 판단 보류)"
+    ? "⚠️ 자료 확인 필요 — 오늘 알림은 참고만 봐주세요."
     : "";
   const regimeBanner = riskOff
-    ? "⚠️ 시장 약세 — 신규 검토 축소·현금 비중 고려"
+    ? "⚠️ 시장 흐름: 조심"
     : regime === "강세"
-      ? "🟢 시장 강세 — 추세 우호적"
-      : "";
+      ? "🟢 시장 흐름: 좋음"
+      : regime === "중립"
+        ? "🟡 시장 흐름: 보통"
+        : "";
   const body =
-    sections.length || watchSection
+    picks.length || watchSection
       ? [
           dataBanner,
           regimeBanner,
-          `KOSPI·KOSDAQ 자동 스캔 · 후보 ${ranked.length} · 관찰 ${watchlist.length}`,
+          `후보 ${ranked.length}개 · 관찰 ${watchlist.length}개`,
           "",
-          ...sections,
+          picks.length ? ["✅ 후보", ...picks.map((c, index) => formatPick(c, 2.5, index + 1))].join("\n") : "",
+          ranked.length > picks.length ? `외 ${ranked.length - picks.length}개 후보는 대시보드에서 확인하세요.` : "",
           watchSection,
           "",
           ...footer,
         ]
           .filter(Boolean)
           .join("\n")
-      : [dataBanner, "오늘은 조건에 맞는 스윙 후보가 없습니다."].filter(Boolean).join("\n");
+      : [dataBanner, "오늘은 조건에 맞는 후보가 없습니다.", ...footer].filter(Boolean).join("\n");
   return { title, body };
 }
 
@@ -356,7 +300,7 @@ export async function notifyDailySwingCandidates(
   _agentTeamReport?: AgentTeamReport,
   _kosdaqFocusCandidates: SwingCandidate[] = [],
   watchlist: SwingCandidate[] = [],
-  options: { performanceLine?: string; dataDegraded?: boolean } = {}
+  options: { performanceLine?: string; dataDegraded?: boolean; accuracyLine?: string } = {}
 ): Promise<NotificationDeliveryResult> {
   const { title, body } = buildDailySwingMessage(
     candidates,

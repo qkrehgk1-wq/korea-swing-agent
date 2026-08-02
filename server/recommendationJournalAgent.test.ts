@@ -98,6 +98,18 @@ describe("scoreEntry", () => {
     expect(scored.exitDate).toBe("2026-01-03");
   });
 
+  it("scores a target touched on the entry bar like the backtest", () => {
+    const rows = [
+      row("2026-01-02", 125, 98, 110), // trigger and target on the same bar
+      row("2026-01-03", 110, 100, 105),
+      row("2026-01-04", 110, 100, 105),
+    ];
+    const scored = scoreEntry(openEntry(), rows, { entryWindow: 5, holdingDays: 3 });
+    expect(scored.status).toBe("target");
+    expect(scored.entryDate).toBe("2026-01-02");
+    expect(scored.exitDate).toBe("2026-01-02");
+  });
+
   it("records a stop hit", () => {
     const rows = [
       row("2026-01-02", 105, 98, 100), // triggers

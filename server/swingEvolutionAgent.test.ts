@@ -24,6 +24,7 @@ function summary(overrides: Partial<BacktestSummary>): BacktestSummary {
     stopRate: 20,
     targetRate: 40,
     noTriggerRate: 30,
+    profitFactor: 1.8,
     patternStats: [],
     elliottLabelStats: [],
     ...overrides,
@@ -31,7 +32,17 @@ function summary(overrides: Partial<BacktestSummary>): BacktestSummary {
 }
 
 function evaluation(fitness: number, overrides: Partial<BacktestSummary> = {}): Evaluation {
-  return { genome: BASE_GENOME, summary: summary(overrides), fitness };
+  return {
+    genome: BASE_GENOME,
+    summary: summary(overrides),
+    splitSample: {
+      splitDate: "2025-01-01",
+      distinctTickers: 10,
+      inSample: { trades: 20, winRate: 55, avgReturnPct: 1.5 },
+      outOfSample: { trades: 20, winRate: 55, avgReturnPct: 1.5 },
+    },
+    fitness,
+  };
 }
 
 describe("createRng", () => {

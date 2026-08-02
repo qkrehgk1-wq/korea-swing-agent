@@ -78,10 +78,27 @@ export type SwingLearnedOverrides = {
   notes: string[];
 };
 
-const REPORT_PATH = path.join(process.cwd(), ".data", "backtests", "latest-swing-backtest.json");
-const OVERRIDES_PATH = path.join(process.cwd(), ".data", "backtests", "learned-swing-overrides.json");
-const MAINTENANCE_HISTORY_PATH = path.join(process.cwd(), ".data", "swing-maintenance", "history.json");
-const MIN_TRADES_FOR_ADJUSTMENT = Number(process.env.SWING_TUNING_MIN_TRADES ?? "5");
+const REPORT_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "backtests",
+  "latest-swing-backtest.json"
+);
+const OVERRIDES_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "backtests",
+  "learned-swing-overrides.json"
+);
+const MAINTENANCE_HISTORY_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "swing-maintenance",
+  "history.json"
+);
+const MIN_TRADES_FOR_ADJUSTMENT = Number(
+  process.env.SWING_TUNING_MIN_TRADES ?? "5"
+);
 
 function clampAdjustment(value: number) {
   return Math.max(-3, Math.min(3, Math.round(value)));
@@ -123,9 +140,11 @@ function deriveMaintenanceHistoryContext(
   }
 
   const averageApprovedCandidates =
-    recentRuns.reduce((sum, run) => sum + run.approvedCandidates, 0) / recentRuns.length;
+    recentRuns.reduce((sum, run) => sum + run.approvedCandidates, 0) /
+    recentRuns.length;
   const averageHeldCandidates =
-    recentRuns.reduce((sum, run) => sum + run.heldCandidates, 0) / recentRuns.length;
+    recentRuns.reduce((sum, run) => sum + run.heldCandidates, 0) /
+    recentRuns.length;
 
   return {
     recentRuns,
@@ -163,18 +182,28 @@ function deriveWorkflowApprovalPolicy(
     minWorkflowScore += 2;
   }
 
-  const mixedLabel = report.elliottLabelStats?.find(stat => stat.label === "교정/혼조");
-  const bullishLabel = report.elliottLabelStats?.find(
-    stat => stat.label === "강한 상승 5파 진행" || stat.label === "초기 3파 확장"
+  const mixedLabel = report.elliottLabelStats?.find(
+    stat => stat.label === "교정/혼조"
   );
-  if (mixedLabel && mixedLabel.trades >= 5 && (mixedLabel.winRate < 45 || mixedLabel.avgReturnPct < 0)) {
+  const bullishLabel = report.elliottLabelStats?.find(
+    stat =>
+      stat.label === "강한 상승 5파 진행" || stat.label === "초기 3파 확장"
+  );
+  if (
+    mixedLabel &&
+    mixedLabel.trades >= 5 &&
+    (mixedLabel.winRate < 45 || mixedLabel.avgReturnPct < 0)
+  ) {
     minElliottScore += 6;
   }
   if (bullishLabel && bullishLabel.trades >= 5 && bullishLabel.winRate >= 60) {
     minElliottScore += 2;
   }
 
-  if (maintenanceContext?.consecutiveZeroApprovalRuns && maintenanceContext.consecutiveZeroApprovalRuns >= 3) {
+  if (
+    maintenanceContext?.consecutiveZeroApprovalRuns &&
+    maintenanceContext.consecutiveZeroApprovalRuns >= 3
+  ) {
     minAgreementScore -= 2;
     minWorkflowScore -= 3;
     maxConflictScore += 4;
@@ -192,7 +221,10 @@ function deriveWorkflowApprovalPolicy(
   }
 
   return {
-    minAgreementScore: Math.max(50, Math.min(70, Math.round(minAgreementScore))),
+    minAgreementScore: Math.max(
+      50,
+      Math.min(70, Math.round(minAgreementScore))
+    ),
     maxConflictScore: Math.max(30, Math.min(55, Math.round(maxConflictScore))),
     minWorkflowScore: Math.max(52, Math.min(72, Math.round(minWorkflowScore))),
     minElliottScore: Math.max(40, Math.min(65, Math.round(minElliottScore))),
@@ -207,14 +239,19 @@ export function deriveSwingLearnedOverrides(
   const patternWeightAdjustments: Partial<Record<PatternName, number>> = {};
   const notes: string[] = [];
   const bonusScale = report.winRate >= 60 ? 1 : 0.5;
-  const workflowApprovalPolicy = deriveWorkflowApprovalPolicy(report, maintenanceContext);
+  const workflowApprovalPolicy = deriveWorkflowApprovalPolicy(
+    report,
+    maintenanceContext
+  );
 
   for (const stat of report.patternStats) {
     if (!isPatternName(stat.pattern)) {
       continue;
     }
     if (stat.trades < MIN_TRADES_FOR_ADJUSTMENT) {
-      notes.push(`${stat.pattern}: 표본 ${stat.trades}건으로 아직 자동 조정하지 않았습니다.`);
+      notes.push(
+        `${stat.pattern}: 표본 ${stat.trades}건으로 아직 자동 조정하지 않았습니다.`
+      );
       continue;
     }
 
@@ -250,10 +287,13 @@ export function deriveSwingLearnedOverrides(
 
   const effectivePatternWeights = resolveSwingPatternWeights(
     Object.fromEntries(
-      (Object.keys(SWING_PATTERN_BASE_WEIGHTS) as PatternName[]).map(pattern => [
-        pattern,
-        SWING_PATTERN_BASE_WEIGHTS[pattern] + (patternWeightAdjustments[pattern] ?? 0),
-      ])
+      (Object.keys(SWING_PATTERN_BASE_WEIGHTS) as PatternName[]).map(
+        pattern => [
+          pattern,
+          SWING_PATTERN_BASE_WEIGHTS[pattern] +
+            (patternWeightAdjustments[pattern] ?? 0),
+        ]
+      )
     ) as Record<PatternName, number>
   );
 
@@ -271,7 +311,9 @@ export function deriveSwingLearnedOverrides(
   };
 }
 
-export async function loadLatestBacktestReport(reportPath = REPORT_PATH): Promise<BacktestReportLike> {
+export async function loadLatestBacktestReport(
+  reportPath = REPORT_PATH
+): Promise<BacktestReportLike> {
   const raw = await readFile(reportPath, "utf8");
   return JSON.parse(raw) as BacktestReportLike;
 }
@@ -288,12 +330,23 @@ export async function loadMaintenanceHistory(
   }
 }
 
-export async function writeSwingLearnedOverrides(overrides: SwingLearnedOverrides) {
+export async function writeSwingLearnedOverrides(
+  overrides: SwingLearnedOverrides
+) {
   await mkdir(path.dirname(OVERRIDES_PATH), { recursive: true });
-  await writeFile(OVERRIDES_PATH, `${JSON.stringify(overrides, null, 2)}\n`, "utf8");
+  await writeFile(
+    OVERRIDES_PATH,
+    `${JSON.stringify(overrides, null, 2)}\n`,
+    "utf8"
+  );
 }
 
-const PROMOTED_CHAMPION_PATH = path.join(process.cwd(), "data", "evolution", "champion.json");
+const PROMOTED_CHAMPION_PATH = path.join(
+  process.cwd(),
+  "data",
+  "evolution",
+  "champion.json"
+);
 
 async function readJsonFile<T>(filePath: string): Promise<T | null> {
   try {
@@ -312,18 +365,45 @@ async function readJsonFile<T>(filePath: string): Promise<T | null> {
 export async function runSwingAdaptiveLearning(reportPath = REPORT_PATH) {
   const report = await loadLatestBacktestReport(reportPath);
   const maintenanceContext = await loadMaintenanceHistory();
-  const overrides = deriveSwingLearnedOverrides(report, reportPath, maintenanceContext);
-
-  const champion = await readJsonFile<{ genome?: { quality?: unknown }; summary?: unknown }>(
-    PROMOTED_CHAMPION_PATH
+  const overrides = deriveSwingLearnedOverrides(
+    report,
+    reportPath,
+    maintenanceContext
   );
+
+  const champion = await readJsonFile<{
+    genome?: {
+      patternWeights?: Partial<Record<PatternName, number>>;
+      quality?: unknown;
+    };
+    summary?: unknown;
+  }>(PROMOTED_CHAMPION_PATH);
   const existing = await readJsonFile<SwingLearnedOverrides>(OVERRIDES_PATH);
-  if (champion?.genome?.quality && champion.summary && existing?.effectivePatternWeights) {
+  if (
+    champion?.genome?.patternWeights &&
+    champion.genome.quality &&
+    champion.summary
+  ) {
+    const championWeights = resolveSwingPatternWeights(
+      champion.genome.patternWeights
+    );
+    const championAdjustments = Object.fromEntries(
+      (Object.keys(SWING_PATTERN_BASE_WEIGHTS) as PatternName[])
+        .map(pattern => [
+          pattern,
+          championWeights[pattern] - SWING_PATTERN_BASE_WEIGHTS[pattern],
+        ])
+        .filter(([, adjustment]) => adjustment !== 0)
+    ) as Partial<Record<PatternName, number>>;
+    overrides.patternWeightAdjustments = championAdjustments;
+    overrides.effectivePatternWeights = championWeights;
+    overrides.notes.push(
+      "승격된 챔피언의 패턴 가중치를 단일 기준으로 보존했습니다(규칙 학습은 승인 정책만 갱신)."
+    );
+  } else if (report.totalTrades < 20 && existing?.effectivePatternWeights) {
     overrides.patternWeightAdjustments = existing.patternWeightAdjustments;
     overrides.effectivePatternWeights = existing.effectivePatternWeights;
-    overrides.notes.push(
-      "승격된 챔피언의 패턴 가중치를 보존했습니다(규칙 학습은 승인 정책만 갱신)."
-    );
+    overrides.notes.push("체결 표본 20건 미만이라 기존 가중치를 보존했습니다.");
   }
 
   await writeSwingLearnedOverrides(overrides);

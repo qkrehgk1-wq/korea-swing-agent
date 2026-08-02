@@ -21,23 +21,24 @@ function cand(overrides: Partial<Cand> = {}): Cand {
 const NOW = new Date("2026-06-19T01:00:00Z");
 
 describe("buildDailySwingMessage", () => {
-  it("shows a risk-off banner and caps picks in a bearish regime", () => {
+  it("shows a simple risk-off banner and caps picks in a bearish regime", () => {
     const { body } = buildDailySwingMessage(
       [
         cand({ ticker: "A", companyName: "가", marketRegimeLabel: "약세", swingScore: 80 }),
         cand({ ticker: "B", companyName: "나", marketRegimeLabel: "약세", swingScore: 70 }),
         cand({ ticker: "C", companyName: "다", marketRegimeLabel: "약세", swingScore: 60 }),
+        cand({ ticker: "D", companyName: "라", marketRegimeLabel: "약세", swingScore: 50 }),
       ],
       [],
       [],
       NOW
     );
-    expect(body).toContain("시장 약세");
-    expect(body).toContain("가 A");
-    expect(body).not.toContain("다 C"); // bearish → only 1 pick per horizon group
+    expect(body).toContain("시장 흐름: 조심");
+    expect(body).toContain("가 (A)");
+    expect(body).not.toContain("라 D"); // bearish → only 3 picks overall
   });
 
-  it("shows a bullish banner, supply marker and relative strength", () => {
+  it("shows only easy-to-read candidate information", () => {
     const { body } = buildDailySwingMessage(
       [
         cand({
@@ -51,26 +52,28 @@ describe("buildDailySwingMessage", () => {
       [],
       NOW
     );
-    expect(body).toContain("시장 강세");
-    expect(body).toContain("🟢매집");
-    expect(body).toContain("RS+5.2");
-    expect(body).toContain("황금비");
+    expect(body).toContain("시장 흐름: 좋음");
+    expect(body).toContain("기준가");
+    expect(body).toContain("주의가격");
+    expect(body).not.toContain("매집");
+    expect(body).not.toContain("RS+");
+    expect(body).not.toContain("황금비");
   });
 
-  it("marks smart-money distribution", () => {
+  it("keeps internal supply labels out of the message", () => {
     const { body } = buildDailySwingMessage([cand({ supplyState: "distributing" })], [], [], NOW);
-    expect(body).toContain("🔴분산");
+    expect(body).not.toContain("분산");
   });
 
   it("handles an empty candidate list", () => {
     expect(buildDailySwingMessage([], [], [], NOW).body).toContain("후보가 없습니다");
   });
 
-  it("uses review language (no directive terms) with 기준가/손실관리 wording", () => {
+  it("uses review language (no directive terms) with simple price wording", () => {
     const { body } = buildDailySwingMessage([cand({ swingScore: 80 })], [], [], NOW);
-    expect(body).toContain("유력검토");
+    expect(body).toContain("우선 확인");
     expect(body).toContain("기준가 ");
-    expect(body).toContain("손실관리 ");
+    expect(body).toContain("주의가격 ");
     expect(body).not.toContain("ACT");
     expect(body).not.toContain("진입 ");
   });
@@ -78,15 +81,15 @@ describe("buildDailySwingMessage", () => {
   it("shows the data-degradation banner and realized performance line", () => {
     const { body } = buildDailySwingMessage([cand()], [], [], NOW, [], {
       dataDegraded: true,
-      performanceLine: "📈 실측 성과: 체결 12건 · 승률 58.3% · 평균 2.1% (타겟 41.7%·손절 16.7%)",
+      performanceLine: "📈 최근 결과: 12건 · 승률 58.3% · 평균 2.1%",
     });
-    expect(body).toContain("데이터 신뢰도 저하");
-    expect(body).toContain("실측 성과");
+    expect(body).toContain("자료 확인 필요");
+    expect(body).toContain("최근 결과");
   });
 
   it("keeps the degradation banner even when there is nothing to show", () => {
     const { body } = buildDailySwingMessage([], [], [], NOW, [], { dataDegraded: true });
-    expect(body).toContain("데이터 신뢰도 저하");
+    expect(body).toContain("자료 확인 필요");
     expect(body).toContain("후보가 없습니다");
   });
 
@@ -101,7 +104,7 @@ describe("buildDailySwingMessage", () => {
       }),
     ]);
     expect(body).toContain("관찰");
-    expect(body).toContain("관찰주 W");
+    expect(body).toContain("관찰주 (W)");
     expect(body).not.toContain("후보가 없습니다");
   });
 });

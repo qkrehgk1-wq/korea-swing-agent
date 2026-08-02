@@ -5,7 +5,11 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 import { deriveElliottFractalInsightFromRows } from "./agentTeams/elliottFractalAgent";
-import { fetchKoreanOhlcvRowsBatch, type OhlcvRow } from "./koreaStockMcp";
+import {
+  fetchKoreanOhlcvRowsBatch,
+  isKoreanTicker,
+  type OhlcvRow,
+} from "./koreaStockMcp";
 import { runSwingAdaptiveLearning } from "./swingAdaptiveLearning";
 import { runSwingPredictionQualityAgent } from "./swingPredictionQualityAgent";
 import { FIRST_LIMIT_UP_UNIVERSE } from "./firstLimitUpFollowThroughAgent";
@@ -84,6 +88,7 @@ type BacktestReport = {
   stopRate: number;
   targetRate: number;
   noTriggerRate: number;
+  profitFactor: number;
   patternStats: PatternStat[];
   elliottLabelStats: ElliottLabelStat[];
   recommendations: string[];
@@ -99,11 +104,17 @@ const REPORT_DIR = path.join(process.cwd(), ".data", "backtests");
 const REPORT_JSON_PATH = path.join(REPORT_DIR, "latest-swing-backtest.json");
 const REPORT_MD_PATH = path.join(REPORT_DIR, "latest-swing-backtest.md");
 const STATE_PATH = path.join(REPORT_DIR, "state.json");
-const DEFAULT_INTERVAL_DAYS = Number(process.env.SWING_BACKTEST_INTERVAL_DAYS ?? "7");
+const DEFAULT_INTERVAL_DAYS = Number(
+  process.env.SWING_BACKTEST_INTERVAL_DAYS ?? "7"
+);
 const LOOKBACK_DAYS = Number(process.env.SWING_BACKTEST_LOOKBACK_DAYS ?? "420");
 const HOLDING_DAYS = Number(process.env.SWING_BACKTEST_HOLDING_DAYS ?? "15");
-const ENTRY_LOOKAHEAD_DAYS = Number(process.env.SWING_BACKTEST_ENTRY_LOOKAHEAD_DAYS ?? "5");
-const SIGNAL_STEP_DAYS = Number(process.env.SWING_BACKTEST_SIGNAL_STEP_DAYS ?? "5");
+const ENTRY_LOOKAHEAD_DAYS = Number(
+  process.env.SWING_BACKTEST_ENTRY_LOOKAHEAD_DAYS ?? "5"
+);
+const SIGNAL_STEP_DAYS = Number(
+  process.env.SWING_BACKTEST_SIGNAL_STEP_DAYS ?? "5"
+);
 const WARMUP_BARS = 160;
 const FORCE_RUN = process.env.SWING_BACKTEST_FORCE === "true";
 /**
@@ -141,15 +152,30 @@ async function resolveBacktestUniverse(): Promise<string[]> {
   try {
     dynamic = await resolveSwingUniverse();
   } catch (error) {
-    console.warn("[Swing Backtest] dynamic universe unavailable, using curated only:", error);
+    console.warn(
+      "[Swing Backtest] dynamic universe unavailable, using curated only:",
+      error
+    );
   }
-  const curated = [...DEFAULT_SWING_UNIVERSE, ...LIMIT_UP_UNIVERSE, ...FIRST_LIMIT_UP_UNIVERSE];
+  const curated = [
+    ...DEFAULT_SWING_UNIVERSE,
+    ...LIMIT_UP_UNIVERSE,
+    ...FIRST_LIMIT_UP_UNIVERSE,
+  ];
   const extra = (process.env.SWING_BACKTEST_EXTRA_TICKERS ?? "")
     .split(",")
     .map(item => item.trim())
     .filter(Boolean);
 
-  return Array.from(new Set(["069500", "229200", ...dynamic.slice(0, cap), ...curated, ...extra]));
+  return Array.from(
+    new Set([
+      "069500",
+      "229200",
+      ...dynamic.slice(0, cap),
+      ...curated,
+      ...extra,
+    ])
+  );
 }
 
 function percentChange(base: number, current: number) {
@@ -206,9 +232,15 @@ function sliceRowsAtIndex(rows: OhlcvRow[] | null, endIndex: number) {
   return rows.slice(0, endIndex + 1);
 }
 
-function buildRowsSnapshot(rowsByTicker: TechnicalSwingRowsByTicker, signalIndex: number): TechnicalSwingRowsByTicker {
+function buildRowsSnapshot(
+  rowsByTicker: TechnicalSwingRowsByTicker,
+  signalIndex: number
+): TechnicalSwingRowsByTicker {
   return Object.fromEntries(
-    Object.entries(rowsByTicker).map(([ticker, rows]) => [ticker, sliceRowsAtIndex(rows, signalIndex)])
+    Object.entries(rowsByTicker).map(([ticker, rows]) => [
+      ticker,
+      sliceRowsAtIndex(rows, signalIndex),
+    ])
   );
 }
 
@@ -229,7 +261,9 @@ function evaluateTrade(
   const targetR = Number(process.env.SWING_TARGET_R) || 2.5; // 1000d sweep: avg% peaks at 2.5R
   const risk = candidate.triggerPrice - candidate.stopLossPrice;
   const targetPrice = Math.round(
-    risk > 0 ? candidate.triggerPrice + targetR * risk : candidate.triggerPrice * 1.08
+    risk > 0
+      ? candidate.triggerPrice + targetR * risk
+      : candidate.triggerPrice * 1.08
   );
   const entryWindow = futureRows.slice(0, ENTRY_LOOKAHEAD_DAYS);
   let entryRow: OhlcvRow | undefined;
@@ -306,12 +340,17 @@ function evaluateTrade(
     // its high may have printed before our fill, and the live journal scores the
     // same way — the two must model one strategy.
     if (barIndex > 0 && riskPerShare > 0 && exitPolicy.breakevenAtR > 0) {
-      peakR = Math.max(peakR, (row.고가 - candidate.triggerPrice) / riskPerShare);
+      peakR = Math.max(
+        peakR,
+        (row.고가 - candidate.triggerPrice) / riskPerShare
+      );
       if (peakR >= exitPolicy.breakevenAtR) {
-        const breakeven = candidate.triggerPrice * (1 + ROUND_TRIP_COST_PCT / 100);
+        const breakeven =
+          candidate.triggerPrice * (1 + ROUND_TRIP_COST_PCT / 100);
         const trailed =
           exitPolicy.trailGivebackR > 0
-            ? candidate.triggerPrice + (peakR - exitPolicy.trailGivebackR) * riskPerShare
+            ? candidate.triggerPrice +
+              (peakR - exitPolicy.trailGivebackR) * riskPerShare
             : 0;
         effectiveStop = Math.max(effectiveStop, breakeven, trailed);
       }
@@ -319,9 +358,11 @@ function evaluateTrade(
   }
 
   const exitPrice =
-    outcome === "stop" || outcome === "trail_exit" ? effectiveStop :
-    outcome === "target" ? targetPrice :
-    exitRow.종가;
+    outcome === "stop" || outcome === "trail_exit"
+      ? effectiveStop
+      : outcome === "target"
+        ? targetPrice
+        : exitRow.종가;
 
   return {
     signalDate,
@@ -336,7 +377,9 @@ function evaluateTrade(
     exitDate: exitRow.날짜,
     exitPrice,
     outcome,
-    returnPct: round(percentChange(candidate.triggerPrice, exitPrice) - ROUND_TRIP_COST_PCT),
+    returnPct: round(
+      percentChange(candidate.triggerPrice, exitPrice) - ROUND_TRIP_COST_PCT
+    ),
     maxFavorableExcursionPct: round(maxFavorableExcursionPct),
     maxAdverseExcursionPct: round(maxAdverseExcursionPct),
     elliottLabel: elliottInsight?.label,
@@ -360,9 +403,13 @@ function buildRecommendations(
   const notes: string[] = [];
 
   if (report.winRate < 45) {
-    notes.push("전체 적중률이 낮습니다. 승인 후보 수를 더 줄이고 워크플로우 합의 하한을 높이는 쪽이 유리합니다.");
+    notes.push(
+      "전체 적중률이 낮습니다. 승인 후보 수를 더 줄이고 워크플로우 합의 하한을 높이는 쪽이 유리합니다."
+    );
   } else if (report.winRate >= 58) {
-    notes.push("전체 적중률이 양호합니다. 현재 보수적 승인 구조를 유지하되, 표본이 더 쌓이면 상위 패턴 비중 확대를 검토할 수 있습니다.");
+    notes.push(
+      "전체 적중률이 양호합니다. 현재 보수적 승인 구조를 유지하되, 표본이 더 쌓이면 상위 패턴 비중 확대를 검토할 수 있습니다."
+    );
   }
 
   for (const stat of patternStats) {
@@ -370,10 +417,14 @@ function buildRecommendations(
       continue;
     }
     if (stat.winRate >= 60 && stat.avgReturnPct > 2) {
-      notes.push(`${stat.pattern} 패턴은 표본 ${stat.trades}건에서 강했습니다. 우선순위 유지 또는 소폭 가점 검토가 가능합니다.`);
+      notes.push(
+        `${stat.pattern} 패턴은 표본 ${stat.trades}건에서 강했습니다. 우선순위 유지 또는 소폭 가점 검토가 가능합니다.`
+      );
     }
     if (stat.winRate < 40 || stat.avgReturnPct < 0) {
-      notes.push(`${stat.pattern} 패턴은 표본 ${stat.trades}건에서 약했습니다. 거래량/RSI 필터를 강화하거나 우선순위를 낮추는 것이 좋습니다.`);
+      notes.push(
+        `${stat.pattern} 패턴은 표본 ${stat.trades}건에서 약했습니다. 거래량/RSI 필터를 강화하거나 우선순위를 낮추는 것이 좋습니다.`
+      );
     }
   }
 
@@ -381,16 +432,28 @@ function buildRecommendations(
     if (stat.trades < 5) {
       continue;
     }
-    if ((stat.label === "강한 상승 5파 진행" || stat.label === "초기 3파 확장") && stat.winRate >= 60) {
-      notes.push(`${stat.label} 구조는 표본 ${stat.trades}건에서 양호했습니다. 엘리엇 점수 하한 유지 또는 소폭 강화가 가능합니다.`);
+    if (
+      (stat.label === "강한 상승 5파 진행" || stat.label === "초기 3파 확장") &&
+      stat.winRate >= 60
+    ) {
+      notes.push(
+        `${stat.label} 구조는 표본 ${stat.trades}건에서 양호했습니다. 엘리엇 점수 하한 유지 또는 소폭 강화가 가능합니다.`
+      );
     }
-    if (stat.label === "교정/혼조" && (stat.winRate < 45 || stat.avgReturnPct < 0)) {
-      notes.push(`${stat.label} 구조는 성과가 약했습니다. 혼조 파동 차단 기준을 더 엄격히 보는 편이 유리합니다.`);
+    if (
+      stat.label === "교정/혼조" &&
+      (stat.winRate < 45 || stat.avgReturnPct < 0)
+    ) {
+      notes.push(
+        `${stat.label} 구조는 성과가 약했습니다. 혼조 파동 차단 기준을 더 엄격히 보는 편이 유리합니다.`
+      );
     }
   }
 
   if (!notes.length) {
-    notes.push("표본은 쌓였지만 뚜렷한 패턴 편차는 아직 작습니다. 다음 백테스트까지 현재 규칙을 유지합니다.");
+    notes.push(
+      "표본은 쌓였지만 뚜렷한 패턴 편차는 아직 작습니다. 다음 백테스트까지 현재 규칙을 유지합니다."
+    );
   }
 
   return notes;
@@ -417,12 +480,14 @@ function toMarkdown(report: BacktestReport) {
     "",
     "## Pattern Stats",
     ...report.patternStats.map(
-      stat => `- ${stat.pattern}: trades ${stat.trades}, winRate ${stat.winRate.toFixed(1)}%, avgReturn ${stat.avgReturnPct.toFixed(2)}%`
+      stat =>
+        `- ${stat.pattern}: trades ${stat.trades}, winRate ${stat.winRate.toFixed(1)}%, avgReturn ${stat.avgReturnPct.toFixed(2)}%`
     ),
     "",
     "## Elliott / Fractal Stats",
     ...report.elliottLabelStats.map(
-      stat => `- ${stat.label}: trades ${stat.trades}, winRate ${stat.winRate.toFixed(1)}%, avgReturn ${stat.avgReturnPct.toFixed(2)}%`
+      stat =>
+        `- ${stat.label}: trades ${stat.trades}, winRate ${stat.winRate.toFixed(1)}%, avgReturn ${stat.avgReturnPct.toFixed(2)}%`
     ),
   ].join("\n");
 }
@@ -436,7 +501,10 @@ async function writeReport(report: BacktestReport) {
 }
 
 export async function fetchBacktestRows(): Promise<TechnicalSwingRowsByTicker> {
-  return fetchKoreanOhlcvRowsBatch(await resolveBacktestUniverse(), LOOKBACK_DAYS);
+  return fetchKoreanOhlcvRowsBatch(
+    await resolveBacktestUniverse(),
+    LOOKBACK_DAYS
+  );
 }
 
 /**
@@ -452,7 +520,11 @@ export async function collectBacktestTrades(
   const benchmarkRows = rowsByTicker["069500"] ?? rowsByTicker["229200"] ?? [];
   const maxSignalIndex = Math.max(0, benchmarkRows.length - HOLDING_DAYS - 1);
   const signalIndexes: number[] = [];
-  for (let index = WARMUP_BARS; index <= maxSignalIndex; index += SIGNAL_STEP_DAYS) {
+  for (
+    let index = WARMUP_BARS;
+    index <= maxSignalIndex;
+    index += SIGNAL_STEP_DAYS
+  ) {
     signalIndexes.push(index);
   }
 
@@ -469,7 +541,19 @@ export async function collectBacktestTrades(
     }
 
     const snapshotRows = buildRowsSnapshot(rowsByTicker, signalIndex);
-    const result = await screenTechnicalSwingCandidatesFromRows(snapshotRows, undefined, injected);
+    // Replay the same dynamic universe that was fetched for this run. Passing
+    // undefined here silently fell back to the old 30-name curated list while
+    // live scanning used the 200-name market-cap universe, creating a material
+    // live/backtest selection mismatch.
+    const candidateTickers = Object.keys(rowsByTicker).filter(
+      ticker =>
+        isKoreanTicker(ticker) && ticker !== "069500" && ticker !== "229200"
+    );
+    const result = await screenTechnicalSwingCandidatesFromRows(
+      snapshotRows,
+      candidateTickers,
+      injected
+    );
 
     for (const candidate of result.candidates) {
       const priorIndex = lastTradeIndexByTicker[candidate.ticker];
@@ -481,7 +565,10 @@ export async function collectBacktestTrades(
       if (fullIndex === -1) {
         continue;
       }
-      const futureRows = fullRows.slice(fullIndex + 1, fullIndex + 1 + ENTRY_LOOKAHEAD_DAYS + HOLDING_DAYS);
+      const futureRows = fullRows.slice(
+        fullIndex + 1,
+        fullIndex + 1 + ENTRY_LOOKAHEAD_DAYS + HOLDING_DAYS
+      );
       if (!futureRows.length) {
         continue;
       }
@@ -525,16 +612,31 @@ export type BacktestSummary = {
   stopRate: number;
   targetRate: number;
   noTriggerRate: number;
+  profitFactor: number;
   patternStats: PatternStat[];
   elliottLabelStats: ElliottLabelStat[];
 };
 
-export function summarizeBacktestTrades(trades: BacktestTrade[]): BacktestSummary {
-  const triggeredTrades = trades.filter(trade => trade.outcome !== "not_triggered");
+export function summarizeBacktestTrades(
+  trades: BacktestTrade[]
+): BacktestSummary {
+  const triggeredTrades = trades.filter(
+    trade => trade.outcome !== "not_triggered"
+  );
   const winningTrades = triggeredTrades.filter(trade => trade.returnPct > 0);
   const stopTrades = triggeredTrades.filter(trade => trade.outcome === "stop");
-  const targetTrades = triggeredTrades.filter(trade => trade.outcome === "target");
-  const noTriggerTrades = trades.filter(trade => trade.outcome === "not_triggered");
+  const targetTrades = triggeredTrades.filter(
+    trade => trade.outcome === "target"
+  );
+  const noTriggerTrades = trades.filter(
+    trade => trade.outcome === "not_triggered"
+  );
+  const grossProfit = winningTrades.reduce((sum, trade) => sum + trade.returnPct, 0);
+  const grossLoss = Math.abs(
+    triggeredTrades
+      .filter(trade => trade.returnPct <= 0)
+      .reduce((sum, trade) => sum + trade.returnPct, 0)
+  );
   const patternMap = new Map<string, BacktestTrade[]>();
   const elliottLabelMap = new Map<string, BacktestTrade[]>();
 
@@ -551,58 +653,108 @@ export function summarizeBacktestTrades(trades: BacktestTrade[]): BacktestSummar
     }
   }
 
-  const patternStats: PatternStat[] = Array.from(patternMap.entries()).map(([pattern, patternTrades]) => {
-    const activeTrades = patternTrades.filter(item => item.outcome !== "not_triggered");
-    const wins = activeTrades.filter(item => item.returnPct > 0).length;
-    const losses = activeTrades.filter(item => item.returnPct <= 0).length;
+  const patternStats: PatternStat[] = Array.from(patternMap.entries())
+    .map(([pattern, patternTrades]) => {
+      const activeTrades = patternTrades.filter(
+        item => item.outcome !== "not_triggered"
+      );
+      const wins = activeTrades.filter(item => item.returnPct > 0).length;
+      const losses = activeTrades.filter(item => item.returnPct <= 0).length;
 
-    return {
-      pattern,
-      trades: activeTrades.length,
-      wins,
-      losses,
-      noTriggers: patternTrades.filter(item => item.outcome === "not_triggered").length,
-      winRate: activeTrades.length ? round((wins / activeTrades.length) * 100, 1) : 0,
-      avgReturnPct: activeTrades.length ? round(activeTrades.reduce((sum, item) => sum + item.returnPct, 0) / activeTrades.length) : 0,
-    };
-  }).sort((a, b) => b.winRate - a.winRate || b.avgReturnPct - a.avgReturnPct);
-  const elliottLabelStats: ElliottLabelStat[] = Array.from(elliottLabelMap.entries()).map(([label, labelTrades]) => {
-    const activeTrades = labelTrades.filter(item => item.outcome !== "not_triggered");
-    const wins = activeTrades.filter(item => item.returnPct > 0).length;
-    const losses = activeTrades.filter(item => item.returnPct <= 0).length;
+      return {
+        pattern,
+        trades: activeTrades.length,
+        wins,
+        losses,
+        noTriggers: patternTrades.filter(
+          item => item.outcome === "not_triggered"
+        ).length,
+        winRate: activeTrades.length
+          ? round((wins / activeTrades.length) * 100, 1)
+          : 0,
+        avgReturnPct: activeTrades.length
+          ? round(
+              activeTrades.reduce((sum, item) => sum + item.returnPct, 0) /
+                activeTrades.length
+            )
+          : 0,
+      };
+    })
+    .sort((a, b) => b.winRate - a.winRate || b.avgReturnPct - a.avgReturnPct);
+  const elliottLabelStats: ElliottLabelStat[] = Array.from(
+    elliottLabelMap.entries()
+  )
+    .map(([label, labelTrades]) => {
+      const activeTrades = labelTrades.filter(
+        item => item.outcome !== "not_triggered"
+      );
+      const wins = activeTrades.filter(item => item.returnPct > 0).length;
+      const losses = activeTrades.filter(item => item.returnPct <= 0).length;
 
-    return {
-      label,
-      trades: activeTrades.length,
-      wins,
-      losses,
-      noTriggers: labelTrades.filter(item => item.outcome === "not_triggered").length,
-      winRate: activeTrades.length ? round((wins / activeTrades.length) * 100, 1) : 0,
-      avgReturnPct: activeTrades.length ? round(activeTrades.reduce((sum, item) => sum + item.returnPct, 0) / activeTrades.length) : 0,
-    };
-  }).sort((a, b) => b.winRate - a.winRate || b.avgReturnPct - a.avgReturnPct);
+      return {
+        label,
+        trades: activeTrades.length,
+        wins,
+        losses,
+        noTriggers: labelTrades.filter(item => item.outcome === "not_triggered")
+          .length,
+        winRate: activeTrades.length
+          ? round((wins / activeTrades.length) * 100, 1)
+          : 0,
+        avgReturnPct: activeTrades.length
+          ? round(
+              activeTrades.reduce((sum, item) => sum + item.returnPct, 0) /
+                activeTrades.length
+            )
+          : 0,
+      };
+    })
+    .sort((a, b) => b.winRate - a.winRate || b.avgReturnPct - a.avgReturnPct);
 
   return {
     totalSignals: trades.length,
     totalTrades: triggeredTrades.length,
-    winRate: triggeredTrades.length ? round((winningTrades.length / triggeredTrades.length) * 100, 1) : 0,
-    avgReturnPct: triggeredTrades.length ? round(triggeredTrades.reduce((sum, item) => sum + item.returnPct, 0) / triggeredTrades.length) : 0,
+    winRate: triggeredTrades.length
+      ? round((winningTrades.length / triggeredTrades.length) * 100, 1)
+      : 0,
+    avgReturnPct: triggeredTrades.length
+      ? round(
+          triggeredTrades.reduce((sum, item) => sum + item.returnPct, 0) /
+            triggeredTrades.length
+        )
+      : 0,
     medianReturnPct: median(triggeredTrades.map(item => item.returnPct)),
-    stopRate: triggeredTrades.length ? round((stopTrades.length / triggeredTrades.length) * 100, 1) : 0,
-    targetRate: triggeredTrades.length ? round((targetTrades.length / triggeredTrades.length) * 100, 1) : 0,
-    noTriggerRate: trades.length ? round((noTriggerTrades.length / trades.length) * 100, 1) : 0,
+    stopRate: triggeredTrades.length
+      ? round((stopTrades.length / triggeredTrades.length) * 100, 1)
+      : 0,
+    targetRate: triggeredTrades.length
+      ? round((targetTrades.length / triggeredTrades.length) * 100, 1)
+      : 0,
+    noTriggerRate: trades.length
+      ? round((noTriggerTrades.length / trades.length) * 100, 1)
+      : 0,
+    profitFactor: grossLoss > 0 ? round(grossProfit / grossLoss) : grossProfit > 0 ? 99 : 0,
     patternStats,
     elliottLabelStats,
   };
 }
 
-function tradeStats(trades: BacktestTrade[]): { trades: number; winRate: number; avgReturnPct: number } {
+function tradeStats(trades: BacktestTrade[]): {
+  trades: number;
+  winRate: number;
+  avgReturnPct: number;
+} {
   const active = trades.filter(trade => trade.outcome !== "not_triggered");
   const wins = active.filter(trade => trade.returnPct > 0).length;
   return {
     trades: active.length,
     winRate: active.length ? round((wins / active.length) * 100, 1) : 0,
-    avgReturnPct: active.length ? round(active.reduce((sum, trade) => sum + trade.returnPct, 0) / active.length) : 0,
+    avgReturnPct: active.length
+      ? round(
+          active.reduce((sum, trade) => sum + trade.returnPct, 0) /
+            active.length
+        )
+      : 0,
   };
 }
 
@@ -635,8 +787,12 @@ export function splitSampleStats(trades: BacktestTrade[]): SplitSample {
   return {
     splitDate,
     distinctTickers,
-    inSample: tradeStats(triggered.filter(trade => trade.signalDate < splitDate)),
-    outOfSample: tradeStats(triggered.filter(trade => trade.signalDate >= splitDate)),
+    inSample: tradeStats(
+      triggered.filter(trade => trade.signalDate < splitDate)
+    ),
+    outOfSample: tradeStats(
+      triggered.filter(trade => trade.signalDate >= splitDate)
+    ),
   };
 }
 
@@ -663,6 +819,7 @@ async function runBacktest() {
     stopRate: summary.stopRate,
     targetRate: summary.targetRate,
     noTriggerRate: summary.noTriggerRate,
+    profitFactor: summary.profitFactor,
     patternStats: summary.patternStats,
     elliottLabelStats: summary.elliottLabelStats,
     trades: trades.slice(-200),
@@ -670,16 +827,23 @@ async function runBacktest() {
   };
   const report: BacktestReport = {
     ...baseReport,
-    recommendations: buildRecommendations(summary.patternStats, summary.elliottLabelStats, baseReport),
+    recommendations: buildRecommendations(
+      summary.patternStats,
+      summary.elliottLabelStats,
+      baseReport
+    ),
   };
 
   await writeReport(report);
   const learnedOverrides = await runSwingAdaptiveLearning(REPORT_JSON_PATH);
-  const qualityOverrides = await runSwingPredictionQualityAgent(REPORT_JSON_PATH);
+  const qualityOverrides =
+    await runSwingPredictionQualityAgent(REPORT_JSON_PATH);
   await saveState({ lastRunAt: report.generatedAt });
 
   console.log("[Swing Backtest Agent] Report written:", REPORT_JSON_PATH);
-  console.log(`[Swing Backtest Agent] Universe size ${report.universeSize}, signal windows ${report.signalWindows}`);
+  console.log(
+    `[Swing Backtest Agent] Universe size ${report.universeSize}, signal windows ${report.signalWindows}`
+  );
   console.log(
     `[Swing Backtest Agent] Trades ${report.totalTrades}, winRate ${report.winRate.toFixed(1)}%, avgReturn ${report.avgReturnPct.toFixed(2)}%`
   );
@@ -706,7 +870,10 @@ async function main() {
   await runBacktest();
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
+) {
   main().catch(error => {
     console.error("[Swing Backtest Agent] Fatal error:", error);
     process.exit(1);

@@ -24,6 +24,9 @@ export type RecommendationStatus =
   | "time_exit"
   | "no_entry";
 
+/** Versioned so live outcomes can be compared with the matching backtest rule. */
+export const JOURNAL_SCORING_VERSION = "v2-entry-bar-included";
+
 /** A pick whose outcome is decided and priced (excludes open / no_entry). */
 export function isSettledStatus(status: RecommendationStatus): boolean {
   return status === "target" || status === "stop" || status === "trail_exit" || status === "time_exit";
@@ -38,6 +41,8 @@ export type RecommendationEntry = {
   championAt?: string;
   /** Shadow entry (suppressed/watch candidate) — scored but excluded from headline stats. */
   watchOnly?: boolean;
+  /** Price shown in the alert at record time; retained for later accuracy audits. */
+  currentPrice?: number;
   triggerPrice: number;
   stopLossPrice: number;
   targetPrice: number;
@@ -48,6 +53,7 @@ export type RecommendationEntry = {
   newsState?: "positive" | "negative" | "neutral";
   volumeFlowRising?: boolean;
   recordedAt: string;
+  scoringVersion?: string;
   status: RecommendationStatus;
   entryDate?: string;
   exitDate?: string;
@@ -191,7 +197,10 @@ export function scoreEntry(
   }
 
   const entryRow = entrySlice[triggeredIndex];
-  const holdingRows = rows.slice(triggeredIndex + 1, triggeredIndex + 1 + config.holdingDays);
+  // Keep live scoring identical to the backtest: the fill day is part of the
+  // holding window. If both stop and target are touched on that bar, stop is
+  // checked first because OHLCV does not reveal the intraday order.
+  const holdingRows = rows.slice(triggeredIndex, triggeredIndex + config.holdingDays);
 
   // Profit-protection ladder — must mirror the backtest's evaluateTrade exactly,
   // or live and backtest stop measuring the same strategy.
@@ -202,7 +211,8 @@ export function scoreEntry(
   let effectiveStop = entry.stopLossPrice;
   let peakR = 0;
 
-  for (const row of holdingRows) {
+  for (let barIndex = 0; barIndex < holdingRows.length; barIndex += 1) {
+    const row = holdingRows[barIndex];
     // Tested against the level carried into this bar (never assume high before low).
     if (row.저가 <= effectiveStop) {
       const status = effectiveStop > entry.stopLossPrice ? "trail_exit" : "stop";
@@ -211,7 +221,7 @@ export function scoreEntry(
     if (row.고가 >= entry.targetPrice) {
       return settle(entry, entryRow.날짜, row.날짜, entry.targetPrice, "target", roundTripCost);
     }
-    if (riskPerShare > 0 && breakevenAtR > 0) {
+    if (barIndex > 0 && riskPerShare > 0 && breakevenAtR > 0) {
       peakR = Math.max(peakR, (row.고가 - entry.triggerPrice) / riskPerShare);
       if (peakR >= breakevenAtR) {
         const breakeven = entry.triggerPrice * (1 + roundTripCost / 100);
@@ -369,6 +379,7 @@ export async function recordRecommendations(
       market: candidate.market,
       source: "swing",
       ...(watchOnly ? { watchOnly: true } : {}),
+      currentPrice: candidate.currentPrice,
       triggerPrice: candidate.triggerPrice,
       stopLossPrice: candidate.stopLossPrice,
       targetPrice,
@@ -380,6 +391,7 @@ export async function recordRecommendations(
       volumeFlowRising: candidate.volumeFlowRising,
       championAt,
       recordedAt,
+      scoringVersion: JOURNAL_SCORING_VERSION,
       status: "open",
     });
     added += 1;

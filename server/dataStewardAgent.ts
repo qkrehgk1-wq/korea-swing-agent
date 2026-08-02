@@ -37,7 +37,12 @@ import { SWING_PREDICTION_QUALITY_OVERRIDES_PATH } from "./swingPredictionQualit
  * "state of the system" report. Pure governance — no new trading signals.
  */
 
-export type DataCategory = "signals" | "outcomes" | "learning" | "evolution" | "reports";
+export type DataCategory =
+  | "signals"
+  | "outcomes"
+  | "learning"
+  | "evolution"
+  | "reports";
 export type SourceHealth = "fresh" | "ok" | "stale" | "missing";
 
 export type DataSourceSpec = {
@@ -60,22 +65,133 @@ export type SourceStatus = {
   health: SourceHealth;
 };
 
-const CHAMPION_PATH = path.join(process.cwd(), "data", "evolution", "champion.json");
-const EVOLUTION_HISTORY_PATH = path.join(process.cwd(), ".data", "evolution", "history.json");
-const JOURNAL_PATH = path.join(process.cwd(), "data", "journal", "recommendations.json");
+const CHAMPION_PATH = path.join(
+  process.cwd(),
+  "data",
+  "evolution",
+  "champion.json"
+);
+const EVOLUTION_HISTORY_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "evolution",
+  "history.json"
+);
+const JOURNAL_PATH = path.join(
+  process.cwd(),
+  "data",
+  "journal",
+  "recommendations.json"
+);
 const REPORT_DIR = path.join(process.cwd(), ".data", "data-steward");
 const REPORT_JSON_PATH = path.join(REPORT_DIR, "latest-report.json");
 const REPORT_MD_PATH = path.join(REPORT_DIR, "latest-report.md");
+const BILLIONAIRE_BACKTEST_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "backtests",
+  "billionaire-core-v1.json"
+);
+const BILLIONAIRE_SPEC_PATH = path.join(
+  process.cwd(),
+  "data",
+  "strategy",
+  "billionaire-core-v1.md"
+);
+const MARKET_DATA_ACCURACY_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "quality",
+  "market-data",
+  "latest-report.json"
+);
+const MARKET_DATA_JOURNAL_AUDIT_PATH = path.join(
+  process.cwd(),
+  ".data",
+  "quality",
+  "market-data",
+  "journal-audit.md"
+);
 
 const DAY = 24;
 const SOURCES: DataSourceSpec[] = [
-  { key: "추천 저널", path: JOURNAL_PATH, category: "signals", tracked: true, staleAfterHours: 4 * DAY },
-  { key: "진화 챔피언", path: CHAMPION_PATH, category: "evolution", tracked: true, staleAfterHours: 30 * DAY },
-  { key: "진화 히스토리", path: EVOLUTION_HISTORY_PATH, category: "evolution", tracked: false, staleAfterHours: 10 * DAY },
-  { key: "백테스트 리포트", path: SWING_BACKTEST_REPORT_PATH, category: "learning", tracked: false, staleAfterHours: 2 * DAY },
-  { key: "학습 가중치", path: SWING_LEARNED_OVERRIDES_PATH, category: "learning", tracked: false, staleAfterHours: 2 * DAY },
-  { key: "품질 필터", path: SWING_PREDICTION_QUALITY_OVERRIDES_PATH, category: "learning", tracked: false, staleAfterHours: 2 * DAY },
-  { key: "유지보수 히스토리", path: SWING_MAINTENANCE_HISTORY_PATH, category: "reports", tracked: false, staleAfterHours: 10 * DAY },
+  {
+    key: "추천 저널",
+    path: JOURNAL_PATH,
+    category: "signals",
+    tracked: true,
+    staleAfterHours: 4 * DAY,
+  },
+  {
+    key: "진화 챔피언",
+    path: CHAMPION_PATH,
+    category: "evolution",
+    tracked: true,
+    staleAfterHours: 30 * DAY,
+  },
+  {
+    key: "진화 히스토리",
+    path: EVOLUTION_HISTORY_PATH,
+    category: "evolution",
+    tracked: false,
+    staleAfterHours: 10 * DAY,
+  },
+  {
+    key: "백테스트 리포트",
+    path: SWING_BACKTEST_REPORT_PATH,
+    category: "learning",
+    tracked: false,
+    staleAfterHours: 2 * DAY,
+  },
+  {
+    key: "학습 가중치",
+    path: SWING_LEARNED_OVERRIDES_PATH,
+    category: "learning",
+    tracked: false,
+    staleAfterHours: 2 * DAY,
+  },
+  {
+    key: "품질 필터",
+    path: SWING_PREDICTION_QUALITY_OVERRIDES_PATH,
+    category: "learning",
+    tracked: false,
+    staleAfterHours: 2 * DAY,
+  },
+  {
+    key: "Billionaire Core 백테스트",
+    path: BILLIONAIRE_BACKTEST_PATH,
+    category: "learning",
+    tracked: false,
+    staleAfterHours: 2 * DAY,
+  },
+  {
+    key: "Billionaire Core 명세",
+    path: BILLIONAIRE_SPEC_PATH,
+    category: "reports",
+    tracked: true,
+    staleAfterHours: 30 * DAY,
+  },
+  {
+    key: "시세 정확성 검수",
+    path: MARKET_DATA_ACCURACY_PATH,
+    category: "reports",
+    tracked: false,
+    staleAfterHours: 2,
+  },
+  {
+    key: "저널 시세 소급 감사",
+    path: MARKET_DATA_JOURNAL_AUDIT_PATH,
+    category: "reports",
+    tracked: false,
+    staleAfterHours: 7 * DAY,
+  },
+  {
+    key: "유지보수 히스토리",
+    path: SWING_MAINTENANCE_HISTORY_PATH,
+    category: "reports",
+    tracked: false,
+    staleAfterHours: 10 * DAY,
+  },
 ];
 
 /** Pure: classify a source's freshness from existence + age. */
@@ -90,7 +206,10 @@ export function classifyHealth(
   return "stale";
 }
 
-async function inspectSource(spec: DataSourceSpec, now: Date): Promise<SourceStatus> {
+async function inspectSource(
+  spec: DataSourceSpec,
+  now: Date
+): Promise<SourceStatus> {
   let exists = false;
   let sizeBytes = 0;
   let modifiedAt: string | null = null;
@@ -101,7 +220,9 @@ async function inspectSource(spec: DataSourceSpec, now: Date): Promise<SourceSta
     exists = true;
     sizeBytes = info.size;
     modifiedAt = info.mtime.toISOString();
-    ageHours = Math.round(((now.getTime() - info.mtime.getTime()) / 3_600_000) * 10) / 10;
+    ageHours =
+      Math.round(((now.getTime() - info.mtime.getTime()) / 3_600_000) * 10) /
+      10;
     try {
       const parsed = JSON.parse(await readFile(spec.path, "utf8"));
       if (Array.isArray(parsed)) {
@@ -136,9 +257,18 @@ export type SystemAnalysis = {
   journal: JournalSummary;
   journalByTicker: TickerLevelSummary;
   shadowByTicker: TickerLevelSummary;
-  expectancy: { backtest: ExpectancyStats; live: ExpectancyStats; budget: RiskBudget };
+  expectancy: {
+    backtest: ExpectancyStats;
+    live: ExpectancyStats;
+    budget: RiskBudget;
+  };
   factors: ReturnType<typeof summarizeByFactor>;
-  evolution: { championFitness: number | null; championAt: string | null; generations: number; promotions: number };
+  evolution: {
+    championFitness: number | null;
+    championAt: string | null;
+    generations: number;
+    promotions: number;
+  };
   backtest: {
     winRate: number | null;
     avgReturnPct: number | null;
@@ -159,7 +289,9 @@ async function readJson<T>(filePath: string): Promise<T | null> {
   }
 }
 
-export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnalysis> {
+export async function buildSystemAnalysis(
+  now = new Date()
+): Promise<SystemAnalysis> {
   const catalog = await catalogData(now);
   const journalEntries = await loadRecommendationJournal();
   const journal = summarizeJournal(journalEntries);
@@ -167,10 +299,15 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
   const shadowByTicker = summarizeShadowByTicker(journalEntries);
   const factors = summarizeByFactor(journalEntries);
 
-  const champion = await readJson<{ generatedAt?: string; fitness?: number }>(CHAMPION_PATH);
-  const history = (await readJson<Array<{ promoted?: boolean }>>(EVOLUTION_HISTORY_PATH)) ?? [];
+  const champion = await readJson<{ generatedAt?: string; fitness?: number }>(
+    CHAMPION_PATH
+  );
+  const history =
+    (await readJson<Array<{ promoted?: boolean }>>(EVOLUTION_HISTORY_PATH)) ??
+    [];
   const evolution = {
-    championFitness: typeof champion?.fitness === "number" ? champion.fitness : null,
+    championFitness:
+      typeof champion?.fitness === "number" ? champion.fitness : null,
     championAt: champion?.generatedAt ?? null,
     generations: history.length,
     promotions: history.filter(entry => entry.promoted).length,
@@ -209,9 +346,7 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
   const backtestExpectancy = computeExpectancy(backtestReport?.trades ?? []);
   const liveExpectancy = computeExpectancy(
     journalEntries
-      .filter(
-        entry => !entry.watchOnly && isSettledStatus(entry.status)
-      )
+      .filter(entry => !entry.watchOnly && isSettledStatus(entry.status))
       .map(entry => ({
         triggerPrice: entry.triggerPrice,
         stopLossPrice: entry.stopLossPrice,
@@ -219,7 +354,9 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
       }))
   );
   const budget = computeRiskBudget(
-    liveExpectancy.edgeVerdict === "insufficient" ? backtestExpectancy : liveExpectancy
+    liveExpectancy.edgeVerdict === "insufficient"
+      ? backtestExpectancy
+      : liveExpectancy
   );
 
   const issues: string[] = [];
@@ -231,7 +368,17 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
     }
   }
   if (journal.triggered === 0 && journal.open > 0) {
-    issues.push(`정산 표본 0 — 라이브 검증 데이터 축적 중(진행 ${journal.open}건)`);
+    issues.push(
+      `정산 표본 0 — 라이브 검증 데이터 축적 중(진행 ${journal.open}건)`
+    );
+  }
+  const missingCurrentPrice = journalEntries.filter(
+    entry => !Number.isFinite(entry.currentPrice)
+  ).length;
+  if (missingCurrentPrice > 0) {
+    issues.push(
+      `추천 저널: 현재가 누락 ${missingCurrentPrice}/${journalEntries.length}건 — 기록 당시 시세 소급 검증 불가`
+    );
   }
 
   // Negative measured expectancy is the one condition where continuing to size
@@ -248,9 +395,13 @@ export async function buildSystemAnalysis(now = new Date()): Promise<SystemAnaly
   // gates need review before more capital-relevant picks go out.
   const minEdgeTickers = Number(process.env.EDGE_DECAY_MIN_TICKERS) || 8;
   const decayGapPp = Number(process.env.EDGE_DECAY_GAP_PP) || 15;
-  if (journalByTicker.settledTickers >= minEdgeTickers && backtest.winRate != null) {
+  if (
+    journalByTicker.settledTickers >= minEdgeTickers &&
+    backtest.winRate != null
+  ) {
     const winGap = backtest.winRate - journalByTicker.winRate;
-    const losingLive = journalByTicker.avgReturnPct < 0 && (backtest.avgReturnPct ?? 0) > 0;
+    const losingLive =
+      journalByTicker.avgReturnPct < 0 && (backtest.avgReturnPct ?? 0) > 0;
     if (winGap > decayGapPp || losingLive) {
       issues.push(
         `⚠ 엣지 괴리: 실측(종목단위) 승률 ${journalByTicker.winRate}%·평균 ${journalByTicker.avgReturnPct}% vs 백테스트 ${backtest.winRate}%·${backtest.avgReturnPct}% — 신호 군집화/레짐 변화 의심, 게이트 재검토 권고`
@@ -277,7 +428,12 @@ function healthMark(health: SourceHealth): string {
 }
 
 export function toReport(analysis: SystemAnalysis): string {
-  const fmtFactor = (bucket: { label: string; settled: number; winRate: number; avgReturnPct: number }) =>
+  const fmtFactor = (bucket: {
+    label: string;
+    settled: number;
+    winRate: number;
+    avgReturnPct: number;
+  }) =>
     `${bucket.label} ${bucket.settled}건·승률 ${bucket.winRate}%·평균 ${bucket.avgReturnPct}%`;
   return [
     "# Data Steward — 시스템 데이터 총괄",
@@ -301,8 +457,18 @@ export function toReport(analysis: SystemAnalysis): string {
     `- 라이브: ${formatExpectancy(analysis.expectancy.live, analysis.expectancy.budget)}`,
     `- 백테스트: ${formatExpectancy(analysis.expectancy.backtest, analysis.expectancy.budget)}`,
     `- 사이징 근거: ${analysis.expectancy.budget.note}`,
-    `- 수급: ${analysis.factors.supply.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
-    `- 뉴스: ${analysis.factors.news.filter(b => b.settled).map(fmtFactor).join(" / ") || "표본 없음"}`,
+    `- 수급: ${
+      analysis.factors.supply
+        .filter(b => b.settled)
+        .map(fmtFactor)
+        .join(" / ") || "표본 없음"
+    }`,
+    `- 뉴스: ${
+      analysis.factors.news
+        .filter(b => b.settled)
+        .map(fmtFactor)
+        .join(" / ") || "표본 없음"
+    }`,
     "",
     "## 진화 / 백테스트",
     `- 챔피언 적합도 ${analysis.evolution.championFitness ?? "(base 시드)"} · 세대 ${analysis.evolution.generations} · 승격 ${analysis.evolution.promotions}`,
@@ -310,15 +476,23 @@ export function toReport(analysis: SystemAnalysis): string {
     `- 워크포워드: 최근(OOS) ${analysis.backtest.outOfSampleWinRate ?? "-"}% vs 과거(IS) ${analysis.backtest.inSampleWinRate ?? "-"}% · 고유종목 ${analysis.backtest.distinctTickers ?? "-"}`,
     "",
     "## 점검 이슈",
-    ...(analysis.issues.length ? analysis.issues.map(issue => `- ${issue}`) : ["- 없음"]),
+    ...(analysis.issues.length
+      ? analysis.issues.map(issue => `- ${issue}`)
+      : ["- 없음"]),
   ].join("\n");
 }
 
-export async function runDataSteward(now = new Date()): Promise<SystemAnalysis> {
+export async function runDataSteward(
+  now = new Date()
+): Promise<SystemAnalysis> {
   const analysis = await buildSystemAnalysis(now);
   await mkdir(REPORT_DIR, { recursive: true });
   await Promise.all([
-    writeFile(REPORT_JSON_PATH, `${JSON.stringify(analysis, null, 2)}\n`, "utf8"),
+    writeFile(
+      REPORT_JSON_PATH,
+      `${JSON.stringify(analysis, null, 2)}\n`,
+      "utf8"
+    ),
     writeFile(REPORT_MD_PATH, `${toReport(analysis)}\n`, "utf8"),
   ]);
 
@@ -332,9 +506,15 @@ export async function runDataSteward(now = new Date()): Promise<SystemAnalysis> 
   // warnings. Ephemeral .data absence on a CI run is expected, not an incident.
   const criticalIssues = [
     ...analysis.catalog
-      .filter(source => source.tracked && (source.health === "missing" || source.health === "stale"))
+      .filter(
+        source =>
+          source.tracked &&
+          (source.health === "missing" || source.health === "stale")
+      )
       .map(source => `${source.key}: ${source.health}`),
-    ...analysis.issues.filter(issue => issue.includes("엣지 괴리") || issue.includes("기대값 음수")),
+    ...analysis.issues.filter(
+      issue => issue.includes("엣지 괴리") || issue.includes("기대값 음수")
+    ),
   ];
   if (criticalIssues.length) {
     await routeToCommander({
@@ -343,7 +523,9 @@ export async function runDataSteward(now = new Date()): Promise<SystemAnalysis> 
       kind: "high_risk",
       headline: `시스템 점검 경보 ${criticalIssues.length}건`,
       detail: criticalIssues,
-    }).catch(error => console.warn("[Data Steward] commander notify failed:", error));
+    }).catch(error =>
+      console.warn("[Data Steward] commander notify failed:", error)
+    );
   }
 
   return analysis;
@@ -353,7 +535,10 @@ async function runFromCli() {
   await runDataSteward();
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
+) {
   runFromCli().catch(error => {
     console.error("[Data Steward] Failed:", error);
     process.exit(1);
