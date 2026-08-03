@@ -5,7 +5,7 @@
 - [x] 미국 주식(Yahoo) 코드·데이터 완전 제거
 - [x] 한국 LLM 멀티에이전트 분석 엔진 (5개 역할, 결정론 폴백)
 - [x] Claude Opus 4.8 직접 호출 (공식 Anthropic SDK, Forge 폴백)
-- [x] Signal Council 7차원 점수 + ACT/PREPARE/WATCH/AVOID 결정
+- [x] Signal Council 7차원 점수 + 유력검토/검토/관찰 결정
 - [x] DataValidator 하네스 (스캠 차단·과장 톤 위반 로깅)
 - [x] 지휘관 전용 채널 (고확신/고위험 날것 신호 분기)
 - [x] 뉴스/시장심리 에이전트 (Serper / Tavily / NewsAPI)
@@ -27,6 +27,6 @@
 ## 명명 규칙
 
 - 점수 시스템: "Signal Council 7차원 점수"
-- 결정 신호: ACT(실행) / PREPARE(준비) / WATCH(관찰) / AVOID(회피)
+- 결정 신호: 유력검토 / 검토 / 관찰 (2026-07-11 소프트닝, 유사투자자문업·겸직 리스크 대응 — 결정형 표현 금지)
 - 분석 점수: "스윙 적합 점수" (0~100, Signal Council 가중 총점)
 - 알림 대상: 일반 채널(정제 추천) / 지휘관 채널(날것 신호)
