@@ -877,9 +877,21 @@ function buildCandidate(
   // Watch-only: structurally sound (passed every hard gate) but the score or
   // confluence quality is below the conviction floor. Surfaced for situational
   // awareness so the alert is never silent — never counted as a backtest trade.
-  // Bear-market risk-off: the backtest shows 약세-regime entries average a loss
-  // (win ~52%, avg −1%), so in a bearish tape demote every pick to watch-only —
+  // Bear-market risk-off: in a bearish tape demote every pick to watch-only —
   // out of live picks and backtest trades, still visible for awareness.
+  //
+  // Re-measured 2026-08-05 (1000d, exit ladder + round-trip cost applied), and
+  // the original premise has MOVED: 약세 entries are no longer clearly losing
+  // (87 trades, 63.2% win, +0.41%, +0.006R ≈ breakeven) — the profit-protection
+  // ladder repaired the downside. They are still far below 강세 (98 trades,
+  // 66.3%, +4.17%, +0.31R), so the filter stays: it now buys risk-adjusted
+  // quality, not loss avoidance.
+  //
+  // Also falsified in the same run: the intuitive "let rebounds through" carve-out.
+  // Entering a bearish tape while the index has recovered above its MA20 scores
+  // WORSE, not better (-0.175R / 15 trades; index>MA20 AND 5d>0: -0.151R / 14)
+  // than staying with the still-falling tape (+0.043R / 72). Do not re-add that
+  // exception without re-measuring — see PROJECT_CHARTER.md decision log.
   const skipBearish = (process.env.SKIP_BEARISH_ENTRIES ?? "true") !== "false";
   const watchOnly =
     lowPatternScore ||
