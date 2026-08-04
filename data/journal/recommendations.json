@@ -1364,7 +1364,12 @@
     "supplyState": "accumulating",
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-24T19:59:16.187Z",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-07-27",
+    "exitDate": "2026-08-04",
+    "exitPrice": 35038,
+    "returnPct": -14.12,
+    "scoredAt": "2026-08-04T20:11:41.354Z"
   },
   {
     "date": "2026-07-26",
