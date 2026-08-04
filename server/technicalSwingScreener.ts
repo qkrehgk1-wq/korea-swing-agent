@@ -976,6 +976,11 @@ function registerUniverse(entries: NaverUniverseEntry[]): string[] {
  */
 export async function resolveSwingUniverse(): Promise<string[]> {
   if (cachedUniverse) return cachedUniverse;
+  // Kept at top market-cap 120+80, NOT the full market. Tested full-universe
+  // expansion 2026-08-03: the top-200 cap turned out to double as a liquidity/
+  // quality filter — small/mid-cap trades outside it backtested to a negative
+  // R-expectancy (-0.13R, 156 trades) while the top-200 stayed positive
+  // (+0.188R). See PROJECT_CHARTER.md decision log before revisiting this.
   const kospiCount = Number(process.env.SWING_UNIVERSE_KOSPI) || 120;
   const kosdaqCount = Number(process.env.SWING_UNIVERSE_KOSDAQ) || 80;
   try {
