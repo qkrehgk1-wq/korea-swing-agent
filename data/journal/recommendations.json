@@ -1486,5 +1486,26 @@
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-31T20:06:22.700Z",
     "status": "open"
+  },
+  {
+    "date": "2026-08-06",
+    "ticker": "111770",
+    "companyName": "영원무역",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 88200,
+    "triggerPrice": 96530,
+    "stopLossPrice": 82051,
+    "targetPrice": 132728,
+    "swingScore": 89,
+    "qualityScore": 85,
+    "relativeStrength": 14.14,
+    "supplyState": "distributing",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-08-05T20:12:47.978Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
   }
 ]
