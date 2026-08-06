@@ -9,7 +9,15 @@
 
 import { notifyOwner } from "./_core/notification";
 import { sendKakaoMemo } from "./_core/kakaoNotification";
-import { sendTelegramMessage } from "./_core/telegramNotification";
+import {
+  sendTelegramMessage,
+  sendTelegramMessageWithButtons,
+  type TelegramInlineButton,
+} from "./_core/telegramNotification";
+import { buildCallbackData } from "./commanderDecisionJournal";
+// Reused, not re-implemented: the callback's date must match the journal's date
+// exactly or the decision can never be joined back to its pick.
+import { kstDate } from "./recommendationJournalAgent";
 import { ENV } from "./_core/env";
 import type { ExternalPlatformReport } from "./agentTeams/externalPlatformIntegrationAgent";
 import type { AgentTeamReport } from "./agentTeams/orchestrator";
@@ -91,7 +99,8 @@ type NotificationDeliveryResult = {
 
 async function deliverMultiChannelNotification(
   title: string,
-  content: string
+  content: string,
+  telegramButtons: TelegramInlineButton[][] = []
 ): Promise<NotificationDeliveryResult> {
   const ownerConfigured = Boolean(ENV.forgeApiUrl && ENV.forgeApiKey);
   const telegramConfigured = Boolean(ENV.telegramBotToken && ENV.telegramChatId);
@@ -99,9 +108,14 @@ async function deliverMultiChannelNotification(
     ENV.kakaoRestApiKey && (ENV.kakaoRefreshToken || ENV.kakaoAccessToken)
   );
 
+  // Buttons are Telegram-only; owner/Kakao get the same text without them.
+  const sendTelegram = telegramButtons.length
+    ? () => sendTelegramMessageWithButtons(title, content, telegramButtons)
+    : () => sendTelegramMessage(title, content);
+
   const [ownerResult, telegramResult, kakaoResult] = await Promise.allSettled([
     ownerConfigured ? notifyOwner({ title, content }) : Promise.resolve(false),
-    telegramConfigured ? sendTelegramMessage(title, content) : Promise.resolve(false),
+    telegramConfigured ? sendTelegram() : Promise.resolve(false),
     kakaoConfigured ? sendKakaoMemo(title, content) : Promise.resolve(false),
   ]);
 
@@ -241,7 +255,13 @@ export function buildDailySwingMessage(
   firstLimitUpCandidates: FirstLimitUpFollowThroughCandidate[] = [],
   now: Date = new Date(),
   watchlist: SwingCandidate[] = [],
-  options: { performanceLine?: string; dataDegraded?: boolean; accuracyLine?: string } = {}
+  options: {
+    performanceLine?: string;
+    dataDegraded?: boolean;
+    accuracyLine?: string;
+    /** Confirms what yesterday's taps recorded — the only feedback a tap gets. */
+    decisionLine?: string;
+  } = {}
 ): { title: string; body: string } {
   const title = `📊 오늘의 주식 후보 · ${kstDateLabel(now)}`;
   const ranked = [...candidates].sort((a, b) => b.swingScore - a.swingScore);
@@ -268,8 +288,10 @@ export function buildDailySwingMessage(
 
   const footer: string[] = [];
   if (limitUpNames.length) footer.push(`⚡ 급등 관심: ${limitUpNames.join(" · ")}`);
+  if (options.decisionLine) footer.push(options.decisionLine);
   if (options.performanceLine) footer.push(options.performanceLine);
   if (options.accuracyLine) footer.push(options.accuracyLine);
+  if (picks.length) footer.push("👇 아래 버튼으로 오늘 판단만 남겨주세요(1탭).");
   footer.push("자세한 근거와 차트는 대시보드에서 확인하세요.");
 
   const dataBanner = options.dataDegraded
@@ -301,6 +323,33 @@ export function buildDailySwingMessage(
   return { title, body };
 }
 
+/**
+ * One tap per pick — the whole entry cost of the decision journal.
+ *
+ * Only the picks get buttons: watch names are not decisions the commander is
+ * being asked to make, and Telegram gets unusable past a handful of rows.
+ */
+export function buildDecisionButtons(
+  candidates: SwingCandidate[],
+  date: string,
+  limit = 5
+): TelegramInlineButton[][] {
+  return candidates.slice(0, limit).map(candidate => [
+    {
+      text: `${candidate.companyName} 진입`,
+      callbackData: buildCallbackData("entered", candidate.ticker, date),
+    },
+    {
+      text: "관심",
+      callbackData: buildCallbackData("watching", candidate.ticker, date),
+    },
+    {
+      text: "패스",
+      callbackData: buildCallbackData("passed", candidate.ticker, date),
+    },
+  ]);
+}
+
 export async function notifyDailySwingCandidates(
   candidates: SwingCandidate[],
   limitUpCandidates: LimitUpPredictionCandidate[] = [],
@@ -309,19 +358,30 @@ export async function notifyDailySwingCandidates(
   _agentTeamReport?: AgentTeamReport,
   _kosdaqFocusCandidates: SwingCandidate[] = [],
   watchlist: SwingCandidate[] = [],
-  options: { performanceLine?: string; dataDegraded?: boolean; accuracyLine?: string } = {}
+  options: {
+    performanceLine?: string;
+    dataDegraded?: boolean;
+    accuracyLine?: string;
+    decisionLine?: string;
+    enableDecisionButtons?: boolean;
+  } = {}
 ): Promise<NotificationDeliveryResult> {
+  const now = new Date();
   const { title, body } = buildDailySwingMessage(
     candidates,
     limitUpCandidates,
     firstLimitUpCandidates,
-    new Date(),
+    now,
     watchlist,
     options
   );
+  const buttons =
+    options.enableDecisionButtons === false
+      ? []
+      : buildDecisionButtons(candidates, kstDate(now));
 
   try {
-    return await deliverMultiChannelNotification(title, body);
+    return await deliverMultiChannelNotification(title, body, buttons);
   } catch (error) {
     console.error("[Notification Error] daily swing candidates:", error);
     return {

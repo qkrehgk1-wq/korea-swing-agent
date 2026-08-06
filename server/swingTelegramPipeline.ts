@@ -43,6 +43,11 @@ import {
   persistSwingPipelineSeed,
 } from "./swingPipelineContract";
 import { verifyMarketDataCandidates } from "./marketDataAccuracyAgent";
+import { collectCommanderDecisions } from "./commanderDecisionCollector";
+import {
+  buildCommanderScorecard,
+  formatScorecardLine,
+} from "./commanderDecisionJournal";
 
 function uniqueByTicker<T extends { ticker: string }>(items: T[]) {
   const seen = new Set<string>();
@@ -165,6 +170,30 @@ async function runSwingTelegramPipeline() {
         : "";
     const performanceLine = [safetyLine, performanceStatsLine].filter(Boolean).join(" | ");
 
+    // Fold in the taps made since the last run, then report back what landed.
+    // A tap gets no instant feedback (the callback has long expired by now), so
+    // this confirmation in the next alert is the only receipt the commander sees.
+    const nameByTicker: Record<string, string> = {};
+    for (const candidate of [...mergedSwingCandidates, ...watchlist]) {
+      nameByTicker[candidate.ticker] = candidate.companyName;
+    }
+    const decisionCollection = await collectCommanderDecisions(new Date(), nameByTicker).catch(
+      error => {
+        console.warn("[Swing Pipeline] decision collection failed:", error);
+        return null;
+      }
+    );
+    const scorecard = buildCommanderScorecard(
+      decisionCollection?.journal.decisions ?? [],
+      journalEntries
+    );
+    const decisionLine = [
+      decisionCollection?.confirmationLine ?? "",
+      formatScorecardLine(scorecard),
+    ]
+      .filter(Boolean)
+      .join("\n");
+
     if (dataDegraded) {
       await routeToCommander({
         ticker: "DATA",
@@ -259,7 +288,7 @@ async function runSwingTelegramPipeline() {
         agentTeamReport,
         verifiedKosdaqCandidates,
         verifiedWatchlist,
-        { performanceLine, dataDegraded, accuracyLine }
+        { performanceLine, dataDegraded, accuracyLine, decisionLine }
       );
       if (!delivery.primaryDelivered) {
         await persistSwingPipelineExecutionReport(

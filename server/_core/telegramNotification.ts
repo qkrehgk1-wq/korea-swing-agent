@@ -20,14 +20,14 @@ type TelegramHttpResponse = {
   text: () => Promise<string>;
 };
 
-async function postTelegramMessage(message: string, attempt: number, chatId: string): Promise<TelegramHttpResponse | null> {
-  const url = new URL(`https://api.telegram.org/bot${ENV.telegramBotToken}/sendMessage`);
-  const body = JSON.stringify({
-    chat_id: chatId,
-    text: message.slice(0, 4000),
-    parse_mode: "MarkdownV2",
-    disable_web_page_preview: true,
-  });
+/** Single POST to any Bot API method. Same transport settings for every call. */
+async function callTelegram(
+  method: string,
+  payload: Record<string, unknown>,
+  attempt: number
+): Promise<TelegramHttpResponse | null> {
+  const url = new URL(`https://api.telegram.org/bot${ENV.telegramBotToken}/${method}`);
+  const body = JSON.stringify(payload);
 
   try {
     return await new Promise<TelegramHttpResponse>((resolve, reject) => {
@@ -67,24 +67,17 @@ async function postTelegramMessage(message: string, attempt: number, chatId: str
       request.end();
     });
   } catch (error) {
-    console.warn(`[Telegram] Error calling sendMessage (attempt ${attempt}):`, error);
+    console.warn(`[Telegram] Error calling ${method} (attempt ${attempt}):`, error);
     return null;
   }
 }
 
-export async function sendTelegramMessage(
-  title: string,
-  content: string,
-  chatId: string = ENV.telegramChatId
+async function sendWithRetry(
+  method: string,
+  payload: Record<string, unknown>
 ): Promise<boolean> {
-  if (!hasTelegramConfig(chatId)) {
-    return false;
-  }
-
-  const message = `${escapeTelegramMarkdown(title)}\n\n${escapeTelegramMarkdown(content)}`;
-
   for (let attempt = 1; attempt <= 3; attempt += 1) {
-    const response = await postTelegramMessage(message, attempt, chatId);
+    const response = await callTelegram(method, payload, attempt);
 
     if (!response) {
       if (attempt < 3) {
@@ -100,7 +93,7 @@ export async function sendTelegramMessage(
 
     const detail = await response.text().catch(() => "");
     console.warn(
-      `[Telegram] Failed to send message (${response.status} ${response.statusText})${
+      `[Telegram] Failed ${method} (${response.status} ${response.statusText})${
         detail ? `: ${detail}` : ""
       }`
     );
@@ -114,4 +107,180 @@ export async function sendTelegramMessage(
   }
 
   return false;
+}
+
+export async function sendTelegramMessage(
+  title: string,
+  content: string,
+  chatId: string = ENV.telegramChatId
+): Promise<boolean> {
+  if (!hasTelegramConfig(chatId)) {
+    return false;
+  }
+
+  const message = `${escapeTelegramMarkdown(title)}\n\n${escapeTelegramMarkdown(content)}`;
+  return sendWithRetry("sendMessage", {
+    chat_id: chatId,
+    text: message.slice(0, 4000),
+    parse_mode: "MarkdownV2",
+    disable_web_page_preview: true,
+  });
+}
+
+export type TelegramInlineButton = {
+  text: string;
+  /** ≤64 bytes — Telegram rejects anything longer. */
+  callbackData: string;
+};
+
+/**
+ * Same as sendTelegramMessage but with tappable buttons underneath.
+ *
+ * Used for the one-tap decision journal: the commander logs a decision by
+ * tapping, never by typing. Taps are collected on the next scheduled run via
+ * fetchTelegramCallbackTaps — no webhook or always-on server involved.
+ */
+export async function sendTelegramMessageWithButtons(
+  title: string,
+  content: string,
+  buttons: TelegramInlineButton[][],
+  chatId: string = ENV.telegramChatId
+): Promise<boolean> {
+  if (!hasTelegramConfig(chatId)) {
+    return false;
+  }
+
+  const message = `${escapeTelegramMarkdown(title)}\n\n${escapeTelegramMarkdown(content)}`;
+  const inlineKeyboard = buttons
+    .map(row =>
+      row
+        .filter(button => Buffer.byteLength(button.callbackData) <= 64)
+        .map(button => ({ text: button.text, callback_data: button.callbackData }))
+    )
+    .filter(row => row.length > 0);
+
+  return sendWithRetry("sendMessage", {
+    chat_id: chatId,
+    text: message.slice(0, 4000),
+    parse_mode: "MarkdownV2",
+    disable_web_page_preview: true,
+    ...(inlineKeyboard.length ? { reply_markup: { inline_keyboard: inlineKeyboard } } : {}),
+  });
+}
+
+export type TelegramTap = {
+  updateId: number;
+  callbackQueryId?: string;
+  /** callback_data for a button tap, or raw text for a typed reply. */
+  data: string;
+  kind: "tap" | "text";
+  chatId?: string;
+  receivedAt: string;
+};
+
+type RawUpdate = {
+  update_id?: number;
+  callback_query?: {
+    id?: string;
+    data?: string;
+    message?: { chat?: { id?: number | string } };
+  };
+  message?: {
+    text?: string;
+    chat?: { id?: number | string };
+  };
+};
+
+/**
+ * Drain pending updates.
+ *
+ * `offset` must be lastUpdateId + 1; Telegram then drops everything before it,
+ * which is what stops a tap being counted twice. The offset is persisted in the
+ * tracked decision journal because CI runners are ephemeral — keeping it in
+ * .data would silently replay a day of taps on every run.
+ */
+export async function fetchTelegramTaps(
+  offset?: number
+): Promise<{ taps: TelegramTap[]; lastUpdateId: number | null }> {
+  if (!ENV.telegramBotToken) {
+    return { taps: [], lastUpdateId: null };
+  }
+
+  const response = await callTelegram(
+    "getUpdates",
+    {
+      ...(typeof offset === "number" ? { offset } : {}),
+      timeout: 0,
+      limit: 100,
+      allowed_updates: ["callback_query", "message"],
+    },
+    1
+  );
+  if (!response?.ok) {
+    if (response) {
+      const detail = await response.text().catch(() => "");
+      console.warn(`[Telegram] getUpdates failed (${response.status})${detail ? `: ${detail}` : ""}`);
+    }
+    return { taps: [], lastUpdateId: null };
+  }
+
+  let parsed: { ok?: boolean; result?: RawUpdate[] };
+  try {
+    parsed = JSON.parse(await response.text());
+  } catch (error) {
+    console.warn("[Telegram] getUpdates returned unparsable body:", error);
+    return { taps: [], lastUpdateId: null };
+  }
+
+  const receivedAt = new Date().toISOString();
+  const taps: TelegramTap[] = [];
+  let lastUpdateId: number | null = null;
+
+  for (const update of parsed.result ?? []) {
+    if (typeof update.update_id !== "number") continue;
+    lastUpdateId = Math.max(lastUpdateId ?? update.update_id, update.update_id);
+
+    const callback = update.callback_query;
+    if (callback?.data) {
+      taps.push({
+        updateId: update.update_id,
+        callbackQueryId: callback.id,
+        data: callback.data,
+        kind: "tap",
+        chatId: callback.message?.chat?.id != null ? String(callback.message.chat.id) : undefined,
+        receivedAt,
+      });
+      continue;
+    }
+
+    const text = update.message?.text?.trim();
+    if (text) {
+      taps.push({
+        updateId: update.update_id,
+        data: text,
+        kind: "text",
+        chatId: update.message?.chat?.id != null ? String(update.message.chat.id) : undefined,
+        receivedAt,
+      });
+    }
+  }
+
+  return { taps, lastUpdateId };
+}
+
+/**
+ * Clears the button's loading spinner. Taps are usually processed a day later,
+ * by which point Telegram has expired the query — that failure is expected and
+ * deliberately not retried.
+ */
+export async function answerTelegramCallback(
+  callbackQueryId: string,
+  text?: string
+): Promise<void> {
+  if (!ENV.telegramBotToken) return;
+  await callTelegram(
+    "answerCallbackQuery",
+    { callback_query_id: callbackQueryId, ...(text ? { text } : {}) },
+    1
+  ).catch(() => null);
 }
