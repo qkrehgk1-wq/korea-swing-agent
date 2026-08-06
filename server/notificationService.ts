@@ -249,8 +249,17 @@ export function buildDailySwingMessage(
   const riskOff = regime === "약세";
   const maxPicks = riskOff ? 3 : 5;
   const picks = ranked.slice(0, maxPicks);
+  // When the tape demotes everything, the watch list IS the day's entire output —
+  // showing only 3 of it made the alert look frozen on the same names for weeks.
+  // With picks present it stays a short footnote.
+  const watchLimit = picks.length ? 3 : 10;
+  const shownWatch = watchlist.slice(0, watchLimit);
+  const watchHeader =
+    watchlist.length > shownWatch.length
+      ? `👀 관찰 ${shownWatch.length}/${watchlist.length}`
+      : "👀 관찰";
   const watchSection = watchlist.length
-    ? ["👀 관찰", ...watchlist.slice(0, 3).map(formatWatch)].join("\n")
+    ? [watchHeader, ...shownWatch.map(formatWatch)].join("\n")
     : "";
 
   const limitUpNames = [...limitUpCandidates, ...firstLimitUpCandidates]

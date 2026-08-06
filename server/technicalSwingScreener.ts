@@ -10,6 +10,7 @@ import {
 } from "./koreaStockMcp";
 import { SWING_UNIVERSE_FALLBACK } from "./swingUniverseFallback";
 import { analyzeTechnicalConfluence, type ConfluenceResult } from "./technicalConfluence";
+import { classifyMarketState, type MarketState } from "./marketState";
 
 export type PatternName =
   | "밥그릇 1번자리"
@@ -62,6 +63,14 @@ type ScreenerResult = {
   watchlist?: Candidate[];
   scannedTickers: string[];
   notes: string[];
+  /** Six-way tape read (marketState.ts) — richer than the legacy 3-label regime. */
+  marketState?: MarketState;
+  /**
+   * Why the funnel emptied, counted by stage. Without this "오늘도 후보 없음"
+   * is indistinguishable from a broken scan, and the 2026-08 investigation had
+   * to be done by hand to find out which gate was actually binding.
+   */
+  funnel?: Record<string, number>;
   dataReliability?: {
     scanned: number;
     dataFailures: number;
@@ -77,6 +86,13 @@ export function isoDaysBetween(fromDate: string, toDate: string): number {
   if (!Number.isFinite(from) || !Number.isFinite(to)) return 0;
   return Math.round((to - from) / 86400000);
 }
+
+/** buildCandidate outcome — a candidate, or the gate that stopped it. */
+type CandidateBuild = {
+  candidate: Candidate | null;
+  watchOnly: boolean;
+  reject?: string;
+};
 
 export type TechnicalSwingRowsByTicker = Record<string, OhlcvRow[] | null>;
 export type TechnicalSwingScreenerResult = ScreenerResult;
@@ -797,11 +813,12 @@ function buildCandidate(
   regime: MarketRegime,
   patternWeights: SwingPatternWeights,
   confluence: ConfluenceResult,
-  qualityOverrides?: Partial<SwingQualityParams> | null
-): { candidate: Candidate; watchOnly: boolean } | null {
+  qualityOverrides?: Partial<SwingQualityParams> | null,
+  marketState?: MarketState | null
+): CandidateBuild {
   const patterns = detections.filter(item => item.result.matched).map(item => item.name);
   if (patterns.length === 0) {
-    return null;
+    return { candidate: null, watchOnly: false, reject: "패턴 미매칭" };
   }
 
   // Bear-market handling is unified below (watch-only demotion), so the old
@@ -822,16 +839,16 @@ function buildCandidate(
     indicators.rsi14 >= 72 &&
     indicators.currentPrice >= indicators.annualHigh * 0.94;
   if (isOverheatedAggressive) {
-    return null;
+    return { candidate: null, watchOnly: false, reject: "과열 추격(단일 고가패턴+RSI72↑)" };
   }
   if (!isEarlyBowl && indicators.volumeRatio < minVolumeRatio) {
-    return null;
+    return { candidate: null, watchOnly: false, reject: "거래량 부족" };
   }
   if (!isEarlyBowl && indicators.rsi14 > maxRsi14) {
-    return null;
+    return { candidate: null, watchOnly: false, reject: "RSI 과열" };
   }
   if (!isEarlyBowl && indicators.volatility20 > maxVolatility20 && patterns.length === 1) {
-    return null;
+    return { candidate: null, watchOnly: false, reject: "변동성 과다(단일패턴)" };
   }
   // Soft score shortfall → not rejected, but demoted to watch-only (see below).
   const lowPatternScore =
@@ -846,13 +863,39 @@ function buildCandidate(
   const rsFloor =
     qualityOverrides?.minRelativeStrength ?? (Number.isFinite(rsFloorEnv) ? rsFloorEnv : -10);
   if (confluence.relativeStrength60 < rsFloor) {
-    return null; // chronically lagging its index — not a leadership stock
+    // chronically lagging its index — not a leadership stock
+    return { candidate: null, watchOnly: false, reject: "상대강도 하한 미달" };
   }
-  if (confluence.overExtended && !isEarlyBowl) {
-    return null; // anti-FOMO: do not chase a stock stretched far above its 20MA
+  // Rebound gate (experimental, default off — REBOUND_GATE_MODE).
+  //
+  // `trendAligned` demands MA20 ≥ MA60 AND close ≥ MA60. After a crash no name
+  // satisfies that for weeks, so during a recovery every non-earlyBowl setup is
+  // rejected before it is ever scored — which is why the 2026-08 study found
+  // only 1 반등확인 trade in 1000 days. That is not evidence the rebound is
+  // unprofitable; it is evidence the gate prevents the evidence from existing.
+  // Relaxing it only inside a breadth-confirmed rebound lets the backtest
+  // finally generate those trades so they can be judged on measured results.
+  const reboundMode = process.env.REBOUND_GATE_MODE ?? "off";
+  const inRebound =
+    marketState?.label === "반등확인" || marketState?.label === "반등초기";
+  const reboundRelax = reboundMode !== "off" && inRebound;
+
+  const overExtended =
+    reboundRelax && reboundMode === "reclaim_wide"
+      ? indicators.currentPrice > indicators.ma20 * 1.25
+      : confluence.overExtended;
+  if (overExtended && !isEarlyBowl) {
+    // anti-FOMO: do not chase a stock stretched far above its 20MA
+    return { candidate: null, watchOnly: false, reject: "20일선 대비 과확장" };
   }
-  if (!isEarlyBowl && !confluence.trendAligned) {
-    return null; // breakout/continuation setups must sit in an uptrend
+  // In a confirmed rebound, "price has reclaimed its 20-day average" stands in
+  // for full trend repair, which cannot happen yet by construction.
+  const trendOk =
+    confluence.trendAligned ||
+    (reboundRelax && indicators.currentPrice >= indicators.ma20);
+  if (!isEarlyBowl && !trendOk) {
+    // breakout/continuation setups must sit in an uptrend
+    return { candidate: null, watchOnly: false, reject: "정배열 미충족(MA20<MA60)" };
   }
 
   const triggerPrice = Math.round(
@@ -1036,6 +1079,15 @@ export async function screenTechnicalSwingCandidatesFromRows(
     kospiRegime.score <= kosdaqRegime.score ? kospiRegime : kosdaqRegime;
   const kospiBars = toBars(kospiRows);
   const kosdaqBars = toBars(kosdaqRows);
+  // Six-way tape read. Breadth is measured over the scanned names only, so the
+  // benchmark ETFs do not vote on participation. Rows are already truncated to
+  // the signal date in the backtest, so this is point-in-time safe there too.
+  const breadthRows: TechnicalSwingRowsByTicker = {};
+  for (const ticker of tickers) {
+    const rows = rowsByTicker[ticker];
+    if (rows) breadthRows[ticker] = rows;
+  }
+  const marketState = classifyMarketState(kospiRows ?? kosdaqRows, breadthRows);
   const benchLastDate =
     kospiRows?.[kospiRows.length - 1]?.날짜 ?? kosdaqRows?.[kosdaqRows.length - 1]?.날짜 ?? null;
   const haltStaleDays = Number(process.env.HALT_STALE_DAYS) || 7;
@@ -1097,13 +1149,15 @@ export async function screenTechnicalSwingCandidatesFromRows(
         marketRegime,
         patternWeights,
         confluence,
-        qualityOverrides
+        qualityOverrides,
+        marketState
       );
       return {
         ticker,
-        candidate: built?.candidate ?? null,
-        watchOnly: built?.watchOnly ?? false,
+        candidate: built.candidate,
+        watchOnly: built.watchOnly,
         skipReason: null,
+        reject: built.reject ?? null,
       };
     },
     6
@@ -1117,13 +1171,29 @@ export async function screenTechnicalSwingCandidatesFromRows(
     .filter(item => item?.candidate && !item.watchOnly)
     .map(item => item!.candidate as Candidate)
     .sort((a, b) => b.swingScore - a.swingScore);
-  // Watch-only near-misses (passed every hard gate, just below the conviction
-  // floor) — surfaced so the daily alert is never silent in a thin/weak tape.
+  // Watch-only names: passed every hard gate but were demoted — either just under
+  // the conviction floor, or (far more often) mass-demoted because the tape is
+  // bearish. The cap used to be a hardcoded 3, which was fine while this was a
+  // rare "never be silent" fallback. It is not fine once the whole output lands
+  // here: on 2026-08-06, 31 names cleared every gate and 28 were silently thrown
+  // away, so the alert showed the same top 3 day after day and looked frozen.
+  // Watch-only names are still excluded from picks, backtest and headline stats,
+  // so widening this changes visibility only — never what counts as a trade.
+  const watchLimit = Math.max(3, Number(process.env.SWING_WATCHLIST_LIMIT) || 12);
   const watchlist = scanned
     .filter(item => item?.candidate && item.watchOnly)
     .map(item => item!.candidate as Candidate)
     .sort((a, b) => b.swingScore - a.swingScore)
-    .slice(0, 3);
+    .slice(0, watchLimit);
+  // Funnel: where the 200-name scan actually drained away. Counted every run so
+  // "후보 없음" always comes with the reason attached.
+  const funnel: Record<string, number> = { 스캔: tickers.length };
+  for (const item of scanned) {
+    const reason = item?.skipReason ?? item?.reject;
+    if (reason) funnel[reason] = (funnel[reason] ?? 0) + 1;
+  }
+  funnel["통과(관찰 포함)"] = scanned.filter(item => item?.candidate).length;
+
   const earlyBowlCandidates = candidates.filter(candidate => hasEarlyBowlPattern(candidate.patterns));
   const rankedCandidates = rankBowlFocusedCandidates(candidates, 5);
   const dataFailureCount = skipped.filter(item => item.skipReason.includes("OHLCV")).length;
@@ -1149,6 +1219,8 @@ export async function screenTechnicalSwingCandidatesFromRows(
     candidates: finalCandidates,
     watchlist: finalWatchlist,
     scannedTickers: tickers,
+    marketState,
+    funnel,
     dataReliability: {
       scanned: tickers.length,
       dataFailures: dataFailureCount,
