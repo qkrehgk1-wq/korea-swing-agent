@@ -328,13 +328,24 @@ export function buildDailySwingMessage(
  *
  * Only the picks get buttons: watch names are not decisions the commander is
  * being asked to make, and Telegram gets unusable past a handful of rows.
+ *
+ * `journalTickers`, if given, restricts buttons to candidates that will
+ * actually be written to the recommendation journal. The alert can legally
+ * show more than that (e.g. KOSDAQ-team candidates are merged into display
+ * but deliberately excluded from the core journal) — a button on a pick that
+ * never gets journaled would let the commander tap "진입", have it saved to
+ * decisions.json, and then silently never join to anything in the scorecard.
  */
 export function buildDecisionButtons(
   candidates: SwingCandidate[],
   date: string,
-  limit = 5
+  limit = 5,
+  journalTickers?: Set<string>
 ): TelegramInlineButton[][] {
-  return candidates.slice(0, limit).map(candidate => [
+  const eligible = journalTickers
+    ? candidates.filter(candidate => journalTickers.has(candidate.ticker))
+    : candidates;
+  return eligible.slice(0, limit).map(candidate => [
     {
       text: `${candidate.companyName} 진입`,
       callbackData: buildCallbackData("entered", candidate.ticker, date),
@@ -364,6 +375,8 @@ export async function notifyDailySwingCandidates(
     accuracyLine?: string;
     decisionLine?: string;
     enableDecisionButtons?: boolean;
+    /** Tickers that will actually be journaled — see buildDecisionButtons. */
+    journalTickers?: Set<string>;
   } = {}
 ): Promise<NotificationDeliveryResult> {
   const now = new Date();
@@ -378,7 +391,7 @@ export async function notifyDailySwingCandidates(
   const buttons =
     options.enableDecisionButtons === false
       ? []
-      : buildDecisionButtons(candidates, kstDate(now));
+      : buildDecisionButtons(candidates, kstDate(now), 5, options.journalTickers);
 
   try {
     return await deliverMultiChannelNotification(title, body, buttons);

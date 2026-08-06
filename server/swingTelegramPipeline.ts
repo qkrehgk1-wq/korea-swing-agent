@@ -288,7 +288,15 @@ async function runSwingTelegramPipeline() {
         agentTeamReport,
         verifiedKosdaqCandidates,
         verifiedWatchlist,
-        { performanceLine, dataDegraded, accuracyLine, decisionLine }
+        {
+          performanceLine,
+          dataDegraded,
+          accuracyLine,
+          decisionLine,
+          // Must match the recordRecommendations filter below exactly — a
+          // button on a candidate that filter excludes would tap-and-vanish.
+          journalTickers: new Set(candidates.map(item => item.ticker)),
+        }
       );
       if (!delivery.primaryDelivered) {
         await persistSwingPipelineExecutionReport(

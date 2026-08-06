@@ -8,6 +8,7 @@
  */
 
 import { fetchTelegramTaps, answerTelegramCallback } from "./_core/telegramNotification";
+import { ENV } from "./_core/env";
 import {
   actionLabel,
   loadDecisionJournal,
@@ -19,6 +20,16 @@ import {
   type DecisionJournal,
 } from "./commanderDecisionJournal";
 import { kstDate } from "./recommendationJournalAgent";
+
+// getUpdates is bot-wide, not chat-scoped, so anything the bot token can see
+// comes back — including a DM from a stranger who found the bot's username.
+// Restrict to the chat(s) the alert is actually sent to. A tap with no
+// chat id at all (Telegram omits callback_query.message in rare cases) is
+// let through rather than dropped, since that is the legitimate flow, not
+// the injection vector.
+function allowedChatIds(): Set<string> {
+  return new Set([ENV.telegramChatId, ENV.commanderChatId].filter(Boolean));
+}
 
 export type CollectionResult = {
   journal: DecisionJournal;
@@ -51,8 +62,13 @@ export async function collectCommanderDecisions(
   const decidedAt = now.toISOString();
   const today = kstDate(now);
   const added: CommanderDecision[] = [];
+  const trustedChats = allowedChatIds();
 
   for (const tap of taps) {
+    if (tap.chatId && trustedChats.size && !trustedChats.has(tap.chatId)) {
+      console.warn(`[Decision Journal] ignored tap from untrusted chat ${tap.chatId}`);
+      continue;
+    }
     const parsed =
       tap.kind === "tap"
         ? parseCallbackData(tap.data)

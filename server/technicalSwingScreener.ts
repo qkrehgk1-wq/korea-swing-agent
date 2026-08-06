@@ -875,6 +875,36 @@ export function rankBowlFocusedCandidates(
     .slice(0, limit);
 }
 
+/**
+ * Names that cleared every hard gate but lost the top-N cut fall through to the
+ * watch list instead of vanishing, ranked ahead of genuine near-misses (a name
+ * that passed every gate outranks one that didn't).
+ *
+ * Extracted as a pure function and unit-tested on purpose: "silently drop
+ * whatever doesn't fit the cap" is a failure shape this codebase has hit twice
+ * (the old hardcoded watchlist cap of 3, then this pick-limit overflow) —
+ * see PROJECT_CHARTER.md, 2026-08-06.
+ */
+export function mergeOverflowIntoWatchlist(
+  rankedCandidates: TechnicalSwingCandidate[],
+  allGatePassingCandidates: TechnicalSwingCandidate[],
+  watchlist: TechnicalSwingCandidate[],
+  limit: number
+): TechnicalSwingCandidate[] {
+  const promoted = new Set(rankedCandidates.map(candidate => candidate.ticker));
+  const overflow = allGatePassingCandidates.filter(candidate => !promoted.has(candidate.ticker));
+  // Two groups, each sorted internally by score — NOT one flat sort across
+  // both. An overflow name cleared every hard gate (RS floor, trend alignment,
+  // confluence floor) and missed a pick only because the top-N cap is finite;
+  // a near-miss watchlist name failed one of those gates outright. A flat
+  // score sort would let a higher-scoring gate-failer outrank a gate-passer,
+  // which is backwards — the group a name is in says more than its raw score.
+  return [
+    ...[...overflow].sort((a, b) => b.swingScore - a.swingScore),
+    ...[...watchlist].sort((a, b) => b.swingScore - a.swingScore),
+  ].slice(0, limit);
+}
+
 function buildCandidate(
   ticker: string,
   companyName: string,
@@ -1273,14 +1303,6 @@ export async function screenTechnicalSwingCandidatesFromRows(
   const earlyBowlCandidates = candidates.filter(candidate => hasEarlyBowlPattern(candidate.patterns));
   const pickLimit = Math.max(1, Number(process.env.SWING_PICK_LIMIT) || 5);
   const rankedCandidates = rankBowlFocusedCandidates(candidates, pickLimit);
-  // Candidates past the display cap must fall through to the watch list, not
-  // vanish. Unblocking 약세 on 2026-08-06 exposed this: names that had been
-  // visible as watch (셀트리온 85점, 삼성바이오로직스 81점) were promoted to
-  // candidates, overflowed the cap of 5, and disappeared from the alert
-  // entirely — while lower-scoring watch names stayed on screen. Same failure
-  // shape as the old hardcoded watchlist cap.
-  const promoted = new Set(rankedCandidates.map(candidate => candidate.ticker));
-  const overflowCandidates = candidates.filter(candidate => !promoted.has(candidate.ticker));
   const dataFailureCount = skipped.filter(item => item.skipReason.includes("OHLCV")).length;
   const staleTickerCount = skipped.filter(item => item.skipReason.includes("시세 없음")).length;
   const shortHistoryCount = skipped.filter(item => item.skipReason.includes("140봉")).length;
@@ -1293,12 +1315,9 @@ export async function screenTechnicalSwingCandidatesFromRows(
   const degraded =
     benchmarkMissing || (tickers.length > 0 && dataFailureCount / tickers.length > degradedRatio);
   const finalCandidates = degraded ? [] : rankedCandidates;
-  // Overflow first: a name that cleared every gate outranks a genuine near-miss.
   const finalWatchlist = degraded
     ? [...rankedCandidates, ...watchlist].slice(0, 5)
-    : [...overflowCandidates, ...watchlist]
-        .sort((a, b) => b.swingScore - a.swingScore)
-        .slice(0, watchLimit);
+    : mergeOverflowIntoWatchlist(rankedCandidates, candidates, watchlist, watchLimit);
   const skippedSummary = skipped
     .slice(0, 5)
     .map(item => `${nameFor(item.ticker)}: ${item.skipReason}`)
