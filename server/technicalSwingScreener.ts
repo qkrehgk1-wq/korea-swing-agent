@@ -990,22 +990,27 @@ function buildCandidate(
   // Watch-only: structurally sound (passed every hard gate) but the score or
   // confluence quality is below the conviction floor. Surfaced for situational
   // awareness so the alert is never silent — never counted as a backtest trade.
-  // Bear-market risk-off: in a bearish tape demote every pick to watch-only —
-  // out of live picks and backtest trades, still visible for awareness.
+  // Bear-market risk-off — DEFAULT OFF since 2026-08-06 (commander's call).
   //
-  // Re-measured 2026-08-05 (1000d, exit ladder + round-trip cost applied), and
-  // the original premise has MOVED: 약세 entries are no longer clearly losing
-  // (87 trades, 63.2% win, +0.41%, +0.006R ≈ breakeven) — the profit-protection
-  // ladder repaired the downside. They are still far below 강세 (98 trades,
-  // 66.3%, +4.17%, +0.31R), so the filter stays: it now buys risk-adjusted
-  // quality, not loss avoidance.
+  // History of this filter, because the premise moved twice:
+  //  - Added when 약세 entries measurably lost money (win ~52%, avg −1%).
+  //  - Re-measured 2026-08-05 after the exit ladder and round-trip costs landed:
+  //    no longer losing (87 trades, 63.2% win, +0.41%, ≈+0.006R breakeven) — the
+  //    profit-protection ladder had repaired the downside.
+  //  - Re-measured again 2026-08-06 on the current screener: 약세 77 trades at
+  //    +0.115R. Blocking them gives 113 trades at +0.351R; allowing them gives
+  //    190 trades at +0.255R. Lower quality per trade, MORE total edge
+  //    (113×0.351 = 39.7 vs 190×0.255 = 48.5).
   //
-  // Also falsified in the same run: the intuitive "let rebounds through" carve-out.
-  // Entering a bearish tape while the index has recovered above its MA20 scores
-  // WORSE, not better (-0.175R / 15 trades; index>MA20 AND 5d>0: -0.151R / 14)
-  // than staying with the still-falling tape (+0.043R / 72). Do not re-add that
-  // exception without re-measuring — see PROJECT_CHARTER.md decision log.
-  const skipBearish = (process.env.SKIP_BEARISH_ENTRIES ?? "true") !== "false";
+  // So this is a quality-vs-quantity preference, not a right/wrong question, and
+  // it is the commander's to make. Default now allows them. Set
+  // SKIP_BEARISH_ENTRIES=true to go back to the concentrated, higher-quality set.
+  //
+  // Still falsified, and NOT re-added: the "let rebounds through" carve-out.
+  // Entering a bearish tape once the index has reclaimed its MA20 scored WORSE
+  // (−0.175R / 15 trades) than the still-falling tape (+0.043R / 72). Blanket
+  // allowing is not the same as timing the bounce — see PROJECT_CHARTER.md.
+  const skipBearish = (process.env.SKIP_BEARISH_ENTRIES ?? "false") !== "false";
   const watchOnly =
     lowPatternScore ||
     confluence.qualityScore < confluenceFloor ||
@@ -1266,7 +1271,16 @@ export async function screenTechnicalSwingCandidatesFromRows(
   funnel["통과(관찰 포함)"] = scanned.filter(item => item?.candidate).length;
 
   const earlyBowlCandidates = candidates.filter(candidate => hasEarlyBowlPattern(candidate.patterns));
-  const rankedCandidates = rankBowlFocusedCandidates(candidates, 5);
+  const pickLimit = Math.max(1, Number(process.env.SWING_PICK_LIMIT) || 5);
+  const rankedCandidates = rankBowlFocusedCandidates(candidates, pickLimit);
+  // Candidates past the display cap must fall through to the watch list, not
+  // vanish. Unblocking 약세 on 2026-08-06 exposed this: names that had been
+  // visible as watch (셀트리온 85점, 삼성바이오로직스 81점) were promoted to
+  // candidates, overflowed the cap of 5, and disappeared from the alert
+  // entirely — while lower-scoring watch names stayed on screen. Same failure
+  // shape as the old hardcoded watchlist cap.
+  const promoted = new Set(rankedCandidates.map(candidate => candidate.ticker));
+  const overflowCandidates = candidates.filter(candidate => !promoted.has(candidate.ticker));
   const dataFailureCount = skipped.filter(item => item.skipReason.includes("OHLCV")).length;
   const staleTickerCount = skipped.filter(item => item.skipReason.includes("시세 없음")).length;
   const shortHistoryCount = skipped.filter(item => item.skipReason.includes("140봉")).length;
@@ -1279,7 +1293,12 @@ export async function screenTechnicalSwingCandidatesFromRows(
   const degraded =
     benchmarkMissing || (tickers.length > 0 && dataFailureCount / tickers.length > degradedRatio);
   const finalCandidates = degraded ? [] : rankedCandidates;
-  const finalWatchlist = degraded ? [...rankedCandidates, ...watchlist].slice(0, 5) : watchlist;
+  // Overflow first: a name that cleared every gate outranks a genuine near-miss.
+  const finalWatchlist = degraded
+    ? [...rankedCandidates, ...watchlist].slice(0, 5)
+    : [...overflowCandidates, ...watchlist]
+        .sort((a, b) => b.swingScore - a.swingScore)
+        .slice(0, watchLimit);
   const skippedSummary = skipped
     .slice(0, 5)
     .map(item => `${nameFor(item.ticker)}: ${item.skipReason}`)
