@@ -2,10 +2,10 @@
  * News / market-sentiment agent.
  *
  * Pulls recent headlines for a Korean company so the LLM market-intelligence
- * agent can factor real news into its reasoning. Tries Tavily first (larger
- * free quota), then Serper (Google News) as a fallback, then NewsAPI —
- * whichever key is present. Returns null when no key is configured or in
- * tests, so analysis degrades gracefully.
+ * agent can factor real news into its reasoning. Tries Google News RSS first
+ * (public feed, no key, no quota to burn), then Tavily, then Serper (Google
+ * News) as a fallback, then NewsAPI — whichever key is present. Returns null
+ * when no source works or in tests, so analysis degrades gracefully.
  */
 
 import { ENV } from "./_core/env";
@@ -29,6 +29,51 @@ async function fetchJson(url: string, init: RequestInit): Promise<any | null> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function decodeXmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
+/**
+ * Google News' public RSS search feed -- no API key, no per-key quota, and
+ * (unlike the Serper/Twitter/etc. pattern flagged in the Agent Reach
+ * review) no cookie or login involved: it's the same feed anyone gets by
+ * visiting the URL in a browser. Tried first so Tavily/Serper quota is only
+ * spent when this doesn't return anything.
+ */
+async function fetchViaGoogleNewsRss(query: string): Promise<NewsSentiment | null> {
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=ko&gl=KR&ceid=KR:ko`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  let xml: string;
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) return null;
+    xml = await res.text();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+
+  const headlines = Array.from(xml.matchAll(/<item>([\s\S]*?)<\/item>/g))
+    .slice(0, 8)
+    .map(match => {
+      const titleMatch = match[1].match(/<title>([\s\S]*?)<\/title>/);
+      if (!titleMatch) return "";
+      const raw = titleMatch[1].replace(/^<!\[CDATA\[([\s\S]*?)\]\]>$/, "$1").trim();
+      return decodeXmlEntities(raw);
+    })
+    .filter(Boolean);
+
+  if (headlines.length === 0) return null;
+  return { source: "Google News (RSS)", headlines };
 }
 
 async function fetchViaSerper(query: string): Promise<NewsSentiment | null> {
@@ -86,6 +131,8 @@ export async function fetchNewsSentiment(companyName: string): Promise<NewsSenti
 
   const query = `${companyName} 주가`;
   try {
+    const rss = await fetchViaGoogleNewsRss(query);
+    if (rss) return rss;
     if (ENV.tavilyApiKey) {
       const result = await fetchViaTavily(query);
       if (result) return result;
