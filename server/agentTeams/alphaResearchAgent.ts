@@ -141,7 +141,29 @@ async function fetchJson(
   }
 }
 
+// Tavily first (higher free quota), Serper only as a fallback when Tavily is
+// unavailable or returns nothing -- avoids burning Serper's smaller free
+// quota on every call when Tavily alone would have worked.
 async function webSearch(query: string, fetchImpl: typeof fetch): Promise<SearchHit[]> {
+  if (ENV.tavilyApiKey) {
+    const data = await fetchJson(
+      "https://api.tavily.com/search",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ api_key: ENV.tavilyApiKey, query, max_results: 6 }),
+      },
+      fetchImpl
+    );
+    const results = data?.results;
+    if (Array.isArray(results)) {
+      const hits = results
+        .slice(0, 6)
+        .map((r: any) => ({ title: String(r.title ?? ""), snippet: String(r.content ?? "") }))
+        .filter((h: SearchHit) => h.title || h.snippet);
+      if (hits.length > 0) return hits;
+    }
+  }
   if (ENV.serperApiKey) {
     const data = await fetchJson(
       "https://google.serper.dev/search",
@@ -157,24 +179,6 @@ async function webSearch(query: string, fetchImpl: typeof fetch): Promise<Search
       return organic
         .slice(0, 6)
         .map((o: any) => ({ title: String(o.title ?? ""), snippet: String(o.snippet ?? "") }))
-        .filter((h: SearchHit) => h.title || h.snippet);
-    }
-  }
-  if (ENV.tavilyApiKey) {
-    const data = await fetchJson(
-      "https://api.tavily.com/search",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: ENV.tavilyApiKey, query, max_results: 6 }),
-      },
-      fetchImpl
-    );
-    const results = data?.results;
-    if (Array.isArray(results)) {
-      return results
-        .slice(0, 6)
-        .map((r: any) => ({ title: String(r.title ?? ""), snippet: String(r.content ?? "") }))
         .filter((h: SearchHit) => h.title || h.snippet);
     }
   }

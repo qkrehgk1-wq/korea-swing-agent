@@ -2,9 +2,10 @@
  * News / market-sentiment agent.
  *
  * Pulls recent headlines for a Korean company so the LLM market-intelligence
- * agent can factor real news into its reasoning. Tries Serper (Google News),
- * then Tavily, then NewsAPI — whichever key is present. Returns null when no
- * key is configured or in tests, so analysis degrades gracefully.
+ * agent can factor real news into its reasoning. Tries Tavily first (larger
+ * free quota), then Serper (Google News) as a fallback, then NewsAPI —
+ * whichever key is present. Returns null when no key is configured or in
+ * tests, so analysis degrades gracefully.
  */
 
 import { ENV } from "./_core/env";
@@ -85,12 +86,12 @@ export async function fetchNewsSentiment(companyName: string): Promise<NewsSenti
 
   const query = `${companyName} 주가`;
   try {
-    if (ENV.serperApiKey) {
-      const result = await fetchViaSerper(query);
-      if (result) return result;
-    }
     if (ENV.tavilyApiKey) {
       const result = await fetchViaTavily(query);
+      if (result) return result;
+    }
+    if (ENV.serperApiKey) {
+      const result = await fetchViaSerper(query);
       if (result) return result;
     }
     if (ENV.newsApiKey) {
