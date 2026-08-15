@@ -1460,7 +1460,12 @@
     "volumeFlowRising": true,
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-29T19:55:42.546Z",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-07-31",
+    "exitDate": "2026-08-13",
+    "exitPrice": 20961,
+    "returnPct": 1.63,
+    "scoredAt": "2026-08-15T19:00:44.971Z"
   },
   {
     "date": "2026-07-31",
@@ -1697,7 +1702,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-07T00:27:51.495Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-10",
+    "exitDate": "2026-08-12",
+    "exitPrice": 36663,
+    "returnPct": 1.97,
+    "scoredAt": "2026-08-15T19:00:44.972Z"
   },
   {
     "date": "2026-08-07",
@@ -2034,7 +2044,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-08T19:11:13.475Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-10",
+    "exitDate": "2026-08-13",
+    "exitPrice": 43884.5,
+    "returnPct": 2.59,
+    "scoredAt": "2026-08-15T19:00:44.972Z"
   },
   {
     "date": "2026-08-09",
