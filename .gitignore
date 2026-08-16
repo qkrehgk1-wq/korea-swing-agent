@@ -113,7 +113,15 @@ temp/
 secure_zone/
 
 # Local runtime state (analysis history, kakao token, backtests, reports, logs)
-.data/
+.data/*
+# Exception: constitution-violation audit trail should survive across deploys
+# if this ever runs somewhere persistent -- see dataValidator.ts. A trailing-
+# slash directory ignore (.data/) blocks git from descending far enough for a
+# nested negation to work, so .data/* + explicit re-allow of the path down to
+# the file is required instead.
+!.data/logs
+.data/logs/*
+!.data/logs/constitution-violations.jsonl
 .manus-logs/
 .codex-runtime/
 .tmp-*
