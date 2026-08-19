@@ -5,10 +5,12 @@ import {
   buildSectorIndex,
   buildTickerSectorMap,
   computeSectorStrength,
+  diversifyBySector,
   indexAtOrBefore,
   parseSectorList,
   parseSectorMembers,
   rankSectors,
+  summarizeSectorConcentration,
   type SectorSeries,
 } from "./sectorRotation";
 
@@ -183,5 +185,62 @@ describe("buildTickerSectorMap", () => {
     ]);
     expect(map["005930"]).toBe("반도체");
     expect(map["090430"]).toBe("화장품");
+  });
+});
+
+describe("summarizeSectorConcentration", () => {
+  it("counts tickers per sector, worst (most concentrated) first", () => {
+    const map = { A: "제약", B: "제약", C: "은행", D: "제약" };
+    const result = summarizeSectorConcentration(["A", "B", "C", "D"], map);
+    expect(result[0]).toEqual({ sector: "제약", count: 3 });
+    expect(result[1]).toEqual({ sector: "은행", count: 1 });
+  });
+
+  it("ignores tickers with no known sector", () => {
+    expect(summarizeSectorConcentration(["X"], {})).toEqual([]);
+  });
+});
+
+describe("diversifyBySector", () => {
+  const item = (ticker: string, score: number) => ({ ticker, swingScore: score });
+
+  it("keeps the highest scorer of an over-represented sector, demotes the rest", () => {
+    const map = { A: "제약", B: "제약", C: "제약", D: "은행" };
+    const ranked = [item("A", 90), item("B", 85), item("C", 80), item("D", 70)];
+
+    const { kept, overflow } = diversifyBySector(ranked, map, 1);
+
+    expect(kept.map(i => i.ticker)).toEqual(["A", "D"]);
+    expect(overflow.map(i => i.ticker)).toEqual(["B", "C"]);
+  });
+
+  it("never demotes a stronger candidate in favour of a weaker one", () => {
+    // Best-first input: A is the strongest name in 제약 and must survive
+    // regardless of how many weaker 제약 names precede it in some other order.
+    const map = { A: "제약", B: "은행", C: "제약" };
+    const ranked = [item("A", 95), item("B", 80), item("C", 60)];
+    const { kept } = diversifyBySector(ranked, map, 1);
+    expect(kept.map(i => i.ticker)).toContain("A");
+  });
+
+  it("fails open on an unmapped ticker instead of blocking it", () => {
+    const ranked = [item("UNKNOWN", 99)];
+    const { kept, overflow } = diversifyBySector(ranked, {}, 1);
+    expect(kept.map(i => i.ticker)).toEqual(["UNKNOWN"]);
+    expect(overflow).toEqual([]);
+  });
+
+  it("is a no-op when maxPerSector is 0 or negative (feature off)", () => {
+    const map = { A: "제약", B: "제약" };
+    const ranked = [item("A", 90), item("B", 85)];
+    expect(diversifyBySector(ranked, map, 0).kept).toEqual(ranked);
+  });
+
+  it("respects a higher cap", () => {
+    const map = { A: "제약", B: "제약", C: "제약" };
+    const ranked = [item("A", 90), item("B", 85), item("C", 80)];
+    const { kept, overflow } = diversifyBySector(ranked, map, 2);
+    expect(kept.map(i => i.ticker)).toEqual(["A", "B"]);
+    expect(overflow.map(i => i.ticker)).toEqual(["C"]);
   });
 });

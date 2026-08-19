@@ -371,3 +371,84 @@ export function buildTickerSectorMap(
   }
   return map;
 }
+
+// ── Sector diversity ──
+//
+// Prompted by X's (Twitter's) 2026-05 open-sourced For You algorithm: its
+// candidate funnel caps how many posts from one author/topic can land in the
+// same feed, so one loud source cannot crowd out everything else. Its actual
+// ranking model (a Grok-based engagement predictor) has no analogue here —
+// predicting likes/replies and predicting price move are unrelated problems —
+// but the diversity CAP is domain-agnostic risk control, not a return signal,
+// so it transfers as an idea worth testing.
+//
+// Measured live 2026-08-18: of 5 same-day real picks, 2 were 제약 (pharma) —
+// a real, current instance of the pattern this is meant to catch, not a
+// hypothetical.
+//
+// Deliberately NOT wired into the live screener yet. Wiring it into
+// screenTechnicalSwingCandidatesFromRows would change which tickers get
+// journaled as real picks, and this project has hit the live/backtest
+// mismatch bug enough times (see PROJECT_CHARTER.md) that a selection-
+// affecting change needs the same backtest-measured treatment every other
+// filter here got before being trusted. Built and unit-tested now so that
+// measurement is a data question, not an implementation one.
+
+export type SectorConcentration = { sector: string; count: number };
+
+/** How concentrated a candidate set already is, sector by sector, ranked worst first. */
+export function summarizeSectorConcentration(
+  tickers: string[],
+  tickerSectorMap: Record<string, string>
+): SectorConcentration[] {
+  const counts = new Map<string, number>();
+  for (const ticker of tickers) {
+    const sector = tickerSectorMap[ticker];
+    if (!sector) continue;
+    counts.set(sector, (counts.get(sector) ?? 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .map(([sector, count]) => ({ sector, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Enforce a per-sector cap on an already-ranked (best-first) list.
+ *
+ * Greedy by design: because the input is pre-ranked, keeping the first
+ * `maxPerSector` occurrences of each sector and pushing the rest to overflow
+ * always keeps the highest scorer(s) of every sector and only ever demotes a
+ * WEAKER duplicate — never a stronger candidate in favour of a weaker one.
+ * Unmapped tickers (sector unknown) are never penalized, so a mapping gap
+ * fails open rather than silently blocking a candidate.
+ *
+ * `overflow` is shaped to compose with mergeOverflowIntoWatchlist: a name
+ * bumped for diversity still passed every real gate, so it belongs beside
+ * that function's "cleared every gate but lost the cut" overflow, not
+ * dropped.
+ */
+export function diversifyBySector<T extends { ticker: string }>(
+  ranked: T[],
+  tickerSectorMap: Record<string, string>,
+  maxPerSector: number
+): { kept: T[]; overflow: T[] } {
+  if (maxPerSector <= 0) return { kept: ranked, overflow: [] };
+  const sectorCounts = new Map<string, number>();
+  const kept: T[] = [];
+  const overflow: T[] = [];
+  for (const item of ranked) {
+    const sector = tickerSectorMap[item.ticker];
+    if (!sector) {
+      kept.push(item);
+      continue;
+    }
+    const count = sectorCounts.get(sector) ?? 0;
+    if (count < maxPerSector) {
+      kept.push(item);
+      sectorCounts.set(sector, count + 1);
+    } else {
+      overflow.push(item);
+    }
+  }
+  return { kept, overflow };
+}
