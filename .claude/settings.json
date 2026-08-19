@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "if": "Bash(git commit*)",
+            "command": "mkdir -p .data && if npx tsc --noEmit > .data/hook-tsc-check.txt 2>&1; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"permissionDecision\\\":\\\"allow\\\"}}\"; else node -e \"const fs=require('fs');const out=fs.readFileSync('.data/hook-tsc-check.txt','utf8').slice(0,1200);console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'deny',permissionDecisionReason:'tsc 타입체크 실패 - 커밋 전에 오류를 먼저 고치세요.\\n\\n'+out}}))\"; fi",
+            "timeout": 120,
+            "statusMessage": "커밋 전 tsc 타입체크 중..."
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const j=JSON.parse(d);const f=(j.tool_input&&j.tool_input.file_path)||'';if(/\\.env(\\.|$)/.test(f.split(/[\\\\/]/).pop())){console.log(JSON.stringify({systemMessage:'실제 API 키가 담긴 파일입니다. 값을 응답에 노출하지 않도록 주의하세요.'}))}})\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
