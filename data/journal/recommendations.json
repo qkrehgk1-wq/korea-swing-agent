@@ -1441,7 +1441,12 @@
     "volumeFlowRising": false,
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-28T20:04:42.660Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-07-30",
+    "exitDate": "2026-08-20",
+    "exitPrice": 26400,
+    "returnPct": -5.07,
+    "scoredAt": "2026-08-20T19:17:13.790Z"
   },
   {
     "date": "2026-07-30",
@@ -1918,7 +1923,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-07T19:36:22.724Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-11",
+    "exitDate": "2026-08-20",
+    "exitPrice": 183522.6,
+    "returnPct": 8.64,
+    "scoredAt": "2026-08-20T19:17:13.790Z"
   },
   {
     "date": "2026-08-08",
@@ -2237,7 +2247,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-11T19:41:09.142Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-20T19:17:13.790Z"
   },
   {
     "date": "2026-08-12",
@@ -2726,6 +2738,27 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-19T19:05:36.467Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-08-21",
+    "ticker": "003230",
+    "companyName": "삼양식품",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 1397000,
+    "triggerPrice": 1422340,
+    "stopLossPrice": 1208989,
+    "targetPrice": 1955718,
+    "swingScore": 83,
+    "qualityScore": 77,
+    "relativeStrength": 18.35,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-08-20T19:17:10.786Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
