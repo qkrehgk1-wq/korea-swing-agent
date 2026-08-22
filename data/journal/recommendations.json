@@ -1858,7 +1858,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-07T19:36:22.724Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-10",
+    "exitDate": "2026-08-21",
+    "exitPrice": 124742,
+    "returnPct": 1.81,
+    "scoredAt": "2026-08-22T19:02:03.008Z"
   },
   {
     "date": "2026-08-08",
@@ -2132,7 +2137,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-10T19:37:18.060Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-12",
+    "exitDate": "2026-08-18",
+    "exitPrice": 96358.5,
+    "returnPct": 0.71,
+    "scoredAt": "2026-08-22T19:02:03.008Z"
   },
   {
     "date": "2026-08-11",
@@ -2835,6 +2845,28 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-21T19:08:48.754Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-08-23",
+    "ticker": "140860",
+    "companyName": "파크시스템스",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 259500,
+    "triggerPrice": 263393,
+    "stopLossPrice": 231540,
+    "targetPrice": 343026,
+    "swingScore": 59,
+    "qualityScore": 70,
+    "relativeStrength": 21.51,
+    "supplyState": "neutral",
+    "newsState": "positive",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-08-22T19:01:59.927Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
