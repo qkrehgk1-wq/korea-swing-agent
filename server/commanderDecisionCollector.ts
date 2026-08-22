@@ -64,6 +64,12 @@ export async function collectCommanderDecisions(
   const added: CommanderDecision[] = [];
   const trustedChats = allowedChatIds();
 
+  // Always log, even when empty — the alternative is an unreadable silence
+  // that makes "nothing was tapped" and "something broke upstream" identical.
+  console.log(
+    `[Decision Journal] polled offset=${offset ?? "(none)"}: ${taps.length} raw update(s) from Telegram`
+  );
+
   for (const tap of taps) {
     if (tap.chatId && trustedChats.size && !trustedChats.has(tap.chatId)) {
       console.warn(`[Decision Journal] ignored tap from untrusted chat ${tap.chatId}`);
@@ -73,7 +79,10 @@ export async function collectCommanderDecisions(
       tap.kind === "tap"
         ? parseCallbackData(tap.data)
         : parseTextDecision(tap.data, today);
-    if (!parsed) continue;
+    if (!parsed) {
+      console.warn(`[Decision Journal] could not parse ${tap.kind} update: ${JSON.stringify(tap.data)}`);
+      continue;
+    }
 
     added.push({
       ...parsed,
@@ -98,6 +107,7 @@ export async function collectCommanderDecisions(
 
   if (added.length || next.lastUpdateId !== journal.lastUpdateId) {
     await saveDecisionJournal(next);
+    console.log(`[Decision Journal] saved: ${added.length} decision(s) added, offset now ${next.lastUpdateId}`);
   }
 
   return { journal: next, added, confirmationLine: formatConfirmation(added) };
