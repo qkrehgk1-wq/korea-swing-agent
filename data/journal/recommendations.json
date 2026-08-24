@@ -1490,7 +1490,12 @@
     "volumeFlowRising": true,
     "championAt": "2026-07-18T19:47:23.643Z",
     "recordedAt": "2026-07-30T20:05:03.741Z",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-03",
+    "exitDate": "2026-08-24",
+    "exitPrice": 31950,
+    "returnPct": -4.09,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-01",
@@ -2408,7 +2413,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-13T19:39:57.232Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-14",
@@ -2429,7 +2436,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-13T19:39:57.232Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-14",
@@ -2471,7 +2480,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-13T19:39:57.232Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-15",
@@ -2511,7 +2522,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-14T19:33:34.477Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-15",
@@ -2574,7 +2587,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-14T19:33:34.477Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-15",
@@ -2595,7 +2610,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-14T19:33:34.477Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-15",
@@ -2616,7 +2633,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-14T19:33:34.477Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-08-24T19:14:12.082Z"
   },
   {
     "date": "2026-08-19",
@@ -2867,6 +2886,48 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-22T19:01:59.927Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-08-25",
+    "ticker": "051910",
+    "companyName": "LG화학",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 273000,
+    "triggerPrice": 277095,
+    "stopLossPrice": 237150,
+    "targetPrice": 376958,
+    "swingScore": 68,
+    "qualityScore": 61,
+    "relativeStrength": 1.15,
+    "supplyState": "distributing",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-08-24T19:14:08.879Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-08-25",
+    "ticker": "005490",
+    "companyName": "POSCO홀딩스",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 327500,
+    "triggerPrice": 332412,
+    "stopLossPrice": 294270,
+    "targetPrice": 427767,
+    "swingScore": 63,
+    "qualityScore": 45,
+    "relativeStrength": -3.99,
+    "supplyState": "neutral",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-08-24T19:14:08.879Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
