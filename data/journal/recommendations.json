@@ -1568,7 +1568,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-07T00:27:51.495Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-13",
+    "exitDate": "2026-09-03",
+    "exitPrice": 207500,
+    "returnPct": -6.25,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-07",
@@ -2428,7 +2433,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-12T19:43:24.096Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-14",
+    "exitDate": "2026-09-03",
+    "exitPrice": 136867.1,
+    "returnPct": 13.73,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-13",
@@ -2562,7 +2572,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-14T19:33:34.477Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-24",
+    "exitDate": "2026-09-03",
+    "exitPrice": 136319,
+    "returnPct": 11.57,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-15",
@@ -3180,7 +3195,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-27",
@@ -3201,7 +3218,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-27",
@@ -3222,7 +3241,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-27",
@@ -3286,7 +3307,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-27",
@@ -3307,7 +3330,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-03T21:18:33.516Z"
   },
   {
     "date": "2026-08-27",
@@ -3874,6 +3899,112 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-02T21:14:49.942Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-04",
+    "ticker": "373220",
+    "companyName": "LG에너지솔루션",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 365500,
+    "triggerPrice": 370982,
+    "stopLossPrice": 315335,
+    "targetPrice": 510100,
+    "swingScore": 89,
+    "qualityScore": 75,
+    "relativeStrength": 12.4,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-03T21:18:29.101Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-04",
+    "ticker": "088350",
+    "companyName": "한화생명",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 6110,
+    "triggerPrice": 6110,
+    "stopLossPrice": 5194,
+    "targetPrice": 8400,
+    "swingScore": 88,
+    "qualityScore": 81,
+    "relativeStrength": 42.18,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-03T21:18:29.101Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-04",
+    "ticker": "004020",
+    "companyName": "현대제철",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 31650,
+    "triggerPrice": 32125,
+    "stopLossPrice": 27306,
+    "targetPrice": 44173,
+    "swingScore": 84,
+    "qualityScore": 77,
+    "relativeStrength": 14.84,
+    "supplyState": "neutral",
+    "newsState": "positive",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-03T21:18:29.101Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-04",
+    "ticker": "052690",
+    "companyName": "한전기술",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 107400,
+    "triggerPrice": 109011,
+    "stopLossPrice": 92659,
+    "targetPrice": 149891,
+    "swingScore": 72,
+    "qualityScore": 71,
+    "relativeStrength": 9.5,
+    "supplyState": "distributing",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-03T21:18:29.101Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-04",
+    "ticker": "323410",
+    "companyName": "카카오뱅크",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 21800,
+    "triggerPrice": 22127,
+    "stopLossPrice": 20145,
+    "targetPrice": 27082,
+    "swingScore": 71,
+    "qualityScore": 63,
+    "relativeStrength": 9.56,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-03T21:18:29.101Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
