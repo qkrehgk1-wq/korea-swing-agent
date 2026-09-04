@@ -3395,7 +3395,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-28T02:19:06.958Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-04T21:01:00.225Z"
   },
   {
     "date": "2026-08-28",
@@ -3479,7 +3481,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-28T02:19:06.958Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-04T21:01:00.225Z"
   },
   {
     "date": "2026-08-28",
@@ -3521,7 +3525,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-28T02:19:06.958Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-04T21:01:00.225Z"
   },
   {
     "date": "2026-08-28",
@@ -3563,7 +3569,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-29T01:54:20.284Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-04T21:01:00.225Z"
   },
   {
     "date": "2026-08-29",
@@ -3668,7 +3676,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-29T01:54:20.284Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-04T21:01:00.225Z"
   },
   {
     "date": "2026-09-03",
@@ -4005,6 +4015,48 @@
     "volumeFlowRising": true,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-03T21:18:29.101Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-05",
+    "ticker": "267250",
+    "companyName": "HD현대",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 240500,
+    "triggerPrice": 244107,
+    "stopLossPrice": 207491,
+    "targetPrice": 335647,
+    "swingScore": 81,
+    "qualityScore": 70,
+    "relativeStrength": 13.6,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-04T21:00:55.840Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-05",
+    "ticker": "086790",
+    "companyName": "하나금융지주",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 134300,
+    "triggerPrice": 137408,
+    "stopLossPrice": 124865,
+    "targetPrice": 168766,
+    "swingScore": 75,
+    "qualityScore": 62,
+    "relativeStrength": 28.34,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-04T21:00:55.840Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
