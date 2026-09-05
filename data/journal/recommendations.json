@@ -2641,7 +2641,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-14T19:33:34.477Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-24",
+    "exitDate": "2026-08-31",
+    "exitPrice": 434066,
+    "returnPct": 3.22,
+    "scoredAt": "2026-09-05T20:42:08.291Z"
   },
   {
     "date": "2026-08-15",
@@ -2866,7 +2871,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-19T19:05:36.467Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-21",
+    "exitDate": "2026-08-31",
+    "exitPrice": 105059.5,
+    "returnPct": 1.44,
+    "scoredAt": "2026-09-05T20:42:08.292Z"
   },
   {
     "date": "2026-08-21",
@@ -2887,7 +2897,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-20T19:17:10.786Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-25",
+    "exitDate": "2026-09-02",
+    "exitPrice": 1450324.5,
+    "returnPct": 1.62,
+    "scoredAt": "2026-09-05T20:42:08.292Z"
   },
   {
     "date": "2026-08-22",
@@ -3353,7 +3368,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-28",
+    "exitDate": "2026-09-02",
+    "exitPrice": 362122.5,
+    "returnPct": 1.29,
+    "scoredAt": "2026-09-05T20:42:08.292Z"
   },
   {
     "date": "2026-08-27",
@@ -3375,7 +3395,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-28",
+    "exitDate": "2026-09-04",
+    "exitPrice": 15397.5,
+    "returnPct": 1.6,
+    "scoredAt": "2026-09-05T20:42:08.292Z"
   },
   {
     "date": "2026-08-28",
