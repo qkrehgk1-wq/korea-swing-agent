@@ -2944,7 +2944,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-21T19:08:48.754Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-24",
+    "exitDate": "2026-09-11",
+    "exitPrice": 11460,
+    "returnPct": 6.36,
+    "scoredAt": "2026-09-11T21:14:43.469Z"
   },
   {
     "date": "2026-08-22",
@@ -3018,7 +3023,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-22T19:01:59.927Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-24",
+    "exitDate": "2026-09-11",
+    "exitPrice": 252000,
+    "returnPct": -4.68,
+    "scoredAt": "2026-09-11T21:14:43.469Z"
   },
   {
     "date": "2026-08-25",
@@ -3872,7 +3882,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-02T21:14:49.942Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-04",
+    "exitDate": "2026-09-11",
+    "exitPrice": 163991.8,
+    "returnPct": 8.04,
+    "scoredAt": "2026-09-11T21:14:43.469Z"
   },
   {
     "date": "2026-09-03",
@@ -4407,6 +4422,47 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-10T21:09:36.660Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-12",
+    "ticker": "263750",
+    "companyName": "펄어비스",
+    "market": "코스닥",
+    "source": "swing",
+    "currentPrice": 35300,
+    "triggerPrice": 35830,
+    "stopLossPrice": 31161,
+    "targetPrice": 47503,
+    "swingScore": 79,
+    "qualityScore": 71,
+    "relativeStrength": 11.72,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-11T21:14:39.603Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-12",
+    "ticker": "009540",
+    "companyName": "HD한국조선해양",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 365500,
+    "triggerPrice": 370982,
+    "stopLossPrice": 333540,
+    "targetPrice": 464587,
+    "swingScore": 68,
+    "qualityScore": 48,
+    "relativeStrength": 6.98,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-11T21:14:39.603Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
