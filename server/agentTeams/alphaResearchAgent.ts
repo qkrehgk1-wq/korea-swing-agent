@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 import { ENV } from "../_core/env";
-import { invokeLLM } from "../_core/llm";
+import { hasLlmProvider, invokeLLM } from "../_core/llm";
 import { sendTelegramMessage } from "../_core/telegramNotification";
 
 export type AlphaCategory =
@@ -297,7 +297,7 @@ export async function collectAlphaResearchReport(
   const notes: string[] = [];
 
   const searchAvailable = Boolean(ENV.serperApiKey || ENV.tavilyApiKey);
-  const llmAvailable = Boolean(ENV.anthropicApiKey || ENV.forgeApiKey);
+  const llmAvailable = hasLlmProvider();
   const isTest = process.env.NODE_ENV === "test";
 
   let report: AlphaResearchReport;

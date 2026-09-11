@@ -481,26 +481,24 @@ async function callAnthropic(params: InvokeParams, model: string): Promise<Invok
   };
 }
 
-type LlmProvider = { name: string; available: boolean; call: () => Promise<InvokeResult> };
+type LlmProvider = {
+  name: string;
+  available: boolean;
+  call: (params: InvokeParams) => Promise<InvokeResult>;
+};
 
-/**
- * Multi-provider LLM with a fallback chain. Tries each configured provider in
- * priority order (LLM_PROVIDER_ORDER) and moves to the next on any failure —
- * so a capped/rate-limited Anthropic key transparently falls through to
- * OpenAI → Gemini → OpenRouter → Forge instead of dropping to deterministic.
- */
-export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  const cheap = params.tier === "cheap";
-  const registry: Record<string, () => LlmProvider> = {
+/** Provider implementations. Rebuilt per call so the model tier applies. */
+function buildProviderRegistry(cheap: boolean): Record<string, () => LlmProvider> {
+  return {
     anthropic: () => ({
       name: "anthropic",
       available: Boolean(ENV.anthropicApiKey),
-      call: () => callAnthropic(params, cheap ? ENV.anthropicCheapModel : ENV.anthropicModel),
+      call: params => callAnthropic(params, cheap ? ENV.anthropicCheapModel : ENV.anthropicModel),
     }),
     openai: () => ({
       name: "openai",
       available: Boolean(ENV.openaiApiKey),
-      call: () =>
+      call: params =>
         callOpenAICompatible(params, {
           url: "https://api.openai.com/v1/chat/completions",
           apiKey: ENV.openaiApiKey,
@@ -510,12 +508,12 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     gemini: () => ({
       name: "gemini",
       available: Boolean(ENV.geminiApiKey),
-      call: () => callGemini(params, cheap ? ENV.geminiCheapModel : ENV.geminiModel),
+      call: params => callGemini(params, cheap ? ENV.geminiCheapModel : ENV.geminiModel),
     }),
     openrouter: () => ({
       name: "openrouter",
       available: Boolean(ENV.openrouterApiKey),
-      call: () =>
+      call: params =>
         callOpenAICompatible(params, {
           url: "https://openrouter.ai/api/v1/chat/completions",
           apiKey: ENV.openrouterApiKey,
@@ -525,7 +523,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     forge: () => ({
       name: "forge",
       available: Boolean(ENV.forgeApiKey),
-      call: () =>
+      call: params =>
         callOpenAICompatible(params, {
           url: resolveApiUrl(),
           apiKey: ENV.forgeApiKey,
@@ -534,10 +532,36 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     }),
   };
 
-  const providers = ENV.llmProviderOrder
+}
+
+/** Providers named in LLM_PROVIDER_ORDER that actually hold a key, in order. */
+function resolveProviders(cheap: boolean): LlmProvider[] {
+  const registry = buildProviderRegistry(cheap);
+  return ENV.llmProviderOrder
     .split(",")
     .map(name => registry[name.trim().toLowerCase()]?.())
     .filter((p): p is LlmProvider => Boolean(p && p.available));
+}
+
+/**
+ * True when any provider in LLM_PROVIDER_ORDER is configured.
+ *
+ * Callers used to gate LLM features on ANTHROPIC_API_KEY || BUILT_IN_FORGE_API_KEY,
+ * which silently dropped to deterministic output on a Gemini/OpenAI-only
+ * deployment — exactly the setup that is now the default.
+ */
+export function hasLlmProvider(): boolean {
+  return resolveProviders(false).length > 0;
+}
+
+/**
+ * Multi-provider LLM with a fallback chain. Tries each configured provider in
+ * priority order (LLM_PROVIDER_ORDER) and moves to the next on any failure —
+ * so a capped provider transparently falls through to the next one instead of
+ * dropping to deterministic output.
+ */
+export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+  const providers = resolveProviders(params.tier === "cheap");
 
   if (providers.length === 0) {
     throw new Error(
@@ -548,7 +572,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   let lastError: unknown;
   for (const provider of providers) {
     try {
-      return await provider.call();
+      return await provider.call(params);
     } catch (error) {
       lastError = error;
       const message = error instanceof Error ? error.message : String(error);

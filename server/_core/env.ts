@@ -42,10 +42,13 @@ export const ENV = {
   anthropicCheapModel: process.env.ANTHROPIC_CHEAP_MODEL || "claude-haiku-4-5",
   geminiCheapModel: process.env.GEMINI_CHEAP_MODEL || "gemini-2.5-flash",
   openrouterCheapModel: process.env.OPENROUTER_CHEAP_MODEL || "openai/gpt-4o-mini",
-  // Provider priority order. Override to skip a capped provider, e.g.
-  // LLM_PROVIDER_ORDER="openai,gemini,anthropic".
+  // Provider priority order. Anthropic sits last on purpose: its balance ran
+  // out twice (2026-06-16, 2026-08-18) and each outage degraded output quietly
+  // (a fallback ignored the Korean-only instruction and answered in English),
+  // so it is a last-resort fallback rather than the default path.
+  // Override to skip a capped provider, e.g. LLM_PROVIDER_ORDER="openai,gemini".
   llmProviderOrder:
-    process.env.LLM_PROVIDER_ORDER || "anthropic,openai,gemini,openrouter,forge",
+    process.env.LLM_PROVIDER_ORDER || "gemini,openai,openrouter,forge,anthropic",
   // Commander-only Telegram channel (raw high-conviction signals).
   commanderChatId: process.env.COMMANDER_CHAT_ID ?? "",
   // News / market-sentiment sources (optional).

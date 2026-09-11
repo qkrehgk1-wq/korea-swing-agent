@@ -8,8 +8,7 @@
  * out, or returns an empty body — so output is never worse than rule-based.
  */
 
-import { ENV } from "./_core/env";
-import { invokeLLM } from "./_core/llm";
+import { hasLlmProvider, invokeLLM } from "./_core/llm";
 import {
   buildKoreanAnalyses,
   calculateSnapshot,
@@ -251,7 +250,7 @@ export async function runKoreanAgentAnalysis(
   }
 
   // No usable price data, or no LLM configured → deterministic + council only.
-  const llmAvailable = Boolean(ENV.anthropicApiKey || ENV.forgeApiKey);
+  const llmAvailable = hasLlmProvider();
   if (!data || !snapshot || !verdict || !llmAvailable) {
     return result;
   }
