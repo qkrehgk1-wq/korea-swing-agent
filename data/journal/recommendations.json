@@ -3331,7 +3331,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-08-28",
+    "exitDate": "2026-09-11",
+    "exitPrice": 69153,
+    "returnPct": 2.41,
+    "scoredAt": "2026-09-12T20:54:49.006Z"
   },
   {
     "date": "2026-08-27",
@@ -3932,7 +3937,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-02T21:14:49.942Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-04",
+    "exitDate": "2026-09-09",
+    "exitPrice": 112036,
+    "returnPct": 1.04,
+    "scoredAt": "2026-09-12T20:54:49.006Z"
   },
   {
     "date": "2026-09-03",
@@ -4463,6 +4473,27 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-11T21:14:39.603Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-13",
+    "ticker": "329180",
+    "companyName": "HD현대중공업",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 479000,
+    "triggerPrice": 486185,
+    "stopLossPrice": 430440,
+    "targetPrice": 625548,
+    "swingScore": 63,
+    "qualityScore": 47,
+    "relativeStrength": -9.49,
+    "supplyState": "neutral",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-12T20:54:45.409Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
