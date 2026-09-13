@@ -193,10 +193,21 @@ async function generateCombined(
       ],
       maxTokens: 4096,
     });
+    // Both returns below used to fall back silently — the same shape that hid a
+    // truncated Gemini answer behind canned alpha research for weeks.
     const content = response.choices[0]?.message.content;
-    if (typeof content !== "string") return det;
+    const finish = response.choices[0]?.finish_reason ?? "?";
+    if (typeof content !== "string") {
+      console.warn(`[KoreanAgentEngine] LLM content is not text (finish=${finish}) — using deterministic`);
+      return det;
+    }
     const obj = extractJsonObject(content);
-    if (!obj) return det;
+    if (!obj) {
+      console.warn(
+        `[KoreanAgentEngine] no JSON object in LLM output (finish=${finish}, ${content.length} chars) — using deterministic`
+      );
+      return det;
+    }
 
     const pick = (key: keyof CombinedSections, role: string): string => {
       const raw = obj[key];

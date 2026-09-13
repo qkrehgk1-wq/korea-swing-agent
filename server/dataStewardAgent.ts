@@ -13,6 +13,7 @@ import {
   summarizeJournalByTicker,
   summarizeShadowByTicker,
   type JournalSummary,
+  type RecommendationEntry,
   type TickerLevelSummary,
 } from "./recommendationJournalAgent";
 import {
@@ -259,7 +260,10 @@ export type SystemAnalysis = {
   shadowByTicker: TickerLevelSummary;
   expectancy: {
     backtest: ExpectancyStats;
+    /** Settled picks under the current champion — what alerts judge. */
     live: ExpectancyStats;
+    /** Every settled pick ever, including code that no longer runs. Report only. */
+    lifetime: ExpectancyStats;
     budget: RiskBudget;
   };
   factors: ReturnType<typeof summarizeByFactor>;
@@ -287,6 +291,45 @@ async function readJson<T>(filePath: string): Promise<T | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Picks made under the current champion — the same population the evolution
+ * gate already scores. Every "is the running system working?" judgement here
+ * uses it, so the steward and the gate cannot disagree about what "live" means.
+ */
+export function currentChampionEntries(
+  entries: RecommendationEntry[],
+  championAt: string | null | undefined
+): RecommendationEntry[] {
+  if (!championAt) return [];
+  return entries.filter(entry => entry.championAt === championAt);
+}
+
+/**
+ * Sizing basis, most conservative evidence first: current-champion live if it
+ * has a verdict, else lifetime live, else backtest. Jumping straight to the
+ * backtest whenever a fresh champion has not settled enough picks would size
+ * off a promise instead of evidence.
+ */
+export function pickBudgetBasis(
+  current: ExpectancyStats,
+  lifetime: ExpectancyStats,
+  backtest: ExpectancyStats
+): ExpectancyStats {
+  if (current.edgeVerdict !== "insufficient") return current;
+  if (lifetime.edgeVerdict !== "insufficient") return lifetime;
+  return backtest;
+}
+
+function liveRTrades(entries: RecommendationEntry[]) {
+  return entries
+    .filter(entry => !entry.watchOnly && isSettledStatus(entry.status))
+    .map(entry => ({
+      triggerPrice: entry.triggerPrice,
+      stopLossPrice: entry.stopLossPrice,
+      returnPct: entry.returnPct ?? 0,
+    }));
 }
 
 export async function buildSystemAnalysis(
@@ -343,21 +386,17 @@ export async function buildSystemAnalysis(
 
   // Expectancy in R — the risk-normalized edge. Live is the one that decides
   // whether the strategy is actually worth running; backtest is the reference.
+  // "Live" is scoped to the current champion. Judged on the whole journal, the
+  // 40 picks from pre-July code (−0.345R) outvoted the 13 from the current rules
+  // (+0.043R), so the commander got the same stale "기대값 음수" alert every day.
+  const currentEntries = currentChampionEntries(journalEntries, champion?.generatedAt);
   const backtestExpectancy = computeExpectancy(backtestReport?.trades ?? []);
-  const liveExpectancy = computeExpectancy(
-    journalEntries
-      .filter(entry => !entry.watchOnly && isSettledStatus(entry.status))
-      .map(entry => ({
-        triggerPrice: entry.triggerPrice,
-        stopLossPrice: entry.stopLossPrice,
-        returnPct: entry.returnPct ?? 0,
-      }))
-  );
+  const liveExpectancy = computeExpectancy(liveRTrades(currentEntries));
+  const lifetimeExpectancy = computeExpectancy(liveRTrades(journalEntries));
   const budget = computeRiskBudget(
-    liveExpectancy.edgeVerdict === "insufficient"
-      ? backtestExpectancy
-      : liveExpectancy
+    pickBudgetBasis(liveExpectancy, lifetimeExpectancy, backtestExpectancy)
   );
+  const currentByTicker = summarizeJournalByTicker(currentEntries);
 
   const issues: string[] = [];
   for (const source of catalog) {
@@ -385,7 +424,7 @@ export async function buildSystemAnalysis(
   // up is mathematically indefensible, regardless of how good the picks look.
   if (liveExpectancy.edgeVerdict === "negative") {
     issues.push(
-      `⚠ 기대값 음수: 라이브 ${liveExpectancy.expectancyR}R/거래(${liveExpectancy.trades}건) — 리스크 예산 0% 유지, 게이트 재검토 필요`
+      `⚠ 기대값 음수: 현 챔피언 라이브 ${liveExpectancy.expectancyR}R/거래(${liveExpectancy.trades}건) — 리스크 예산 0% 유지, 게이트 재검토 필요`
     );
   }
 
@@ -395,16 +434,18 @@ export async function buildSystemAnalysis(
   // gates need review before more capital-relevant picks go out.
   const minEdgeTickers = Number(process.env.EDGE_DECAY_MIN_TICKERS) || 8;
   const decayGapPp = Number(process.env.EDGE_DECAY_GAP_PP) || 15;
+  // Same scoping as expectancy: compare the backtest with picks the current
+  // champion actually made, not with results from rules that were replaced.
   if (
-    journalByTicker.settledTickers >= minEdgeTickers &&
+    currentByTicker.settledTickers >= minEdgeTickers &&
     backtest.winRate != null
   ) {
-    const winGap = backtest.winRate - journalByTicker.winRate;
+    const winGap = backtest.winRate - currentByTicker.winRate;
     const losingLive =
-      journalByTicker.avgReturnPct < 0 && (backtest.avgReturnPct ?? 0) > 0;
+      currentByTicker.avgReturnPct < 0 && (backtest.avgReturnPct ?? 0) > 0;
     if (winGap > decayGapPp || losingLive) {
       issues.push(
-        `⚠ 엣지 괴리: 실측(종목단위) 승률 ${journalByTicker.winRate}%·평균 ${journalByTicker.avgReturnPct}% vs 백테스트 ${backtest.winRate}%·${backtest.avgReturnPct}% — 신호 군집화/레짐 변화 의심, 게이트 재검토 권고`
+        `⚠ 엣지 괴리: 현 챔피언 실측(종목단위) 승률 ${currentByTicker.winRate}%·평균 ${currentByTicker.avgReturnPct}% vs 백테스트 ${backtest.winRate}%·${backtest.avgReturnPct}% — 신호 군집화/레짐 변화 의심, 게이트 재검토 권고`
       );
     }
   }
@@ -415,7 +456,12 @@ export async function buildSystemAnalysis(
     journal,
     journalByTicker,
     shadowByTicker,
-    expectancy: { backtest: backtestExpectancy, live: liveExpectancy, budget },
+    expectancy: {
+      backtest: backtestExpectancy,
+      live: liveExpectancy,
+      lifetime: lifetimeExpectancy,
+      budget,
+    },
     factors,
     evolution,
     backtest,
@@ -454,7 +500,8 @@ export function toReport(analysis: SystemAnalysis): string {
     `- 관찰 섀도(억제 후보 검증): ${analysis.shadowByTicker.settledTickers}종목 · 승률 ${analysis.shadowByTicker.winRate}% · 평균 ${analysis.shadowByTicker.avgReturnPct}%`,
     "",
     "## 기대값 / 리스크 예산 (R 단위)",
-    `- 라이브: ${formatExpectancy(analysis.expectancy.live, analysis.expectancy.budget)}`,
+    `- 라이브(현 챔피언): ${formatExpectancy(analysis.expectancy.live, analysis.expectancy.budget)}`,
+    `- 라이브(전체 이력·교체된 규칙 포함, 참고용): ${formatExpectancy(analysis.expectancy.lifetime, analysis.expectancy.budget)}`,
     `- 백테스트: ${formatExpectancy(analysis.expectancy.backtest, analysis.expectancy.budget)}`,
     `- 사이징 근거: ${analysis.expectancy.budget.note}`,
     `- 수급: ${
@@ -501,6 +548,11 @@ export async function runDataSteward(
       analysis.evolution.championFitness ?? "seed"
     }`
   );
+  // The markdown report lives in .data, which a CI runner discards — so the
+  // log line used to be the only trace, and it carried a count with no text.
+  for (const issue of analysis.issues) {
+    console.log(`[Data Steward]   - ${issue}`);
+  }
 
   // Alert on durable problems only: tracked-data health issues and edge-decay
   // warnings. Ephemeral .data absence on a CI run is expected, not an incident.

@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyHealth, toReport, type SystemAnalysis } from "./dataStewardAgent";
+import {
+  classifyHealth,
+  currentChampionEntries,
+  pickBudgetBasis,
+  toReport,
+  type SystemAnalysis,
+} from "./dataStewardAgent";
+import type { ExpectancyStats } from "./expectancy";
+import type { RecommendationEntry } from "./recommendationJournalAgent";
 
 describe("classifyHealth", () => {
   it("classifies by existence and age", () => {
@@ -73,6 +81,15 @@ describe("toReport", () => {
           profitFactor: 0.4,
           edgeVerdict: "insufficient",
         },
+        lifetime: {
+          trades: 40,
+          winRate: 30,
+          avgWinR: 0.86,
+          avgLossR: 0.86,
+          expectancyR: -0.345,
+          profitFactor: 0.43,
+          edgeVerdict: "negative",
+        },
         budget: { kellyFraction: 0.12, halfKellyPct: 2, cappedBy: "max", note: "상한 2%로 제한" },
       },
       factors: { supply: [], news: [], volumeFlow: [] },
@@ -97,5 +114,57 @@ describe("toReport", () => {
     expect(md).toContain("관찰 섀도");
     expect(md).toContain("기대값");
     expect(md).toContain("리스크 예산");
+    expect(md).toContain("현 챔피언");
+    expect(md).toContain("전체 이력");
+  });
+});
+
+function stats(edgeVerdict: ExpectancyStats["edgeVerdict"], expectancyR: number): ExpectancyStats {
+  return { trades: 20, winRate: 50, avgWinR: 1, avgLossR: 1, expectancyR, profitFactor: 1, edgeVerdict };
+}
+
+function entry(ticker: string, championAt?: string): RecommendationEntry {
+  return {
+    date: "2026-09-01",
+    ticker,
+    companyName: ticker,
+    market: "코스피",
+    source: "swing",
+    triggerPrice: 100,
+    stopLossPrice: 90,
+    targetPrice: 125,
+    swingScore: 70,
+    recordedAt: "2026-09-01T00:00:00.000Z",
+    status: "stop",
+    championAt,
+  } as RecommendationEntry;
+}
+
+describe("currentChampionEntries", () => {
+  it("keeps only picks made under the current champion", () => {
+    const entries = [entry("A", "2026-06-20"), entry("B", "2026-08-01"), entry("C")];
+    expect(currentChampionEntries(entries, "2026-08-01").map(e => e.ticker)).toEqual(["B"]);
+  });
+
+  it("returns nothing when no champion is known, rather than falling back to everything", () => {
+    // Falling back to the whole journal is exactly how replaced rules ended up
+    // driving a daily "negative" alert.
+    expect(currentChampionEntries([entry("A", "2026-06-20"), entry("B")], null)).toEqual([]);
+  });
+});
+
+describe("pickBudgetBasis", () => {
+  const backtest = stats("positive", 0.33);
+
+  it("uses the current champion once it has a verdict", () => {
+    expect(pickBudgetBasis(stats("breakeven", 0.04), stats("negative", -0.26), backtest).expectancyR).toBe(0.04);
+  });
+
+  it("falls back to lifetime evidence, not the backtest, while a new champion is unproven", () => {
+    expect(pickBudgetBasis(stats("insufficient", 0.5), stats("negative", -0.26), backtest).expectancyR).toBe(-0.26);
+  });
+
+  it("uses the backtest only when there is no live verdict at all", () => {
+    expect(pickBudgetBasis(stats("insufficient", 0), stats("insufficient", 0), backtest).expectancyR).toBe(0.33);
   });
 });
