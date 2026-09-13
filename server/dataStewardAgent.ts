@@ -87,6 +87,11 @@ const JOURNAL_PATH = path.join(
 const REPORT_DIR = path.join(process.cwd(), ".data", "data-steward");
 const REPORT_JSON_PATH = path.join(REPORT_DIR, "latest-report.json");
 const REPORT_MD_PATH = path.join(REPORT_DIR, "latest-report.md");
+// Under data/ (committed by the daily workflow) so the next run can read it.
+const HEARTBEAT_PATH = path.join(process.cwd(), "data", "ops", "steward-heartbeat.json");
+// Normal cron jitter was observed up to ~29h between runs; one fully missed
+// day lands near 48h.
+const RUN_GAP_ALERT_HOURS = Number(process.env.RUN_GAP_ALERT_HOURS) || 36;
 const BILLIONAIRE_BACKTEST_PATH = path.join(
   process.cwd(),
   ".data",
@@ -322,6 +327,26 @@ export function pickBudgetBasis(
   return backtest;
 }
 
+/**
+ * Hours since the previous run when that exceeds the threshold, else null.
+ *
+ * A job that never starts cannot report its own absence: on 2026-08-30..09-01
+ * GitHub never assigned a runner, three days of alerts and scoring were lost,
+ * and nothing said so. The first run afterwards is the earliest point anyone
+ * can notice — so it measures the gap.
+ */
+export function detectRunGap(
+  previousRunAt: string | null,
+  now: Date,
+  thresholdHours: number
+): number | null {
+  if (!previousRunAt) return null;
+  const previous = Date.parse(previousRunAt);
+  if (!Number.isFinite(previous)) return null;
+  const hours = (now.getTime() - previous) / 3_600_000;
+  return hours > thresholdHours ? Math.round(hours) : null;
+}
+
 function liveRTrades(entries: RecommendationEntry[]) {
   return entries
     .filter(entry => !entry.watchOnly && isSettledStatus(entry.status))
@@ -422,6 +447,13 @@ export async function buildSystemAnalysis(
 
   // Negative measured expectancy is the one condition where continuing to size
   // up is mathematically indefensible, regardless of how good the picks look.
+  // After a promotion the new champion starts from zero picks, so both live
+  // alerts below go quiet for weeks. Say so instead of going quiet silently.
+  if (liveExpectancy.edgeVerdict === "insufficient") {
+    issues.push(
+      `현 챔피언 라이브 표본 부족(${liveExpectancy.trades}건) — 기대값·엣지 괴리 경보 판정 보류(전체 이력은 리포트 참고)`
+    );
+  }
   if (liveExpectancy.edgeVerdict === "negative") {
     issues.push(
       `⚠ 기대값 음수: 현 챔피언 라이브 ${liveExpectancy.expectancyR}R/거래(${liveExpectancy.trades}건) — 리스크 예산 0% 유지, 게이트 재검토 필요`
@@ -533,6 +565,25 @@ export async function runDataSteward(
   now = new Date()
 ): Promise<SystemAnalysis> {
   const analysis = await buildSystemAnalysis(now);
+
+  // Heartbeat. Only CI's cadence means anything, and a local run would dirty a
+  // tracked file — so both the check and the write are CI-only.
+  if (process.env.GITHUB_ACTIONS === "true") {
+    const previous = await readJson<{ lastRunAt?: string }>(HEARTBEAT_PATH);
+    const gapHours = detectRunGap(previous?.lastRunAt ?? null, now, RUN_GAP_ALERT_HOURS);
+    if (gapHours !== null) {
+      analysis.issues.unshift(
+        `⚠ 자동 실행 공백 ${gapHours}시간 — 그 사이 알림·채점·데이터 커밋이 없었습니다(GitHub Actions 러너 미배정 등)`
+      );
+    }
+    await mkdir(path.dirname(HEARTBEAT_PATH), { recursive: true });
+    await writeFile(
+      HEARTBEAT_PATH,
+      `${JSON.stringify({ lastRunAt: now.toISOString() }, null, 2)}\n`,
+      "utf8"
+    );
+  }
+
   await mkdir(REPORT_DIR, { recursive: true });
   await Promise.all([
     writeFile(
@@ -565,7 +616,10 @@ export async function runDataSteward(
       )
       .map(source => `${source.key}: ${source.health}`),
     ...analysis.issues.filter(
-      issue => issue.includes("엣지 괴리") || issue.includes("기대값 음수")
+      issue =>
+        issue.includes("엣지 괴리") ||
+        issue.includes("기대값 음수") ||
+        issue.includes("자동 실행 공백")
     ),
   ];
   if (criticalIssues.length) {

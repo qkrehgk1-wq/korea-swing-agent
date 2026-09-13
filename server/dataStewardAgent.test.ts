@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   classifyHealth,
   currentChampionEntries,
+  detectRunGap,
   pickBudgetBasis,
   toReport,
   type SystemAnalysis,
@@ -150,6 +151,24 @@ describe("currentChampionEntries", () => {
     // Falling back to the whole journal is exactly how replaced rules ended up
     // driving a daily "negative" alert.
     expect(currentChampionEntries([entry("A", "2026-06-20"), entry("B")], null)).toEqual([]);
+  });
+});
+
+describe("detectRunGap", () => {
+  it("flags the real 2026-08-30..09-01 outage on the first run that came back", () => {
+    // Last successful run before GitHub stopped assigning runners, then the
+    // first one after: ~96h with no alert, no scoring, no data commit.
+    expect(detectRunGap("2026-08-29T21:08:37Z", new Date("2026-09-02T21:13:39Z"), 36)).toBe(96);
+  });
+
+  it("stays quiet through normal cron jitter", () => {
+    // The widest normal spacing observed (a delayed, not missed, run) was ~29h.
+    expect(detectRunGap("2026-08-26T21:08:20Z", new Date("2026-08-28T02:17:53Z"), 36)).toBeNull();
+  });
+
+  it("does nothing on the very first run or an unreadable heartbeat", () => {
+    expect(detectRunGap(null, new Date("2026-09-13T00:00:00Z"), 36)).toBeNull();
+    expect(detectRunGap("not-a-date", new Date("2026-09-13T00:00:00Z"), 36)).toBeNull();
   });
 });
 
