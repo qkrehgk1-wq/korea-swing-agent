@@ -1,0 +1,49 @@
+name: CI Tests
+
+# The unit tests had never run in CI — the three scheduled workflows run
+# `pnpm check` at most, so a broken contract (e.g. a regression of the Gemini
+# thinking-budget fix) could ship without anyone seeing it. This runs the
+# suite on every push and PR to main. The daily data commits carry
+# [skip ci] and are skipped automatically.
+#
+# No secrets on purpose: the suite is hermetic (verified green on a clean
+# checkout with no .env), and a test that needs a live key belongs elsewhere.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # corepack을 setup-node보다 먼저 켜야 pnpm 캐시가 동작합니다.
+      - name: Enable Corepack (pnpm)
+        run: corepack enable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: corepack pnpm check
+
+      - name: Unit tests
+        run: corepack pnpm test
