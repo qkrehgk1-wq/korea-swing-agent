@@ -244,14 +244,30 @@ async function distillWithLlm(hits: SearchHit[]): Promise<AlphaTechnique[] | nul
       ],
       maxTokens: 4096,
     });
+    // Every null below used to return silently, so a truncated or malformed
+    // answer shipped the curated fallback while the report still read like
+    // fresh research. Each path now says why.
     const content = response.choices[0]?.message.content;
-    if (typeof content !== "string") return null;
+    const finish = response.choices[0]?.finish_reason ?? "?";
+    if (typeof content !== "string") {
+      console.warn(`[AlphaResearch] LLM content is not text (finish=${finish}) — using curated fallback`);
+      return null;
+    }
     const arr = extractJsonArray(content);
-    if (!arr) return null;
+    if (!arr) {
+      console.warn(
+        `[AlphaResearch] no JSON array in LLM output (finish=${finish}, ${content.length} chars, tail=${JSON.stringify(content.slice(-80))}) — using curated fallback`
+      );
+      return null;
+    }
     const techniques = arr
       .map(coerceTechnique)
       .filter((t): t is AlphaTechnique => t !== null);
-    return techniques.length > 0 ? techniques : null;
+    if (techniques.length === 0) {
+      console.warn(`[AlphaResearch] ${arr.length} item(s) parsed, none had title+thesis — using curated fallback`);
+      return null;
+    }
+    return techniques;
   } catch (error) {
     console.warn("[AlphaResearch] LLM distillation failed:", error);
     return null;
@@ -323,6 +339,11 @@ export async function collectAlphaResearchReport(
       notes.push("웹 검색 결과가 비어 큐레이션 기법으로 대체.");
     }
     const distilled = hits.length > 0 ? await distillWithLlm(hits) : null;
+    if (hits.length > 0 && !distilled) {
+      // Tell the reader, not just the log: without this the report said
+      // "검색 스니펫 N건 수집" over canned techniques and looked like research.
+      notes.push("LLM 분석 결과를 쓸 수 없어 큐레이션 기법으로 대체(원인은 CI 로그 [AlphaResearch]).");
+    }
     report = {
       generatedAt: now.toISOString(),
       source: distilled ? "llm" : "deterministic",

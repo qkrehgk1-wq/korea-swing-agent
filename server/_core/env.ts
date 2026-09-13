@@ -41,6 +41,9 @@ export const ENV = {
   openaiCheapModel: process.env.OPENAI_CHEAP_MODEL || "gpt-4o-mini",
   anthropicCheapModel: process.env.ANTHROPIC_CHEAP_MODEL || "claude-haiku-4-5",
   geminiCheapModel: process.env.GEMINI_CHEAP_MODEL || "gemini-2.5-flash",
+  // Tokens Gemini 2.5 may spend "thinking", granted *on top of* the answer
+  // budget (see geminiGenerationConfig). 0 disables thinking on Flash models.
+  geminiThinkingBudget: Number(process.env.GEMINI_THINKING_BUDGET ?? 1024),
   openrouterCheapModel: process.env.OPENROUTER_CHEAP_MODEL || "openai/gpt-4o-mini",
   // Provider priority order. Anthropic sits last on purpose: its balance ran
   // out twice (2026-06-16, 2026-08-18) and each outage degraded output quietly

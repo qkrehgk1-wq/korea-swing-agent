@@ -358,6 +358,38 @@ async function callOpenAICompatible(
   )) as InvokeResult;
 }
 
+/**
+ * Gemini 2.5 models think before answering, and thinking tokens come out of the
+ * same maxOutputTokens budget as the answer. With a flat 4096 budget the alpha
+ * research prompt spent 3,929 tokens thinking, got cut off 163 tokens into its
+ * JSON, failed to parse, and silently shipped canned output for weeks. So the
+ * caller's maxTokens is treated as the *answer* budget and a capped thinking
+ * budget is granted on top of it.
+ */
+export function geminiGenerationConfig(
+  model: string,
+  answerTokens: number,
+  thinkingBudget: number
+): Record<string, unknown> {
+  if (!/^gemini-2\.5/.test(model)) {
+    return { maxOutputTokens: answerTokens };
+  }
+  let budget = Math.max(0, Math.floor(thinkingBudget));
+  // Pro models cannot turn thinking off; 128 is the API minimum.
+  if (/pro/.test(model)) budget = Math.max(128, budget);
+  return {
+    maxOutputTokens: answerTokens + budget,
+    thinkingConfig: { thinkingBudget: budget },
+  };
+}
+
+/** Gemini finishReason → the OpenAI-style value the rest of the code speaks. */
+export function mapGeminiFinishReason(reason: unknown): string {
+  if (reason == null || reason === "STOP") return "stop";
+  if (reason === "MAX_TOKENS") return "length";
+  return String(reason).toLowerCase();
+}
+
 // Google Gemini (Generative Language API) — different request/response shape.
 async function callGemini(params: InvokeParams, model: string): Promise<InvokeResult> {
   const systemParts: string[] = [];
@@ -377,9 +409,11 @@ async function callGemini(params: InvokeParams, model: string): Promise<InvokeRe
 
   const body: Record<string, unknown> = {
     contents: contents.length ? contents : [{ role: "user", parts: [{ text: " " }] }],
-    generationConfig: {
-      maxOutputTokens: params.maxTokens ?? params.max_tokens ?? ENV.llmMaxTokens,
-    },
+    generationConfig: geminiGenerationConfig(
+      model,
+      params.maxTokens ?? params.max_tokens ?? ENV.llmMaxTokens,
+      ENV.geminiThinkingBudget
+    ),
   };
   if (systemParts.length) {
     body.systemInstruction = { parts: [{ text: systemParts.join("\n\n") }] };
@@ -391,16 +425,25 @@ async function callGemini(params: InvokeParams, model: string): Promise<InvokeRe
     `gemini(${model})`
   );
 
-  const text = (data?.candidates?.[0]?.content?.parts ?? [])
+  const candidate = data?.candidates?.[0];
+  const text = (candidate?.content?.parts ?? [])
     .map((part: any) => (typeof part?.text === "string" ? part.text : ""))
     .join("");
   const usage = data?.usageMetadata ?? {};
+  // This used to be hard-coded to "stop", which reported truncated answers as
+  // complete. Surface the real reason so a cut-off shows up in CI logs.
+  const finishReason = mapGeminiFinishReason(candidate?.finishReason);
+  if (finishReason !== "stop") {
+    console.warn(
+      `[LLM] gemini(${model}) finished with ${candidate?.finishReason}: answer ${usage.candidatesTokenCount ?? 0} tok, thinking ${usage.thoughtsTokenCount ?? 0} tok — output may be cut off`
+    );
+  }
   return {
     id: `gemini-${Date.now()}`,
     created: Date.now(),
     model: model,
     choices: [
-      { index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" },
+      { index: 0, message: { role: "assistant", content: text }, finish_reason: finishReason },
     ],
     usage: {
       prompt_tokens: usage.promptTokenCount ?? 0,
