@@ -3049,7 +3049,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-24T19:14:08.879Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-28",
+    "exitDate": "2026-09-17",
+    "exitPrice": 270000,
+    "returnPct": -2.91,
+    "scoredAt": "2026-09-17T21:42:23.329Z"
   },
   {
     "date": "2026-08-25",
@@ -3164,7 +3169,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-25T19:12:16.341Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-28",
+    "exitDate": "2026-09-17",
+    "exitPrice": 144300,
+    "returnPct": -3.2,
+    "scoredAt": "2026-09-17T21:42:23.329Z"
   },
   {
     "date": "2026-08-26",
@@ -3319,7 +3329,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-28",
+    "exitDate": "2026-09-17",
+    "exitPrice": 1098000,
+    "returnPct": -0.83,
+    "scoredAt": "2026-09-17T21:42:23.329Z"
   },
   {
     "date": "2026-08-27",
@@ -4001,7 +4016,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-02T21:14:49.942Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-04",
+    "exitDate": "2026-09-17",
+    "exitPrice": 106238.6,
+    "returnPct": 7.08,
+    "scoredAt": "2026-09-17T21:42:23.329Z"
   },
   {
     "date": "2026-09-04",
@@ -4312,7 +4332,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-09T21:08:55.430Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-17T21:42:23.329Z"
   },
   {
     "date": "2026-09-10",
@@ -4354,7 +4376,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-09T21:08:55.430Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-17T21:42:23.329Z"
   },
   {
     "date": "2026-09-10",
@@ -4376,7 +4400,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-09T21:08:55.430Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-17T21:42:23.329Z"
   },
   {
     "date": "2026-09-11",
@@ -4820,6 +4846,88 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-16T21:40:33.865Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-18",
+    "ticker": "086280",
+    "companyName": "현대글로비스",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 206500,
+    "triggerPrice": 209597,
+    "stopLossPrice": 184008,
+    "targetPrice": 273570,
+    "swingScore": 83,
+    "qualityScore": 63,
+    "relativeStrength": 30.31,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-17T21:42:19.942Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-18",
+    "ticker": "010140",
+    "companyName": "삼성중공업",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 21550,
+    "triggerPrice": 21873,
+    "stopLossPrice": 19788,
+    "targetPrice": 27086,
+    "swingScore": 76,
+    "qualityScore": 49,
+    "relativeStrength": 8.5,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-17T21:42:19.942Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-18",
+    "ticker": "041510",
+    "companyName": "에스엠",
+    "market": "코스닥",
+    "source": "swing",
+    "currentPrice": 82400,
+    "triggerPrice": 83636,
+    "stopLossPrice": 71091,
+    "targetPrice": 114999,
+    "swingScore": 90,
+    "qualityScore": 77,
+    "relativeStrength": 30.08,
+    "supplyState": "distributing",
+    "newsState": "negative",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-17T21:42:19.942Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-18",
+    "ticker": "175330",
+    "companyName": "JB금융지주",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 32000,
+    "triggerPrice": 32456,
+    "stopLossPrice": 27588,
+    "targetPrice": 44626,
+    "swingScore": 84,
+    "qualityScore": 81,
+    "relativeStrength": 48.85,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-17T21:42:19.942Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
