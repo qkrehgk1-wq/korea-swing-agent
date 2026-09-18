@@ -3240,7 +3240,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-26T21:09:31.530Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-31",
+    "exitDate": "2026-09-18",
+    "exitPrice": 204000,
+    "returnPct": -2.07,
+    "scoredAt": "2026-09-18T21:12:45.997Z"
   },
   {
     "date": "2026-08-27",
@@ -3503,7 +3508,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-28T02:19:06.958Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-31",
+    "exitDate": "2026-09-18",
+    "exitPrice": 325500,
+    "returnPct": -4.62,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-08-28",
@@ -3523,7 +3533,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-28T02:19:06.958Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-31",
+    "exitDate": "2026-09-18",
+    "exitPrice": 268000,
+    "returnPct": -4.34,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-08-28",
@@ -3633,7 +3648,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-28T02:19:06.958Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-31",
+    "exitDate": "2026-09-18",
+    "exitPrice": 466000,
+    "returnPct": -1.93,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-08-29",
@@ -3677,7 +3697,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-29T01:54:20.284Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-31",
+    "exitDate": "2026-09-18",
+    "exitPrice": 21050,
+    "returnPct": -3.89,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-08-29",
@@ -3745,7 +3770,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-08-29T01:54:20.284Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-08-31",
+    "exitDate": "2026-09-18",
+    "exitPrice": 188500,
+    "returnPct": -2.06,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-08-29",
@@ -4269,7 +4299,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-08T21:23:20.806Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-09-10",
+    "exitDate": "2026-09-18",
+    "exitPrice": 212667,
+    "returnPct": -15.35,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-09-09",
@@ -4290,7 +4325,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-08T21:23:20.806Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-11",
+    "exitDate": "2026-09-18",
+    "exitPrice": 113558.4,
+    "returnPct": 7.02,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-09-10",
@@ -4444,7 +4484,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-10T21:09:36.660Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-09-11",
@@ -4465,7 +4507,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-10T21:09:36.660Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-09-11",
@@ -4486,7 +4530,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-10T21:09:36.660Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-09-12",
@@ -4527,7 +4573,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-11T21:14:39.603Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-09-18T21:12:45.998Z"
   },
   {
     "date": "2026-09-13",
@@ -4928,6 +4976,90 @@
     "volumeFlowRising": true,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-17T21:42:19.942Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-19",
+    "ticker": "047810",
+    "companyName": "한국항공우주",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 130200,
+    "triggerPrice": 132153,
+    "stopLossPrice": 119850,
+    "targetPrice": 162911,
+    "swingScore": 84,
+    "qualityScore": 64,
+    "relativeStrength": 11.72,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-18T21:12:42.809Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-19",
+    "ticker": "000880",
+    "companyName": "한화",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 134100,
+    "triggerPrice": 136112,
+    "stopLossPrice": 115695,
+    "targetPrice": 187155,
+    "swingScore": 83,
+    "qualityScore": 77,
+    "relativeStrength": 28.35,
+    "supplyState": "accumulating",
+    "newsState": "negative",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-18T21:12:42.809Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-19",
+    "ticker": "028050",
+    "companyName": "삼성E&A",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 52100,
+    "triggerPrice": 63434,
+    "stopLossPrice": 53919,
+    "targetPrice": 87222,
+    "swingScore": 79,
+    "qualityScore": 67,
+    "relativeStrength": 39.28,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-18T21:12:42.809Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-19",
+    "ticker": "140410",
+    "companyName": "메지온",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 75100,
+    "triggerPrice": 96530,
+    "stopLossPrice": 82051,
+    "targetPrice": 132728,
+    "swingScore": 79,
+    "qualityScore": 77,
+    "relativeStrength": 41.42,
+    "supplyState": "distributing",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-18T21:12:42.809Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
