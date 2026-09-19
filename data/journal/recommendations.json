@@ -3839,7 +3839,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-02T21:14:49.942Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-04",
+    "exitDate": "2026-09-17",
+    "exitPrice": 9413.5,
+    "returnPct": 2.47,
+    "scoredAt": "2026-09-19T20:58:48.194Z"
   },
   {
     "date": "2026-09-03",
@@ -5060,6 +5065,27 @@
     "volumeFlowRising": true,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-18T21:12:42.809Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-09-20",
+    "ticker": "012450",
+    "companyName": "한화에어로스페이스",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 1092000,
+    "triggerPrice": 1108380,
+    "stopLossPrice": 942123,
+    "targetPrice": 1524023,
+    "swingScore": 78,
+    "qualityScore": 70,
+    "relativeStrength": 20.55,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-09-19T20:58:44.528Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
