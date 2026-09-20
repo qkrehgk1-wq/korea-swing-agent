@@ -24,6 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # The scheduled workflows all run in KST and the code computes KST dates;
+    # matching here keeps a date-dependent test from passing locally and
+    # failing only in CI.
+    env:
+      TZ: Asia/Seoul
 
     steps:
       - name: Checkout code
