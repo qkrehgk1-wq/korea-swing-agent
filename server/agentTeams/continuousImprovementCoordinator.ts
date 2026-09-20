@@ -186,6 +186,12 @@ export async function runContinuousImprovementCycle(options: {
   packageJsonPath?: string;
   fetchImpl?: typeof fetch;
   now?: Date;
+  /**
+   * Injectable because the benchmark corpus lives outside the repo and only
+   * exists on some machines — without this a test of *composition* silently
+   * became a test of "is that folder on this disk?".
+   */
+  localBenchmark?: LocalBenchmarkReport;
 }): Promise<ContinuousImprovementReport> {
   const maintenanceHistory =
     await readJsonFile<MaintenanceHistoryLike[]>(options.maintenanceHistoryPath ?? DEFAULT_MAINTENANCE_HISTORY_PATH);
@@ -206,9 +212,11 @@ export async function runContinuousImprovementCycle(options: {
     fetchImpl: options.fetchImpl,
     now: options.now,
   });
-  const localBenchmark = await collectLocalBenchmarkReport({
-    now: options.now,
-  });
+  const localBenchmark =
+    options.localBenchmark ??
+    (await collectLocalBenchmarkReport({
+      now: options.now,
+    }));
   const engineeringUpgrades = await collectEngineeringUpgradeReport({
     packageJsonPath: options.packageJsonPath,
     fetchImpl: options.fetchImpl,

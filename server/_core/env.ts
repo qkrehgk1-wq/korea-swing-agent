@@ -52,6 +52,10 @@ export const ENV = {
   // Override to skip a capped provider, e.g. LLM_PROVIDER_ORDER="openai,gemini".
   llmProviderOrder:
     process.env.LLM_PROVIDER_ORDER || "gemini,openai,openrouter,forge,anthropic",
+  // Benchmark corpus that lives outside the repo, so it differs per machine.
+  // Empty means "skip the benchmark lane" — it used to be a hard-coded absolute
+  // Desktop path, which only existed on one machine.
+  localBenchmarkRoot: process.env.LOCAL_BENCHMARK_ROOT ?? "",
   // Commander-only Telegram channel (raw high-conviction signals).
   commanderChatId: process.env.COMMANDER_CHAT_ID ?? "",
   // News / market-sentiment sources (optional).

@@ -88,6 +88,25 @@ describe("runContinuousImprovementCycle", () => {
         );
       },
       now: new Date("2026-05-22T00:00:00.000Z"),
+      // The benchmark corpus lives outside the repo, so on CI it produced no
+      // findings and this test failed there while passing on the one machine
+      // that happens to hold the folder. Inject it: what is under test here is
+      // that every lane reaches the roadmap, not what is on a given disk.
+      localBenchmark: {
+        generatedAt: "2026-05-22T00:00:00.000Z",
+        scannedRoot: "(injected)",
+        findings: [
+          {
+            title: "스캐너 캐시 TTL 분리",
+            area: "scanner",
+            applicabilityScore: 80,
+            evidence: "벤치마크 스캐너가 소스별 캐시 TTL을 분리해 호출량을 줄인다.",
+            adoptionIdea: "우리 수집기도 소스별 TTL을 나눠 재시도 비용을 낮춘다.",
+            sourcePath: "(injected)/scanner.py",
+          },
+        ],
+        notes: ["테스트 주입 값"],
+      },
     });
 
     expect(report.roadmap.length).toBeGreaterThan(0);

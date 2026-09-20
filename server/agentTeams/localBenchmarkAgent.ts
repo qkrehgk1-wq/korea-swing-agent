@@ -1,6 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { ENV } from "../_core/env";
+
 export type BenchmarkFinding = {
   title: string;
   sourcePath: string;
@@ -25,7 +27,19 @@ type LocalBenchmarkInput = {
   chiefOrchestratorPy?: string;
 };
 
-const DEFAULT_BENCHMARK_ROOT = path.join("C:\\Users\\user\\Desktop", "돈", "prediction_arbitrage");
+/**
+ * Corpus this agent learns from. It lives outside the repo and differs per
+ * machine, so it comes from the environment rather than a baked-in path: the
+ * previous hard-coded absolute Desktop path meant findings appeared only on one
+ * machine (CI silently produced none, and its improvement roadmap was missing
+ * the benchmark lane entirely), and it published a personal directory name in a
+ * public repository. Set LOCAL_BENCHMARK_ROOT in .env.local to enable it.
+ */
+function defaultBenchmarkRoot(): string {
+  // Via ENV, which loads .env.local — plain dotenv/config reads only .env, and
+  // none of the entry points on this path loaded either.
+  return ENV.localBenchmarkRoot;
+}
 const REPORT_DIR = path.join(process.cwd(), ".data", "local-benchmark");
 
 function hasAll(text: string | undefined, keywords: string[]) {
@@ -150,8 +164,8 @@ export async function collectLocalBenchmarkReport(options: {
   rootDir?: string;
   now?: Date;
 } = {}): Promise<LocalBenchmarkReport> {
-  const rootDir = options.rootDir ?? DEFAULT_BENCHMARK_ROOT;
-  const input = await readLocalBenchmarkInput(rootDir);
+  const rootDir = options.rootDir ?? defaultBenchmarkRoot();
+  const input = rootDir ? await readLocalBenchmarkInput(rootDir) : {};
   const findings = buildBenchmarkFindings(rootDir, input);
   const missingFiles = [
     input.scannerPy ? null : "scanner.py",
@@ -165,7 +179,11 @@ export async function collectLocalBenchmarkReport(options: {
     scannedRoot: rootDir,
     findings,
     notes: [
-      missingFiles.length ? `일부 벤치마크 파일을 읽지 못했습니다: ${missingFiles.join(", ")}` : "핵심 벤치마크 파일을 모두 읽었습니다.",
+      rootDir
+        ? missingFiles.length
+          ? `일부 벤치마크 파일을 읽지 못했습니다: ${missingFiles.join(", ")}`
+          : "핵심 벤치마크 파일을 모두 읽었습니다."
+        : "LOCAL_BENCHMARK_ROOT 미설정 — 벤치마크 레인을 건너뜁니다(이 코퍼스는 저장소 밖에 있습니다).",
       "암호화폐 전용 로직은 그대로 이식하지 않고, 패턴 계약·실행 계획·검증 절차처럼 시장 불문 운영 구조만 우선 차용합니다.",
     ],
   };
