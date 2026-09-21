@@ -446,12 +446,28 @@ async function liveFitnessForChampion(): Promise<number | null> {
   );
 }
 
-function shouldRunFullEvolution(): boolean {
-  if ((process.env.EVOLUTION_FORCE ?? "") === "true") return true;
-  const configured = Number(process.env.EVOLUTION_DAY);
-  const targetDay = Number.isInteger(configured) && configured >= 0 && configured <= 6 ? configured : 1; // 기본 월요일(KST)
-  const kstDay = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })).getDay();
-  return kstDay === targetDay;
+/**
+ * Weekday (0=Sun..6=Sat, KST) the full evolution search runs on. Default Monday.
+ *
+ * An unset repository variable reaches the job as an empty string
+ * (`EVOLUTION_DAY: ${{ vars.EVOLUTION_DAY }}`), and Number("") is 0 — Sunday.
+ * The documented "default Monday" therefore never applied: for weeks the search
+ * ran on Sunday while every doc and log said Monday. Blank now means unset.
+ */
+export function resolveEvolutionDay(raw: string | undefined): number {
+  const text = (raw ?? "").trim();
+  if (text === "") return 1;
+  const configured = Number(text);
+  return Number.isInteger(configured) && configured >= 0 && configured <= 6 ? configured : 1;
+}
+
+export function shouldRunFullEvolution(
+  env: Record<string, string | undefined> = process.env,
+  now: Date = new Date()
+): boolean {
+  if ((env.EVOLUTION_FORCE ?? "") === "true") return true;
+  const kstDay = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" })).getDay();
+  return kstDay === resolveEvolutionDay(env.EVOLUTION_DAY);
 }
 
 /**
@@ -552,7 +568,7 @@ export async function runSwingEvolution(): Promise<EvolutionRunResult | null> {
         reason:
           liveFit === null
             ? "라이브 표본 부족 또는 챔피언 연결 없음"
-            : `라이브 기대값 음수 (${liveFit.toFixed(3)}R)`,
+            : `라이브 적합도 ${liveFit.toFixed(3)} < 0 (기대값 × 표본신뢰도, R 아님) — 헌장(2026-08-03)에 따라 라이브가 0 이상으로 돌아설 때까지 승격 보류`,
       };
   const promoted = autoPromote && finalDecision.promote;
   const generatedAt = new Date().toISOString();
