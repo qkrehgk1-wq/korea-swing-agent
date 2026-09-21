@@ -7,6 +7,8 @@ import path from "node:path";
 import { routeToCommander } from "./commanderChannel";
 import {
   isSettledStatus,
+  kstDate,
+  isoDateMinusDays,
   loadRecommendationJournal,
   summarizeByFactor,
   summarizeJournal,
@@ -347,6 +349,39 @@ export function detectRunGap(
   return hours > thresholdHours ? Math.round(hours) : null;
 }
 
+/** How far back a missing recorded price still counts as a *current* failure. */
+const PRICE_CAPTURE_WINDOW_DAYS = 14;
+
+/**
+ * Missing currentPrice among recent journal entries only.
+ *
+ * Counting the whole journal made this warning permanent: 73 of the 74 missing
+ * were Jun–Jul entries written before the field existed, which can never be
+ * filled in, while all 99 entries since 8/20 had it. A warning that cannot clear
+ * says nothing — restricted to the recent window, it fires exactly when price
+ * capture breaks *now*. The legacy count is kept for the report.
+ */
+export function countMissingCurrentPrice(
+  entries: RecommendationEntry[],
+  today: string,
+  windowDays: number
+): { recentMissing: number; recentTotal: number; legacyMissing: number } {
+  const cutoff = isoDateMinusDays(today, windowDays);
+  let recentMissing = 0;
+  let recentTotal = 0;
+  let legacyMissing = 0;
+  for (const entry of entries) {
+    const missing = !Number.isFinite(entry.currentPrice);
+    if (entry.date >= cutoff) {
+      recentTotal += 1;
+      if (missing) recentMissing += 1;
+    } else if (missing) {
+      legacyMissing += 1;
+    }
+  }
+  return { recentMissing, recentTotal, legacyMissing };
+}
+
 function liveRTrades(entries: RecommendationEntry[]) {
   return entries
     .filter(entry => !entry.watchOnly && isSettledStatus(entry.status))
@@ -436,12 +471,10 @@ export async function buildSystemAnalysis(
       `정산 표본 0 — 라이브 검증 데이터 축적 중(진행 ${journal.open}건)`
     );
   }
-  const missingCurrentPrice = journalEntries.filter(
-    entry => !Number.isFinite(entry.currentPrice)
-  ).length;
-  if (missingCurrentPrice > 0) {
+  const priceCapture = countMissingCurrentPrice(journalEntries, kstDate(now), PRICE_CAPTURE_WINDOW_DAYS);
+  if (priceCapture.recentMissing > 0) {
     issues.push(
-      `추천 저널: 현재가 누락 ${missingCurrentPrice}/${journalEntries.length}건 — 기록 당시 시세 소급 검증 불가`
+      `추천 저널: 최근 ${PRICE_CAPTURE_WINDOW_DAYS}일 기록 ${priceCapture.recentTotal}건 중 현재가 누락 ${priceCapture.recentMissing}건 — 시세 기록이 지금 깨졌을 수 있음`
     );
   }
 
