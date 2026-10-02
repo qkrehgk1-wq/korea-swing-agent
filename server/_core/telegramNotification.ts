@@ -1,5 +1,31 @@
 import { ENV } from "./env";
 import https from "node:https";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+
+// When the main chat last received a message, so the commander digest can keep
+// its distance (see commanderChannel.flushCommanderDigest). Lives in .data: it
+// only has to survive between steps of one CI job.
+const MAIN_SENT_AT_PATH = path.join(process.cwd(), ".data", "telegram-main-sent-at.json");
+
+async function markMainChatSent(chatId: string): Promise<void> {
+  if (!chatId || chatId !== ENV.telegramChatId) return;
+  try {
+    await mkdir(path.dirname(MAIN_SENT_AT_PATH), { recursive: true });
+    await writeFile(MAIN_SENT_AT_PATH, JSON.stringify({ sentAt: Date.now() }), "utf8");
+  } catch {
+    // Best-effort: without it the digest simply goes out without waiting.
+  }
+}
+
+export async function readMainChatSentAt(): Promise<number | null> {
+  try {
+    const parsed = JSON.parse(await readFile(MAIN_SENT_AT_PATH, "utf8"));
+    return typeof parsed?.sentAt === "number" ? parsed.sentAt : null;
+  } catch {
+    return null;
+  }
+}
 
 function hasTelegramConfig(chatId: string) {
   return Boolean(ENV.telegramBotToken && chatId);
@@ -119,12 +145,14 @@ export async function sendTelegramMessage(
   }
 
   const message = `${escapeTelegramMarkdown(title)}\n\n${escapeTelegramMarkdown(content)}`;
-  return sendWithRetry("sendMessage", {
+  const sent = await sendWithRetry("sendMessage", {
     chat_id: chatId,
     text: message.slice(0, 4000),
     parse_mode: "MarkdownV2",
     disable_web_page_preview: true,
   });
+  if (sent) await markMainChatSent(chatId);
+  return sent;
 }
 
 export type TelegramInlineButton = {
@@ -159,13 +187,15 @@ export async function sendTelegramMessageWithButtons(
     )
     .filter(row => row.length > 0);
 
-  return sendWithRetry("sendMessage", {
+  const sent = await sendWithRetry("sendMessage", {
     chat_id: chatId,
     text: message.slice(0, 4000),
     parse_mode: "MarkdownV2",
     disable_web_page_preview: true,
     ...(inlineKeyboard.length ? { reply_markup: { inline_keyboard: inlineKeyboard } } : {}),
   });
+  if (sent) await markMainChatSent(chatId);
+  return sent;
 }
 
 export type TelegramTap = {

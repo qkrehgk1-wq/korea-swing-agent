@@ -4,7 +4,7 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-import { routeToCommander } from "./commanderChannel";
+import { flushCommanderDigest, routeToCommander } from "./commanderChannel";
 import {
   isSettledStatus,
   kstDate,
@@ -671,7 +671,16 @@ export async function runDataSteward(
 }
 
 async function runFromCli() {
-  await runDataSteward();
+  try {
+    await runDataSteward();
+  } finally {
+    // Last step of the daily workflow: send the run's queued commander alerts
+    // as one message, clear of the main alert. In finally so a steward failure
+    // cannot strand them.
+    await flushCommanderDigest().catch(error =>
+      console.warn("[Data Steward] commander digest flush failed:", error)
+    );
+  }
 }
 
 if (
