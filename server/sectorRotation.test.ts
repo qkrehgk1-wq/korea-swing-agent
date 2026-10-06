@@ -42,35 +42,49 @@ function bars(closes: number[]): OhlcvRow[] {
 }
 
 describe("parseSectorList", () => {
-  it("extracts sector number, name, and change from table rows", () => {
-    const html = `
-      <tr><td><a href="/sise/sise_group_detail.naver?type=upjong&no=278">반도체</a></td><td>+2.50%</td></tr>
-      <tr><td><a href="/sise/sise_group_detail.naver?type=upjong&no=279">화장품</a></td><td>-1.20%</td></tr>
-    `;
-    const rows = parseSectorList(html);
+  it("extracts sector number, name, and change from the industry list JSON", () => {
+    const json = JSON.stringify({
+      groups: [
+        { no: 278, name: "반도체와반도체장비", changeRate: "2.50", totalCount: 172 },
+        { no: 279, name: "화장품", changeRate: "-1.20", totalCount: 40 },
+      ],
+    });
+    const rows = parseSectorList(json);
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toEqual({ no: "278", name: "반도체", changePct: 2.5 });
+    expect(rows[0]).toEqual({ no: "278", name: "반도체와반도체장비", changePct: 2.5 });
     expect(rows[1].changePct).toBe(-1.2);
   });
 
   it("de-duplicates a sector repeated across rows", () => {
-    const html = `
-      <tr><td><a href="/sise/sise_group_detail.naver?type=upjong&no=278">반도체</a></td><td>+1.00%</td></tr>
-      <tr><td><a href="/sise/sise_group_detail.naver?type=upjong&no=278">반도체</a></td><td>+1.00%</td></tr>
-    `;
-    expect(parseSectorList(html)).toHaveLength(1);
+    const json = JSON.stringify({ groups: [{ no: 278, name: "반도체", changeRate: "1.00" }, { no: 278, name: "반도체", changeRate: "1.00" }] });
+    expect(parseSectorList(json)).toHaveLength(1);
+  });
+
+  it("returns [] (not a throw) for the old HTML page or garbage — the caller treats that as 'source changed'", () => {
+    expect(parseSectorList('<tr><td><a href="/sise/sise_group_detail.naver?type=upjong&no=278">반도체</a></td></tr>')).toEqual([]);
+    expect(parseSectorList("")).toEqual([]);
+    expect(parseSectorList(JSON.stringify({ groups: [{ no: 1 }, { name: "x" }] }))).toEqual([]);
   });
 });
 
 describe("parseSectorMembers", () => {
-  it("collects member tickers and drops ETFs", () => {
-    const html = `
-      <a href="/item/main.naver?code=005930">삼성전자</a>
-      <a href="/item/main.naver?code=000660">SK하이닉스</a>
-      <a href="/item/main.naver?code=069500">KODEX 200</a>
-      <a href="/item/main.naver?code=005930">삼성전자</a>
-    `;
-    expect(parseSectorMembers(html)).toEqual(["005930", "000660"]);
+  it("collects member tickers and drops ETFs, non-stock types and malformed codes", () => {
+    const json = JSON.stringify({
+      stocks: [
+        { itemCode: "005930", stockName: "삼성전자", stockEndType: "stock" },
+        { itemCode: "000660", stockName: "SK하이닉스", stockEndType: "stock" },
+        { itemCode: "069500", stockName: "KODEX 200", stockEndType: "stock" },
+        { itemCode: "005930", stockName: "삼성전자", stockEndType: "stock" },
+        { itemCode: "123456", stockName: "어떤ETF", stockEndType: "etf" },
+        { itemCode: "ABC", stockName: "코드이상", stockEndType: "stock" },
+      ],
+    });
+    expect(parseSectorMembers(json)).toEqual(["005930", "000660"]);
+  });
+
+  it("keeps KONEX-type rows that arrive as stock-like and returns [] on garbage", () => {
+    expect(parseSectorMembers("<html></html>")).toEqual([]);
+    expect(parseSectorMembers(JSON.stringify({ stocks: [{ itemCode: "093370", stockName: "후성" }] }))).toEqual(["093370"]);
   });
 });
 

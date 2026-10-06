@@ -21,11 +21,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { isLikelyEtf, type OhlcvRow } from "./koreaStockMcp";
+import { fetchIndustryGroupsText, fetchIndustryMembersText } from "./naverIndustryApi";
 
-const SECTOR_LIST_URL =
-  "https://finance.naver.com/sise/sise_group.naver?type=upjong";
-const SECTOR_DETAIL_URL =
-  "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=";
+const SECTOR_DETAIL_URL = "https://m.stock.naver.com/api/stocks/industry/";
 const CACHE_PATH = path.join(
   process.cwd(),
   ".data",
@@ -33,7 +31,6 @@ const CACHE_PATH = path.join(
   "definitions.json"
 );
 const CACHE_TTL_HOURS = Number(process.env.SECTOR_CACHE_TTL_HOURS) || 24 * 7;
-const FETCH_TIMEOUT_MS = 12000;
 const DETAIL_CONCURRENCY = 4;
 
 export type SectorDefinition = {
@@ -78,68 +75,50 @@ export type SectorRanking = {
 
 // ── IO: sector definitions ──
 
-async function fetchEucKr(url: string): Promise<string | null> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+/** Pure: pull (no, name, changePct) rows out of the 업종 list JSON (m.stock.naver.com/api/stocks/industry). */
+export function parseSectorList(json: string): Array<Omit<SectorDefinition, "tickers">> {
+  let parsed: { groups?: Array<{ no?: number | string; name?: string; changeRate?: string | number }> };
   try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "user-agent": "Mozilla/5.0",
-        referer: "https://finance.naver.com/sise/",
-      },
-    });
-    if (!response.ok) return null;
-    return new TextDecoder("euc-kr").decode(await response.arrayBuffer());
-  } catch (error) {
-    console.warn(`[Sector] fetch failed ${url}:`, error);
-    return null;
-  } finally {
-    clearTimeout(timer);
+    parsed = JSON.parse(json);
+  } catch {
+    return [];
   }
-}
-
-/** Pure: pull (no, name, changePct) rows out of the 업종별 시세 page. */
-export function parseSectorList(html: string): Array<Omit<SectorDefinition, "tickers">> {
   const rows: Array<Omit<SectorDefinition, "tickers">> = [];
   const seen = new Set<string>();
-  const trPattern = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
-  let tr: RegExpExecArray | null;
-  while ((tr = trPattern.exec(html)) !== null) {
-    const block = tr[1];
-    const nameMatch =
-      /sise_group_detail\.naver\?type=upjong&no=(\d+)"[^>]*>([^<]+)<\/a>/.exec(block);
-    if (!nameMatch) continue;
-    const no = nameMatch[1];
-    if (seen.has(no)) continue;
+  for (const group of parsed.groups ?? []) {
+    const no = group.no === undefined ? "" : String(group.no);
+    const name = (group.name ?? "").trim();
+    if (!no || !name || seen.has(no)) continue;
     seen.add(no);
-    const changeMatch = /([+-]?\d+\.\d+)%/.exec(block);
-    rows.push({
-      no,
-      name: nameMatch[2].trim(),
-      changePct: changeMatch ? Number(changeMatch[1]) : null,
-    });
+    const change = Number(group.changeRate);
+    rows.push({ no, name, changePct: group.changeRate === undefined || !Number.isFinite(change) ? null : change });
   }
   return rows;
 }
 
-/** Pure: pull member tickers out of a 업종 detail page. */
-export function parseSectorMembers(html: string): string[] {
+/** Pure: pull member tickers out of a 업종 members JSON (stocks only — ETFs/ETNs and non-6-digit codes dropped). */
+export function parseSectorMembers(json: string): string[] {
+  let parsed: { stocks?: Array<{ itemCode?: string; stockName?: string; stockEndType?: string }> };
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return [];
+  }
   const tickers: string[] = [];
   const seen = new Set<string>();
-  const pattern = /item\/main\.(?:naver|nhn)\?code=(\d{6})"[^>]*>([^<]+)<\/a>/g;
-  let match: RegExpExecArray | null;
-  while ((match = pattern.exec(html)) !== null) {
-    const ticker = match[1];
-    const name = match[2].trim();
-    if (seen.has(ticker) || isLikelyEtf(name)) continue;
+  for (const stock of parsed.stocks ?? []) {
+    const ticker = stock.itemCode ?? "";
+    const name = (stock.stockName ?? "").trim();
+    if (!/^[0-9]{6}$/.test(ticker) || seen.has(ticker)) continue;
+    if (stock.stockEndType && stock.stockEndType !== "stock") continue;
+    if (isLikelyEtf(name)) continue;
     seen.add(ticker);
     tickers.push(ticker);
   }
   return tickers;
 }
 
-async function readCache(): Promise<SectorDefinition[] | null> {
+async function readCache(allowStale = false): Promise<SectorDefinition[] | null> {
   try {
     const raw = await readFile(CACHE_PATH, "utf8");
     const parsed = JSON.parse(raw) as {
@@ -149,7 +128,7 @@ async function readCache(): Promise<SectorDefinition[] | null> {
     if (!parsed.fetchedAt || !parsed.sectors?.length) return null;
     const ageHours =
       (Date.now() - new Date(parsed.fetchedAt).getTime()) / 3_600_000;
-    if (ageHours > CACHE_TTL_HOURS) return null;
+    if (!allowStale && ageHours > CACHE_TTL_HOURS) return null;
     return parsed.sectors;
   } catch {
     return null;
@@ -168,19 +147,25 @@ export async function fetchSectorDefinitions(
     if (cached) return cached;
   }
 
-  const listHtml = await fetchEucKr(SECTOR_LIST_URL);
-  if (!listHtml) {
-    console.warn("[Sector] list page unavailable — falling back to cache");
-    return (await readCache()) ?? [];
+  const listJson = await fetchIndustryGroupsText();
+  if (!listJson) {
+    console.warn("[Sector] list unavailable — falling back to cache");
+    return (await readCache(true)) ?? [];
   }
-  const heads = parseSectorList(listHtml);
+  const heads = parseSectorList(listJson);
+  if (!heads.length) {
+    // A 200 response that parses to zero sectors means the source changed shape (it did on 2026-10-07).
+    // Say so loudly and keep serving the last good snapshot instead of an empty sector map.
+    console.warn("[Sector] list parsed to 0 sectors — source format likely changed; falling back to stale cache");
+    return (await readCache(true)) ?? [];
+  }
   const sectors: SectorDefinition[] = [];
 
   for (let i = 0; i < heads.length; i += DETAIL_CONCURRENCY) {
     const chunk = heads.slice(i, i + DETAIL_CONCURRENCY);
     const detailed = await Promise.all(
       chunk.map(async head => {
-        const html = await fetchEucKr(`${SECTOR_DETAIL_URL}${head.no}`);
+        const html = await fetchIndustryMembersText(head.no);
         return {
           ...head,
           tickers: html ? parseSectorMembers(html) : [],
