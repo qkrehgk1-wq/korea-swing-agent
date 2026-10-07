@@ -4802,7 +4802,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-15T21:43:30.923Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-17",
+    "exitDate": "2026-10-07",
+    "exitPrice": 121339.8,
+    "returnPct": 9.73,
+    "scoredAt": "2026-10-07T23:17:32.751Z"
   },
   {
     "date": "2026-09-16",
@@ -5297,7 +5302,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-21T22:10:23.736Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-23",
+    "exitDate": "2026-10-07",
+    "exitPrice": 63178.3,
+    "returnPct": 8.09,
+    "scoredAt": "2026-10-07T23:17:32.752Z"
   },
   {
     "date": "2026-09-23",
@@ -5544,7 +5554,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-23T21:44:28.606Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-01",
+    "exitDate": "2026-10-07",
+    "exitPrice": 749874.5,
+    "returnPct": 5.34,
+    "scoredAt": "2026-10-07T23:17:32.752Z"
   },
   {
     "date": "2026-09-24",
@@ -5628,7 +5643,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-28T23:29:20.980Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-07T23:17:32.752Z"
   },
   {
     "date": "2026-09-29",
@@ -5670,7 +5687,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-28T23:29:20.980Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-07T23:17:32.752Z"
   },
   {
     "date": "2026-09-29",
@@ -5711,7 +5730,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-29T22:34:11.536Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-01",
+    "exitDate": "2026-10-07",
+    "exitPrice": 84610.9,
+    "returnPct": 12,
+    "scoredAt": "2026-10-07T23:17:32.752Z"
   },
   {
     "date": "2026-09-30",
@@ -5820,7 +5844,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-29T22:34:11.536Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-01",
+    "exitDate": "2026-10-07",
+    "exitPrice": 125816,
+    "returnPct": 14.82,
+    "scoredAt": "2026-10-07T23:17:32.752Z"
   },
   {
     "date": "2026-10-01",
@@ -5841,7 +5870,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-30T22:34:08.911Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-02",
+    "exitDate": "2026-10-07",
+    "exitPrice": 3917,
+    "returnPct": 8.97,
+    "scoredAt": "2026-10-07T23:17:32.752Z"
   },
   {
     "date": "2026-10-01",
@@ -6446,6 +6480,48 @@
     "volumeFlowRising": true,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-08",
+    "ticker": "443060",
+    "companyName": "HD현대마린솔루션",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 218500,
+    "triggerPrice": 234749,
+    "stopLossPrice": 199537,
+    "targetPrice": 322779,
+    "swingScore": 70,
+    "qualityScore": 79,
+    "relativeStrength": 17.5,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-07T23:17:28.716Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-08",
+    "ticker": "078930",
+    "companyName": "GS",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 109800,
+    "triggerPrice": 127262,
+    "stopLossPrice": 108173,
+    "targetPrice": 174985,
+    "swingScore": 56,
+    "qualityScore": 48,
+    "relativeStrength": 46.62,
+    "supplyState": "distributing",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-07T23:17:28.716Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
