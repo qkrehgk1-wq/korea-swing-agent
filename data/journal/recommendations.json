@@ -4642,7 +4642,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-11T21:14:39.603Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-09-15",
+    "exitDate": "2026-10-08",
+    "exitPrice": 32700,
+    "returnPct": -9.09,
+    "scoredAt": "2026-10-08T23:32:42.002Z"
   },
   {
     "date": "2026-09-12",
@@ -4949,7 +4954,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-16T21:40:33.865Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-09-18",
+    "exitDate": "2026-10-08",
+    "exitPrice": 184008,
+    "returnPct": -11.05,
+    "scoredAt": "2026-10-08T23:32:42.002Z"
   },
   {
     "date": "2026-09-17",
@@ -5126,7 +5136,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-18T21:12:42.809Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-09-21",
+    "exitDate": "2026-10-08",
+    "exitPrice": 119850,
+    "returnPct": -9.66,
+    "scoredAt": "2026-10-08T23:32:42.002Z"
   },
   {
     "date": "2026-09-19",
@@ -5217,7 +5232,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-19T20:58:44.528Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-09-21",
+    "exitDate": "2026-10-08",
+    "exitPrice": 942123,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-08T23:32:42.002Z"
   },
   {
     "date": "2026-09-22",
@@ -5756,7 +5776,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-29T22:34:11.536Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-08T23:32:42.003Z"
   },
   {
     "date": "2026-09-30",
@@ -5778,7 +5800,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-29T22:34:11.536Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-08T23:32:42.003Z"
   },
   {
     "date": "2026-09-30",
@@ -5822,7 +5846,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-29T22:34:11.536Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-08T23:32:42.003Z"
   },
   {
     "date": "2026-09-30",
@@ -5915,7 +5941,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-30T22:34:08.911Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-02",
+    "exitDate": "2026-10-08",
+    "exitPrice": 39217.1,
+    "returnPct": 7.73,
+    "scoredAt": "2026-10-08T23:32:42.003Z"
   },
   {
     "date": "2026-10-01",
@@ -5998,7 +6029,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-01T22:53:26.234Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-08",
+    "exitPrice": 632400,
+    "returnPct": -14.17,
+    "scoredAt": "2026-10-08T23:32:42.003Z"
   },
   {
     "date": "2026-10-02",
@@ -6081,7 +6117,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-02T22:31:33.962Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-08",
+    "exitPrice": 922280,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-08T23:32:42.003Z"
   },
   {
     "date": "2026-10-03",
@@ -6522,6 +6563,90 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-07T23:17:28.716Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-09",
+    "ticker": "278470",
+    "companyName": "에이피알",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 369000,
+    "triggerPrice": 374535,
+    "stopLossPrice": 321300,
+    "targetPrice": 507623,
+    "swingScore": 77,
+    "qualityScore": 64,
+    "relativeStrength": 11.01,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-08T23:32:37.371Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-09",
+    "ticker": "192820",
+    "companyName": "코스맥스",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 303500,
+    "triggerPrice": 305843,
+    "stopLossPrice": 259967,
+    "targetPrice": 420533,
+    "swingScore": 91,
+    "qualityScore": 81,
+    "relativeStrength": 84.98,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-08T23:32:37.371Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-09",
+    "ticker": "056190",
+    "companyName": "SFA",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 31300,
+    "triggerPrice": 32308,
+    "stopLossPrice": 27462,
+    "targetPrice": 44423,
+    "swingScore": 91,
+    "qualityScore": 81,
+    "relativeStrength": 38.92,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-08T23:32:37.371Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-09",
+    "ticker": "161390",
+    "companyName": "한국타이어앤테크놀로지",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 61700,
+    "triggerPrice": 62625,
+    "stopLossPrice": 57381,
+    "targetPrice": 75735,
+    "swingScore": 65,
+    "qualityScore": 42,
+    "relativeStrength": -2.67,
+    "supplyState": "neutral",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-08T23:32:37.371Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
