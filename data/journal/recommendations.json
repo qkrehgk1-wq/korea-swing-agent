@@ -5967,7 +5967,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-30T22:34:08.911Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-08",
+    "exitPrice": 25731,
+    "returnPct": 2.9,
+    "scoredAt": "2026-10-11T22:25:28.662Z"
   },
   {
     "date": "2026-10-01",
