@@ -4716,7 +4716,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-14T22:00:43.038Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-09-16",
+    "exitDate": "2026-10-12",
+    "exitPrice": 54800,
+    "returnPct": -3.25,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-15",
@@ -5280,7 +5285,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-21T22:10:23.736Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-09-23",
+    "exitDate": "2026-10-12",
+    "exitPrice": 38541.4,
+    "returnPct": 32.19,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-22",
@@ -5301,7 +5311,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-21T22:10:23.736Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-09-23",
+    "exitDate": "2026-10-13",
+    "exitPrice": 60824,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-22",
@@ -5347,7 +5362,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-22T21:38:31.419Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-02",
+    "exitDate": "2026-10-13",
+    "exitPrice": 61687,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-23",
@@ -5482,7 +5502,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-22T21:38:31.419Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-02",
+    "exitDate": "2026-10-13",
+    "exitPrice": 381336,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-24",
@@ -5686,7 +5711,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-28T23:29:20.980Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-09-30",
+    "exitDate": "2026-10-12",
+    "exitPrice": 82584,
+    "returnPct": -8.72,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-29",
@@ -5730,7 +5760,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-28T23:29:20.980Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-02",
+    "exitDate": "2026-10-12",
+    "exitPrice": 401534.2,
+    "returnPct": 9.39,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-30",
@@ -5824,7 +5859,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-29T22:34:11.536Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-07",
+    "exitDate": "2026-10-13",
+    "exitPrice": 326359,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-09-30",
@@ -5921,7 +5961,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-30T22:34:08.911Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-01",
@@ -5993,7 +6035,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-30T22:34:08.911Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-01",
@@ -6014,7 +6058,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-30T22:34:08.911Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-02",
@@ -6080,7 +6126,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-01T22:53:26.234Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-02",
@@ -6102,7 +6150,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-01T22:53:26.234Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-08",
+    "exitDate": "2026-10-12",
+    "exitPrice": 31161,
+    "returnPct": -9.44,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-03",
@@ -6169,7 +6222,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-02T22:31:33.962Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-03",
@@ -6191,7 +6246,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-02T22:31:33.962Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-03",
@@ -6212,7 +6269,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-02T22:31:33.962Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-03",
@@ -6233,7 +6292,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-02T22:31:33.962Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-03",
@@ -6274,7 +6335,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-04T21:54:11.976Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-13",
+    "exitPrice": 386943,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-05",
@@ -6316,7 +6382,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T00:18:09.954Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-07",
+    "exitDate": "2026-10-13",
+    "exitPrice": 406054.5,
+    "returnPct": 7.48,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-06",
@@ -6589,7 +6660,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-08T23:32:37.371Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-12",
+    "exitDate": "2026-10-13",
+    "exitPrice": 321300,
+    "returnPct": -14.56,
+    "scoredAt": "2026-10-13T00:57:04.299Z"
   },
   {
     "date": "2026-10-09",
@@ -6652,6 +6728,26 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-08T23:32:37.371Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-13",
+    "ticker": "161390",
+    "companyName": "한국타이어앤테크놀로지",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 60300,
+    "triggerPrice": 61204,
+    "stopLossPrice": 56079,
+    "targetPrice": 74017,
+    "swingScore": 66,
+    "qualityScore": 58,
+    "relativeStrength": -1.94,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-13T00:57:00.991Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
