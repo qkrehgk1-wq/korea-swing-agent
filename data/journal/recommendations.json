@@ -5103,7 +5103,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-17T21:42:19.942Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-09-21",
+    "exitDate": "2026-10-15",
+    "exitPrice": 77800,
+    "returnPct": -7.33,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-09-18",
@@ -5635,7 +5640,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-23T21:44:28.606Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-09-28",
+    "exitDate": "2026-10-15",
+    "exitPrice": 192935,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-09-29",
@@ -6120,7 +6130,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-01T22:53:26.234Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-15",
+    "exitPrice": 35598,
+    "returnPct": -13.75,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-10-02",
@@ -6513,7 +6528,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-10-07",
@@ -6534,7 +6551,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-10-07",
@@ -6556,7 +6575,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-10-07",
@@ -6577,7 +6598,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-10-07",
@@ -6598,7 +6621,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-10-07",
@@ -6619,7 +6644,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-15T21:43:21.635Z"
   },
   {
     "date": "2026-10-08",
@@ -7023,6 +7050,88 @@
     "volumeFlowRising": true,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-14T21:55:26.841Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-16",
+    "ticker": "111770",
+    "companyName": "영원무역",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 75700,
+    "triggerPrice": 76835,
+    "stopLossPrice": 68646,
+    "targetPrice": 97308,
+    "swingScore": 73,
+    "qualityScore": 59,
+    "relativeStrength": 15.21,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-15T21:43:18.265Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-16",
+    "ticker": "352820",
+    "companyName": "하이브",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 164000,
+    "triggerPrice": 166460,
+    "stopLossPrice": 152520,
+    "targetPrice": 201310,
+    "swingScore": 66,
+    "qualityScore": 44,
+    "relativeStrength": 4.15,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-15T21:43:18.265Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-16",
+    "ticker": "086450",
+    "companyName": "동국제약",
+    "market": "코스닥",
+    "source": "swing",
+    "currentPrice": 24200,
+    "triggerPrice": 25512,
+    "stopLossPrice": 21685,
+    "targetPrice": 35080,
+    "swingScore": 91,
+    "qualityScore": 81,
+    "relativeStrength": 38.02,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-15T21:43:18.265Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-16",
+    "ticker": "293490",
+    "companyName": "카카오게임즈",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 9690,
+    "triggerPrice": 12332,
+    "stopLossPrice": 10482,
+    "targetPrice": 16957,
+    "swingScore": 74,
+    "qualityScore": 64,
+    "relativeStrength": 35.28,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-15T21:43:18.265Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
