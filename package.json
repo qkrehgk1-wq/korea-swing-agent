@@ -22,6 +22,7 @@
     "start:swing:evolve": "cross-env NODE_ENV=production tsx server/swingEvolutionAgent.ts",
     "start:swing:journal": "cross-env NODE_ENV=production tsx server/recommendationJournalAgent.ts",
     "start:swing:data": "cross-env NODE_ENV=production tsx server/dataStewardAgent.ts",
+    "start:swing:jev": "cross-env NODE_ENV=production tsx server/jevShadowAgent.ts",
     "start:swing:accuracy": "cross-env NODE_ENV=production tsx scripts/runMarketDataAccuracyAudit.mts",
     "start:swing:journal-audit": "cross-env NODE_ENV=production tsx scripts/auditJournalScoringAlignment.mts",
     "start:tenbagger": "cross-env NODE_ENV=production tsx server/tenbaggerPipeline.ts",

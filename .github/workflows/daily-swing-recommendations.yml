@@ -100,6 +100,15 @@ jobs:
           COMMANDER_CHAT_ID: ${{ secrets.COMMANDER_CHAT_ID }}
         run: corepack pnpm start:swing:data || echo "data steward 건너뜀"
 
+      # Jev(TypeSafe) 섀도 기록 — 질문 결과를 data/journal/jev-shadow.json에 저장만 한다.
+      # 알림·점수·주문에는 쓰지 않으며, 키가 없거나 실패해도 다른 단계에 영향이 없다(JEV_SHADOW=off로 끔).
+      - name: Jev shadow record
+        if: always()
+        continue-on-error: true
+        env:
+          TYPESAFE_AI_API_KEY: ${{ secrets.TYPESAFE_AI_API_KEY }}
+        run: corepack pnpm start:swing:jev || echo "jev 섀도 건너뜀"
+
       # 진화 챔피언 + 추천 저널(추적 파일)을 저장소에 커밋백해 다음 런이
       # 이어받게 한다. [skip ci]로 재귀 트리거 방지.
       - name: Persist champion and journal
