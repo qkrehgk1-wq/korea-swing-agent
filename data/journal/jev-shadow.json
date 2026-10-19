@@ -1,0 +1,649 @@
+{
+  "version": 1,
+  "questionsVersion": "q1-2026-10",
+  "records": {
+    "2026-10-16|111770": {
+      "key": "2026-10-16|111770",
+      "date": "2026-10-16",
+      "ticker": "111770",
+      "companyName": "영원무역",
+      "watchOnly": false,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-12",
+      "return5dPct": 5.08,
+      "return20dPct": 2.9,
+      "answers": {
+        "lingeringBadNews": 0.08,
+        "pricedInRally": 0.41,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.71,
+          "probabilities": {
+            "earnings_or_contract": 0.78,
+            "theme_or_flow": 0.19,
+            "market_wide": 0,
+            "unclear": 0.03
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 6
+      },
+      "usage": {
+        "inputTokens": 938,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-16|352820": {
+      "key": "2026-10-16|352820",
+      "date": "2026-10-16",
+      "ticker": "352820",
+      "companyName": "하이브",
+      "watchOnly": false,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-19",
+      "return5dPct": 8.23,
+      "return20dPct": 2.13,
+      "answers": {
+        "lingeringBadNews": 0.05,
+        "pricedInRally": 0.55,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.63,
+          "probabilities": {
+            "earnings_or_contract": 0.02,
+            "theme_or_flow": 0.72,
+            "market_wide": 0.03,
+            "unclear": 0.23
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 4,
+        "catalystScore": 5
+      },
+      "usage": {
+        "inputTokens": 836,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-16|086450": {
+      "key": "2026-10-16|086450",
+      "date": "2026-10-16",
+      "ticker": "086450",
+      "companyName": "동국제약",
+      "watchOnly": false,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-14",
+      "return5dPct": 12.98,
+      "return20dPct": 23.77,
+      "answers": {
+        "lingeringBadNews": 0.04,
+        "pricedInRally": 0.63,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.48,
+          "probabilities": {
+            "earnings_or_contract": 0.61,
+            "theme_or_flow": 0.36,
+            "market_wide": 0,
+            "unclear": 0.03
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 4
+      },
+      "usage": {
+        "inputTokens": 939,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-17|000100": {
+      "key": "2026-10-17|000100",
+      "date": "2026-10-17",
+      "ticker": "000100",
+      "companyName": "유한양행",
+      "watchOnly": false,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-16",
+      "return5dPct": 9.96,
+      "return20dPct": 2.94,
+      "answers": {
+        "lingeringBadNews": 0.04,
+        "pricedInRally": 0.58,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.43,
+          "probabilities": {
+            "earnings_or_contract": 0.01,
+            "theme_or_flow": 0.41,
+            "market_wide": 0.01,
+            "unclear": 0.57
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 830,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-20|003380": {
+      "key": "2026-10-20|003380",
+      "date": "2026-10-20",
+      "ticker": "003380",
+      "companyName": "하림지주",
+      "watchOnly": false,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 2.07,
+      "return20dPct": 4.97,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-20|247540": {
+      "key": "2026-10-20|247540",
+      "date": "2026-10-20",
+      "ticker": "247540",
+      "companyName": "에코프로비엠",
+      "watchOnly": false,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-08",
+      "return5dPct": -0.17,
+      "return20dPct": 8.04,
+      "answers": {
+        "lingeringBadNews": 0.46,
+        "pricedInRally": 0.37,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.67,
+          "probabilities": {
+            "earnings_or_contract": 0.16,
+            "theme_or_flow": 0.07,
+            "market_wide": 0.02,
+            "unclear": 0.75
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 6,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 871,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-20|005490": {
+      "key": "2026-10-20|005490",
+      "date": "2026-10-20",
+      "ticker": "005490",
+      "companyName": "POSCO홀딩스",
+      "watchOnly": false,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-14",
+      "return5dPct": 4.36,
+      "return20dPct": -6.33,
+      "answers": {
+        "lingeringBadNews": 0.17,
+        "pricedInRally": 0.44,
+        "moveDriver": {
+          "choice": "market_wide",
+          "confidence": 0.25,
+          "probabilities": {
+            "earnings_or_contract": 0.1,
+            "theme_or_flow": 0.37,
+            "market_wide": 0.44,
+            "unclear": 0.09
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 922,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-16|293490": {
+      "key": "2026-10-16|293490",
+      "date": "2026-10-16",
+      "ticker": "293490",
+      "companyName": "카카오게임즈",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 9.86,
+      "return20dPct": 7.89,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-17|090430": {
+      "key": "2026-10-17|090430",
+      "date": "2026-10-17",
+      "ticker": "090430",
+      "companyName": "아모레퍼시픽",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-09-28",
+      "return5dPct": 3.21,
+      "return20dPct": -4.29,
+      "answers": {
+        "lingeringBadNews": 0.05,
+        "pricedInRally": 0.34,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.44,
+          "probabilities": {
+            "earnings_or_contract": 0.08,
+            "theme_or_flow": 0.19,
+            "market_wide": 0.15,
+            "unclear": 0.58
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 4,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 934,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-17|323410": {
+      "key": "2026-10-17|323410",
+      "date": "2026-10-17",
+      "ticker": "323410",
+      "companyName": "카카오뱅크",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 4,
+      "newestHeadlineDate": "2026-09-09",
+      "return5dPct": 4.25,
+      "return20dPct": -5.79,
+      "answers": {
+        "lingeringBadNews": 0.06,
+        "pricedInRally": 0.38,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.48,
+          "probabilities": {
+            "earnings_or_contract": 0.61,
+            "theme_or_flow": 0.13,
+            "market_wide": 0.03,
+            "unclear": 0.23
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 967,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-17|271560": {
+      "key": "2026-10-17|271560",
+      "date": "2026-10-17",
+      "ticker": "271560",
+      "companyName": "오리온",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-16",
+      "return5dPct": 4.42,
+      "return20dPct": -4.48,
+      "answers": {
+        "lingeringBadNews": 0.1,
+        "pricedInRally": 0.38,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.43,
+          "probabilities": {
+            "earnings_or_contract": 0.57,
+            "theme_or_flow": 0.04,
+            "market_wide": 0.01,
+            "unclear": 0.38
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 8
+      },
+      "usage": {
+        "inputTokens": 945,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-19|003380": {
+      "key": "2026-10-19|003380",
+      "date": "2026-10-19",
+      "ticker": "003380",
+      "companyName": "하림지주",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 2.07,
+      "return20dPct": 4.97,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-19|207940": {
+      "key": "2026-10-19|207940",
+      "date": "2026-10-19",
+      "ticker": "207940",
+      "companyName": "삼성바이오로직스",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-16",
+      "return5dPct": 15.89,
+      "return20dPct": -0.87,
+      "answers": {
+        "lingeringBadNews": 0.05,
+        "pricedInRally": 0.61,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.75,
+          "probabilities": {
+            "earnings_or_contract": 0.1,
+            "theme_or_flow": 0.08,
+            "market_wide": 0.01,
+            "unclear": 0.8099999999999999
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 4,
+        "catalystScore": 4
+      },
+      "usage": {
+        "inputTokens": 834,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-20|031980": {
+      "key": "2026-10-20|031980",
+      "date": "2026-10-20",
+      "ticker": "031980",
+      "companyName": "피에스케이홀딩스",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-17",
+      "return5dPct": -1.9,
+      "return20dPct": 17.78,
+      "answers": {
+        "lingeringBadNews": 0.07,
+        "pricedInRally": 0.57,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.67,
+          "probabilities": {
+            "earnings_or_contract": 0.02,
+            "theme_or_flow": 0.75,
+            "market_wide": 0.02,
+            "unclear": 0.21
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 976,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-20|041510": {
+      "key": "2026-10-20|041510",
+      "date": "2026-10-20",
+      "ticker": "041510",
+      "companyName": "에스엠",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 14.99,
+      "return20dPct": -1.14,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-20|011790": {
+      "key": "2026-10-20|011790",
+      "date": "2026-10-20",
+      "ticker": "011790",
+      "companyName": "SKC",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-15",
+      "return5dPct": 3.95,
+      "return20dPct": 14.66,
+      "answers": {
+        "lingeringBadNews": 0.08,
+        "pricedInRally": 0.42,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.71,
+          "probabilities": {
+            "earnings_or_contract": 0.01,
+            "theme_or_flow": 0.16,
+            "market_wide": 0.05,
+            "unclear": 0.78
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 4,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 867,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-20|259960": {
+      "key": "2026-10-20|259960",
+      "date": "2026-10-20",
+      "ticker": "259960",
+      "companyName": "크래프톤",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 4,
+      "newestHeadlineDate": "2026-10-16",
+      "return5dPct": 5.54,
+      "return20dPct": -5.44,
+      "answers": {
+        "lingeringBadNews": 0.11,
+        "pricedInRally": 0.43,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.63,
+          "probabilities": {
+            "earnings_or_contract": 0.72,
+            "theme_or_flow": 0.1,
+            "market_wide": 0.03,
+            "unclear": 0.15
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 982,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-20|010060": {
+      "key": "2026-10-20|010060",
+      "date": "2026-10-20",
+      "ticker": "010060",
+      "companyName": "OCI홀딩스",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-09-10",
+      "return5dPct": -2.9,
+      "return20dPct": 6.62,
+      "answers": {
+        "lingeringBadNews": 0.09,
+        "pricedInRally": 0.18,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.99,
+          "probabilities": {
+            "earnings_or_contract": 0,
+            "theme_or_flow": 0.99,
+            "market_wide": 0,
+            "unclear": 0.01
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 4,
+        "catalystScore": 3
+      },
+      "usage": {
+        "inputTokens": 868,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-20|326030": {
+      "key": "2026-10-20|326030",
+      "date": "2026-10-20",
+      "ticker": "326030",
+      "companyName": "SK바이오팜",
+      "watchOnly": true,
+      "asOf": "2026-10-19T22:38:12.131Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 4,
+      "newestHeadlineDate": "2026-10-14",
+      "return5dPct": 6.5,
+      "return20dPct": -3.7,
+      "answers": {
+        "lingeringBadNews": 0.07,
+        "pricedInRally": 0.38,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.53,
+          "probabilities": {
+            "earnings_or_contract": 0.19,
+            "theme_or_flow": 0.11,
+            "market_wide": 0.05,
+            "unclear": 0.65
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 964,
+        "outputTokens": 94
+      }
+    }
+  }
+}
