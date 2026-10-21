@@ -984,6 +984,117 @@
       },
       "usage": null,
       "skippedReason": "no_headlines"
+    },
+    "2026-10-22|263750": {
+      "key": "2026-10-22|263750",
+      "date": "2026-10-22",
+      "ticker": "263750",
+      "companyName": "펄어비스",
+      "watchOnly": false,
+      "asOf": "2026-10-21T21:59:16.701Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-19",
+      "return5dPct": 5.64,
+      "return20dPct": 0.73,
+      "answers": {
+        "lingeringBadNews": 0.06,
+        "pricedInRally": 0.37,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.2,
+          "probabilities": {
+            "earnings_or_contract": 0.28,
+            "theme_or_flow": 0.3,
+            "market_wide": 0.02,
+            "unclear": 0.39999999999999997
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 862,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-22|011200": {
+      "key": "2026-10-22|011200",
+      "date": "2026-10-22",
+      "ticker": "011200",
+      "companyName": "HMM",
+      "watchOnly": true,
+      "asOf": "2026-10-21T21:59:16.701Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-14",
+      "return5dPct": -0.21,
+      "return20dPct": 11.24,
+      "answers": {
+        "lingeringBadNews": 0.05,
+        "pricedInRally": 0.55,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.91,
+          "probabilities": {
+            "earnings_or_contract": 0.93,
+            "theme_or_flow": 0.05,
+            "market_wide": 0.02,
+            "unclear": 0
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 933,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-22|004020": {
+      "key": "2026-10-22|004020",
+      "date": "2026-10-22",
+      "ticker": "004020",
+      "companyName": "현대제철",
+      "watchOnly": true,
+      "asOf": "2026-10-21T21:59:16.701Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.13.0",
+      "headlineCount": 5,
+      "newestHeadlineDate": "2026-10-20",
+      "return5dPct": -0.53,
+      "return20dPct": -18.17,
+      "answers": {
+        "lingeringBadNews": 0.66,
+        "pricedInRally": 0.23,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.76,
+          "probabilities": {
+            "earnings_or_contract": 0.82,
+            "theme_or_flow": 0.02,
+            "market_wide": 0.04,
+            "unclear": 0.12
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 1030,
+        "outputTokens": 96
+      }
     }
   }
 }

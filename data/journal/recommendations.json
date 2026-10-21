@@ -6876,7 +6876,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-13T23:05:32.780Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-21T21:57:48.820Z"
   },
   {
     "date": "2026-10-14",
@@ -6897,7 +6899,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-13T23:05:32.780Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-21T21:57:48.820Z"
   },
   {
     "date": "2026-10-14",
@@ -6918,7 +6922,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-13T23:05:32.780Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-21T21:57:48.820Z"
   },
   {
     "date": "2026-10-14",
@@ -6940,7 +6946,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-13T23:05:32.780Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-21T21:57:48.820Z"
   },
   {
     "date": "2026-10-15",
@@ -7107,7 +7115,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-15T21:43:18.265Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-19",
+    "exitDate": "2026-10-21",
+    "exitPrice": 190318,
+    "returnPct": 13.98,
+    "scoredAt": "2026-10-21T21:57:48.820Z"
   },
   {
     "date": "2026-10-16",
@@ -7676,6 +7689,70 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-20T21:50:16.668Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-22",
+    "ticker": "263750",
+    "companyName": "펄어비스",
+    "market": "코스닥",
+    "source": "swing",
+    "currentPrice": 34650,
+    "triggerPrice": 35170,
+    "stopLossPrice": 31161,
+    "targetPrice": 45193,
+    "swingScore": 71,
+    "qualityScore": 36,
+    "relativeStrength": -1.51,
+    "supplyState": "accumulating",
+    "newsState": "negative",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-21T21:57:45.568Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-22",
+    "ticker": "011200",
+    "companyName": "HMM",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 23250,
+    "triggerPrice": 23542,
+    "stopLossPrice": 21027,
+    "targetPrice": 29830,
+    "swingScore": 77,
+    "qualityScore": 75,
+    "relativeStrength": 31.53,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-21T21:57:45.568Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-22",
+    "ticker": "004020",
+    "companyName": "현대제철",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 28150,
+    "triggerPrice": 30330,
+    "stopLossPrice": 25781,
+    "targetPrice": 41703,
+    "swingScore": 54,
+    "qualityScore": 44,
+    "relativeStrength": 26.1,
+    "supplyState": "neutral",
+    "newsState": "negative",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-21T21:57:45.568Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
