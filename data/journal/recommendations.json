@@ -6517,7 +6517,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-06T22:46:41.701Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-08",
+    "exitDate": "2026-10-22",
+    "exitPrice": 239845,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-22T21:53:59.056Z"
   },
   {
     "date": "2026-10-07",
@@ -6990,7 +6995,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-14T21:55:26.841Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-22T21:53:59.056Z"
   },
   {
     "date": "2026-10-15",
@@ -7054,7 +7061,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-14T21:55:26.841Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-22T21:53:59.056Z"
   },
   {
     "date": "2026-10-15",
@@ -7753,6 +7762,68 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-21T21:57:45.568Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-23",
+    "ticker": "290650",
+    "companyName": "엘앤씨바이오",
+    "market": "코스닥",
+    "source": "swing",
+    "currentPrice": 59000,
+    "triggerPrice": 59885,
+    "stopLossPrice": 50902,
+    "targetPrice": 82343,
+    "swingScore": 86,
+    "qualityScore": 88,
+    "relativeStrength": 1.58,
+    "supplyState": "distributing",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-22T21:53:55.892Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-23",
+    "ticker": "041510",
+    "companyName": "에스엠",
+    "market": "코스닥",
+    "source": "swing",
+    "currentPrice": 84400,
+    "triggerPrice": 85666,
+    "stopLossPrice": 72816,
+    "targetPrice": 117791,
+    "swingScore": 83,
+    "qualityScore": 62,
+    "relativeStrength": 23.08,
+    "supplyState": "distributing",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-22T21:53:55.892Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-23",
+    "ticker": "166090",
+    "companyName": "하나머티리얼즈",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 52200,
+    "triggerPrice": 59151,
+    "stopLossPrice": 50278,
+    "targetPrice": 81334,
+    "swingScore": 60,
+    "qualityScore": 52,
+    "relativeStrength": 0.47,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-22T21:53:55.892Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }

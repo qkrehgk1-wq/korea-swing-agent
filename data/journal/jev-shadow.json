@@ -1095,6 +1095,102 @@
         "inputTokens": 1030,
         "outputTokens": 96
       }
+    },
+    "2026-10-23|290650": {
+      "key": "2026-10-23|290650",
+      "date": "2026-10-23",
+      "ticker": "290650",
+      "companyName": "엘앤씨바이오",
+      "watchOnly": false,
+      "asOf": "2026-10-22T21:55:27.122Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-16",
+      "return5dPct": 5.92,
+      "return20dPct": 28.26,
+      "answers": {
+        "lingeringBadNews": 0.02,
+        "pricedInRally": 0.65,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 1,
+          "probabilities": {
+            "earnings_or_contract": 1,
+            "theme_or_flow": 0,
+            "market_wide": 0,
+            "unclear": 0
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 4
+      },
+      "usage": {
+        "inputTokens": 897,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-23|041510": {
+      "key": "2026-10-23|041510",
+      "date": "2026-10-23",
+      "ticker": "041510",
+      "companyName": "에스엠",
+      "watchOnly": false,
+      "asOf": "2026-10-22T21:55:27.122Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-21",
+      "return5dPct": 8.48,
+      "return20dPct": 3.43,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.48,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.95,
+          "probabilities": {
+            "earnings_or_contract": 0.03,
+            "theme_or_flow": 0.96,
+            "market_wide": 0,
+            "unclear": 0.01
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 2,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 889,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-23|166090": {
+      "key": "2026-10-23|166090",
+      "date": "2026-10-23",
+      "ticker": "166090",
+      "companyName": "하나머티리얼즈",
+      "watchOnly": true,
+      "asOf": "2026-10-22T21:55:27.122Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 3.78,
+      "return20dPct": -5.78,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
     }
   }
 }
