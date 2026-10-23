@@ -6355,7 +6355,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-02T22:31:33.962Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-23",
+    "exitPrice": 76871,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-23T21:37:22.946Z"
   },
   {
     "date": "2026-10-05",
@@ -6974,7 +6979,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-14T21:55:26.841Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-19",
+    "exitDate": "2026-10-23",
+    "exitPrice": 75404,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-23T21:37:22.946Z"
   },
   {
     "date": "2026-10-15",
@@ -7104,7 +7114,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-15T21:43:18.265Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-20",
+    "exitDate": "2026-10-23",
+    "exitPrice": 68646,
+    "returnPct": -11.01,
+    "scoredAt": "2026-10-23T21:37:22.946Z"
   },
   {
     "date": "2026-10-16",
@@ -7171,7 +7186,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-15T21:43:18.265Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-23T21:37:22.947Z"
   },
   {
     "date": "2026-10-17",
@@ -7213,7 +7230,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-16T21:38:56.154Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-23T21:37:22.947Z"
   },
   {
     "date": "2026-10-17",
@@ -7468,7 +7487,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-21",
+    "exitDate": "2026-10-23",
+    "exitPrice": 187648,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-23T21:37:22.947Z"
   },
   {
     "date": "2026-10-20",
@@ -7824,6 +7848,47 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-22T21:53:55.892Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-24",
+    "ticker": "326030",
+    "companyName": "SK바이오팜",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 76700,
+    "triggerPrice": 77850,
+    "stopLossPrice": 70176,
+    "targetPrice": 97035,
+    "swingScore": 66,
+    "qualityScore": 44,
+    "relativeStrength": 13.13,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-23T21:37:19.133Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-24",
+    "ticker": "226950",
+    "companyName": "올릭스",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 102700,
+    "triggerPrice": 105520,
+    "stopLossPrice": 89692,
+    "targetPrice": 145090,
+    "swingScore": 35,
+    "qualityScore": 26,
+    "relativeStrength": -5.65,
+    "supplyState": "neutral",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-23T21:37:19.133Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }

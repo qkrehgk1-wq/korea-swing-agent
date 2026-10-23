@@ -1191,6 +1191,80 @@
       },
       "usage": null,
       "skippedReason": "no_headlines"
+    },
+    "2026-10-24|326030": {
+      "key": "2026-10-24|326030",
+      "date": "2026-10-24",
+      "ticker": "326030",
+      "companyName": "SK바이오팜",
+      "watchOnly": false,
+      "asOf": "2026-10-23T21:38:50.532Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 5,
+      "newestHeadlineDate": "2026-10-14",
+      "return5dPct": 4.5,
+      "return20dPct": -1.67,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.21,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.41,
+          "probabilities": {
+            "earnings_or_contract": 0.14,
+            "theme_or_flow": 0.26,
+            "market_wide": 0.04,
+            "unclear": 0.56
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 1007,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-24|226950": {
+      "key": "2026-10-24|226950",
+      "date": "2026-10-24",
+      "ticker": "226950",
+      "companyName": "올릭스",
+      "watchOnly": true,
+      "asOf": "2026-10-23T21:38:50.532Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-21",
+      "return5dPct": 4.8,
+      "return20dPct": -4.02,
+      "answers": {
+        "lingeringBadNews": 0.04,
+        "pricedInRally": 0.26,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.37,
+          "probabilities": {
+            "earnings_or_contract": 0.09,
+            "theme_or_flow": 0.53,
+            "market_wide": 0.01,
+            "unclear": 0.37
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 810,
+        "outputTokens": 95
+      }
     }
   }
 }
