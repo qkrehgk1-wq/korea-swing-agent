@@ -1265,6 +1265,43 @@
         "inputTokens": 810,
         "outputTokens": 95
       }
+    },
+    "2026-10-26|064400": {
+      "key": "2026-10-26|064400",
+      "date": "2026-10-26",
+      "ticker": "064400",
+      "companyName": "LG씨엔에스",
+      "watchOnly": false,
+      "asOf": "2026-10-25T21:13:50.926Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-13",
+      "return5dPct": 10.74,
+      "return20dPct": 3.44,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.05,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.85,
+          "probabilities": {
+            "earnings_or_contract": 0,
+            "theme_or_flow": 0.07,
+            "market_wide": 0.04,
+            "unclear": 0.89
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 2,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 891,
+        "outputTokens": 94
+      }
     }
   }
 }

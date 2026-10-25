@@ -6823,7 +6823,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-13T00:57:00.991Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-14",
+    "exitDate": "2026-10-20",
+    "exitPrice": 62037.5,
+    "returnPct": 1.01,
+    "scoredAt": "2026-10-25T21:12:22.872Z"
   },
   {
     "date": "2026-10-14",
@@ -7209,7 +7214,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-16T21:38:56.154Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-19",
+    "exitDate": "2026-10-22",
+    "exitPrice": 83664.5,
+    "returnPct": 1.92,
+    "scoredAt": "2026-10-25T21:12:22.873Z"
   },
   {
     "date": "2026-10-17",
@@ -7320,7 +7330,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-18T21:01:01.023Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "trail_exit",
+    "entryDate": "2026-10-20",
+    "exitDate": "2026-10-22",
+    "exitPrice": 1378786.5,
+    "returnPct": 2.46,
+    "scoredAt": "2026-10-25T21:12:22.873Z"
   },
   {
     "date": "2026-10-20",
@@ -7889,6 +7904,27 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-23T21:37:19.133Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-26",
+    "ticker": "064400",
+    "companyName": "LG씨엔에스",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 72200,
+    "triggerPrice": 73283,
+    "stopLossPrice": 62291,
+    "targetPrice": 100763,
+    "swingScore": 73,
+    "qualityScore": 56,
+    "relativeStrength": 29.91,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-25T21:12:19.291Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
