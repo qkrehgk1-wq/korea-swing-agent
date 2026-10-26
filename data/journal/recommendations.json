@@ -5676,7 +5676,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-09-28T23:29:20.980Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-10-02",
+    "exitDate": "2026-10-26",
+    "exitPrice": 10930,
+    "returnPct": -3.6,
+    "scoredAt": "2026-10-26T22:51:39.902Z"
   },
   {
     "date": "2026-09-29",
@@ -7308,7 +7313,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-18T21:01:01.023Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-26T22:51:39.903Z"
   },
   {
     "date": "2026-10-19",
@@ -7738,7 +7745,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-20T21:50:16.668Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-22",
+    "exitDate": "2026-10-26",
+    "exitPrice": 36410,
+    "returnPct": -8.72,
+    "scoredAt": "2026-10-26T22:51:39.903Z"
   },
   {
     "date": "2026-10-22",
@@ -7925,6 +7937,27 @@
     "volumeFlowRising": false,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-25T21:12:19.291Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-27",
+    "ticker": "237690",
+    "companyName": "에스티팜",
+    "market": "코스닥",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 87800,
+    "triggerPrice": 91981,
+    "stopLossPrice": 81654,
+    "targetPrice": 117799,
+    "swingScore": 42,
+    "qualityScore": 43,
+    "relativeStrength": -4.81,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-26T22:51:37.038Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }

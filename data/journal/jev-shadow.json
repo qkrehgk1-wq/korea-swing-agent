@@ -1302,6 +1302,43 @@
         "inputTokens": 891,
         "outputTokens": 94
       }
+    },
+    "2026-10-27|237690": {
+      "key": "2026-10-27|237690",
+      "date": "2026-10-27",
+      "ticker": "237690",
+      "companyName": "에스티팜",
+      "watchOnly": true,
+      "asOf": "2026-10-26T22:53:08.449Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-13",
+      "return5dPct": -6.79,
+      "return20dPct": -2.66,
+      "answers": {
+        "lingeringBadNews": 0.32,
+        "pricedInRally": 0.09,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.25,
+          "probabilities": {
+            "earnings_or_contract": 0.4,
+            "theme_or_flow": 0.44,
+            "market_wide": 0.01,
+            "unclear": 0.15
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 903,
+        "outputTokens": 95
+      }
     }
   }
 }
