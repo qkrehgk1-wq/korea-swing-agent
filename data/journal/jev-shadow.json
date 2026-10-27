@@ -1339,6 +1339,161 @@
         "inputTokens": 903,
         "outputTokens": 95
       }
+    },
+    "2026-10-28|005935": {
+      "key": "2026-10-28|005935",
+      "date": "2026-10-28",
+      "ticker": "005935",
+      "companyName": "삼성전자우",
+      "watchOnly": true,
+      "asOf": "2026-10-27T22:36:29.342Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-15",
+      "return5dPct": 6.25,
+      "return20dPct": -21.89,
+      "answers": {
+        "lingeringBadNews": 0.21,
+        "pricedInRally": 0.42,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.87,
+          "probabilities": {
+            "earnings_or_contract": 0.05,
+            "theme_or_flow": 0.9,
+            "market_wide": 0.03,
+            "unclear": 0.02
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 959,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-28|028260": {
+      "key": "2026-10-28|028260",
+      "date": "2026-10-28",
+      "ticker": "028260",
+      "companyName": "삼성물산",
+      "watchOnly": true,
+      "asOf": "2026-10-27T22:36:29.342Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 12.32,
+      "return20dPct": -17.1,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-28|035420": {
+      "key": "2026-10-28|035420",
+      "date": "2026-10-28",
+      "ticker": "035420",
+      "companyName": "NAVER",
+      "watchOnly": true,
+      "asOf": "2026-10-27T22:36:29.342Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 2.6,
+      "return20dPct": -7.45,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-28|034730": {
+      "key": "2026-10-28|034730",
+      "date": "2026-10-28",
+      "ticker": "034730",
+      "companyName": "SK",
+      "watchOnly": true,
+      "asOf": "2026-10-27T22:36:29.342Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-15",
+      "return5dPct": 21.09,
+      "return20dPct": -15.82,
+      "answers": {
+        "lingeringBadNews": 0.55,
+        "pricedInRally": 0.4,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.59,
+          "probabilities": {
+            "earnings_or_contract": 0.03,
+            "theme_or_flow": 0.25,
+            "market_wide": 0.03,
+            "unclear": 0.69
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 869,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-28|032830": {
+      "key": "2026-10-28|032830",
+      "date": "2026-10-28",
+      "ticker": "032830",
+      "companyName": "삼성생명",
+      "watchOnly": true,
+      "asOf": "2026-10-27T22:36:29.342Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-09-15",
+      "return5dPct": 10.23,
+      "return20dPct": -12.37,
+      "answers": {
+        "lingeringBadNews": 0.17,
+        "pricedInRally": 0.43,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.33,
+          "probabilities": {
+            "earnings_or_contract": 0.22,
+            "theme_or_flow": 0.25,
+            "market_wide": 0.03,
+            "unclear": 0.5
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 1
+      },
+      "usage": {
+        "inputTokens": 829,
+        "outputTokens": 94
+      }
     }
   }
 }

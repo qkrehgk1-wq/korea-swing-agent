@@ -6246,7 +6246,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-02T22:31:33.962Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-27",
+    "exitPrice": 139500,
+    "returnPct": -11.22,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-03",
@@ -6411,7 +6416,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-04T21:54:11.976Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "time_exit",
+    "entryDate": "2026-10-06",
+    "exitDate": "2026-10-27",
+    "exitPrice": 49900,
+    "returnPct": -13.49,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-06",
@@ -6808,7 +6818,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-08T23:32:37.371Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-12",
+    "exitDate": "2026-10-27",
+    "exitPrice": 57381,
+    "returnPct": -8.72,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-13",
@@ -6853,7 +6868,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-13T23:05:32.780Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-16",
+    "exitDate": "2026-10-27",
+    "exitPrice": 121242,
+    "returnPct": -10.44,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-14",
@@ -7059,7 +7079,12 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-14T21:55:26.841Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "stop",
+    "entryDate": "2026-10-16",
+    "exitDate": "2026-10-27",
+    "exitPrice": 32485,
+    "returnPct": -15.35,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-15",
@@ -7363,7 +7388,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-20",
@@ -7384,7 +7411,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-20",
@@ -7404,7 +7433,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-20",
@@ -7425,7 +7456,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-20",
@@ -7446,7 +7479,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-20",
@@ -7467,7 +7502,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-20",
@@ -7488,7 +7525,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-19T22:36:40.638Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-27T22:35:01.009Z"
   },
   {
     "date": "2026-10-20",
@@ -7958,6 +7997,114 @@
     "volumeFlowRising": true,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-26T22:51:37.038Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-28",
+    "ticker": "005935",
+    "companyName": "삼성전자우",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 173400,
+    "triggerPrice": 184062,
+    "stopLossPrice": 156453,
+    "targetPrice": 253085,
+    "swingScore": 50,
+    "qualityScore": 48,
+    "relativeStrength": 16.5,
+    "supplyState": "distributing",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-27T22:34:57.681Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-28",
+    "ticker": "028260",
+    "companyName": "삼성물산",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 305500,
+    "triggerPrice": 312873,
+    "stopLossPrice": 268770,
+    "targetPrice": 423131,
+    "swingScore": 50,
+    "qualityScore": 48,
+    "relativeStrength": 7.05,
+    "supplyState": "accumulating",
+    "newsState": "negative",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-27T22:34:57.681Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-28",
+    "ticker": "035420",
+    "companyName": "NAVER",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 181400,
+    "triggerPrice": 184976,
+    "stopLossPrice": 168702,
+    "targetPrice": 225661,
+    "swingScore": 50,
+    "qualityScore": 36,
+    "relativeStrength": -6.73,
+    "supplyState": "neutral",
+    "newsState": "negative",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-27T22:34:57.681Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-28",
+    "ticker": "034730",
+    "companyName": "SK",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 511000,
+    "triggerPrice": 520706,
+    "stopLossPrice": 442600,
+    "targetPrice": 715971,
+    "swingScore": 45,
+    "qualityScore": 40,
+    "relativeStrength": 1.34,
+    "supplyState": "accumulating",
+    "newsState": "positive",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-27T22:34:57.681Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-28",
+    "ticker": "032830",
+    "companyName": "삼성생명",
+    "market": "코스피",
+    "source": "swing",
+    "watchOnly": true,
+    "currentPrice": 258500,
+    "triggerPrice": 263080,
+    "stopLossPrice": 229500,
+    "targetPrice": 347030,
+    "swingScore": 43,
+    "qualityScore": 36,
+    "relativeStrength": -2.41,
+    "supplyState": "accumulating",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-27T22:34:57.681Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }
