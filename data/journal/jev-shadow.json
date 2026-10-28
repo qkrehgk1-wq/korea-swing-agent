@@ -1494,6 +1494,257 @@
         "inputTokens": 829,
         "outputTokens": 94
       }
+    },
+    "2026-10-29|005930": {
+      "key": "2026-10-29|005930",
+      "date": "2026-10-29",
+      "ticker": "005930",
+      "companyName": "삼성전자",
+      "watchOnly": false,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-26",
+      "return5dPct": 9.62,
+      "return20dPct": -9.26,
+      "answers": {
+        "lingeringBadNews": 0.02,
+        "pricedInRally": 0.61,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.33,
+          "probabilities": {
+            "earnings_or_contract": 0.01,
+            "theme_or_flow": 0.44,
+            "market_wide": 0.05,
+            "unclear": 0.5
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 8
+      },
+      "usage": {
+        "inputTokens": 854,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-29|307950": {
+      "key": "2026-10-29|307950",
+      "date": "2026-10-29",
+      "ticker": "307950",
+      "companyName": "현대오토에버",
+      "watchOnly": false,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-06",
+      "return5dPct": 3.99,
+      "return20dPct": -6.14,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.24,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.45,
+          "probabilities": {
+            "earnings_or_contract": 0.59,
+            "theme_or_flow": 0.1,
+            "market_wide": 0.01,
+            "unclear": 0.3
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 882,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-29|178320": {
+      "key": "2026-10-29|178320",
+      "date": "2026-10-29",
+      "ticker": "178320",
+      "companyName": "서진시스템",
+      "watchOnly": false,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": -5.57,
+      "return20dPct": -8.95,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-29|000720": {
+      "key": "2026-10-29|000720",
+      "date": "2026-10-29",
+      "ticker": "000720",
+      "companyName": "현대건설",
+      "watchOnly": false,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-09-16",
+      "return5dPct": 3.99,
+      "return20dPct": -21.75,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.27,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.68,
+          "probabilities": {
+            "earnings_or_contract": 0.13,
+            "theme_or_flow": 0.76,
+            "market_wide": 0.03,
+            "unclear": 0.08
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 827,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-29|454910": {
+      "key": "2026-10-29|454910",
+      "date": "2026-10-29",
+      "ticker": "454910",
+      "companyName": "두산로보틱스",
+      "watchOnly": true,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 4,
+      "newestHeadlineDate": "2026-10-27",
+      "return5dPct": 0.66,
+      "return20dPct": -12.34,
+      "answers": {
+        "lingeringBadNews": 0.05,
+        "pricedInRally": 0.06,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.67,
+          "probabilities": {
+            "earnings_or_contract": 0.09,
+            "theme_or_flow": 0.04,
+            "market_wide": 0.12,
+            "unclear": 0.75
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 1028,
+        "outputTokens": 94
+      }
+    },
+    "2026-10-29|017670": {
+      "key": "2026-10-29|017670",
+      "date": "2026-10-29",
+      "ticker": "017670",
+      "companyName": "SK텔레콤",
+      "watchOnly": true,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 1.56,
+      "return20dPct": -10.72,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-10-29|051910": {
+      "key": "2026-10-29|051910",
+      "date": "2026-10-29",
+      "ticker": "051910",
+      "companyName": "LG화학",
+      "watchOnly": true,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 5,
+      "newestHeadlineDate": "2026-10-28",
+      "return5dPct": -4.51,
+      "return20dPct": -7.06,
+      "answers": {
+        "lingeringBadNews": 0.2,
+        "pricedInRally": 0.08,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.75,
+          "probabilities": {
+            "earnings_or_contract": 0.81,
+            "theme_or_flow": 0.05,
+            "market_wide": 0.02,
+            "unclear": 0.12
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 1010,
+        "outputTokens": 96
+      }
+    },
+    "2026-10-29|310210": {
+      "key": "2026-10-29|310210",
+      "date": "2026-10-29",
+      "ticker": "310210",
+      "companyName": "보로노이",
+      "watchOnly": true,
+      "asOf": "2026-10-28T22:50:30.293Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": -11.08,
+      "return20dPct": -11.6,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 4,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
     }
   }
 }
