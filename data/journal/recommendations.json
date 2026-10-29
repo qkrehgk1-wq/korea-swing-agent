@@ -7850,7 +7850,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-21T21:57:45.568Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-29T22:57:13.951Z"
   },
   {
     "date": "2026-10-22",
@@ -7872,7 +7874,9 @@
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-21T21:57:45.568Z",
     "scoringVersion": "v2-entry-bar-included",
-    "status": "open"
+    "status": "no_entry",
+    "returnPct": 0,
+    "scoredAt": "2026-10-29T22:57:13.952Z"
   },
   {
     "date": "2026-10-23",
@@ -8289,6 +8293,46 @@
     "volumeFlowRising": true,
     "championAt": "2026-08-01T19:48:40.134Z",
     "recordedAt": "2026-10-28T22:48:58.557Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-30",
+    "ticker": "031980",
+    "companyName": "피에스케이홀딩스",
+    "market": "코스닥",
+    "source": "swing",
+    "currentPrice": 192900,
+    "triggerPrice": 216700,
+    "stopLossPrice": 184195,
+    "targetPrice": 297963,
+    "swingScore": 79,
+    "qualityScore": 64,
+    "relativeStrength": 132.71,
+    "supplyState": "distributing",
+    "volumeFlowRising": false,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-29T22:57:10.625Z",
+    "scoringVersion": "v2-entry-bar-included",
+    "status": "open"
+  },
+  {
+    "date": "2026-10-30",
+    "ticker": "036460",
+    "companyName": "한국가스공사",
+    "market": "코스피",
+    "source": "swing",
+    "currentPrice": 37050,
+    "triggerPrice": 38021,
+    "stopLossPrice": 35340,
+    "targetPrice": 44724,
+    "swingScore": 70,
+    "qualityScore": 51,
+    "relativeStrength": -0.4,
+    "supplyState": "accumulating",
+    "volumeFlowRising": true,
+    "championAt": "2026-08-01T19:48:40.134Z",
+    "recordedAt": "2026-10-29T22:57:10.625Z",
     "scoringVersion": "v2-entry-bar-included",
     "status": "open"
   }

@@ -1745,6 +1745,80 @@
       },
       "usage": null,
       "skippedReason": "no_headlines"
+    },
+    "2026-10-30|031980": {
+      "key": "2026-10-30|031980",
+      "date": "2026-10-30",
+      "ticker": "031980",
+      "companyName": "피에스케이홀딩스",
+      "watchOnly": false,
+      "asOf": "2026-10-29T22:58:42.066Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-10-13",
+      "return5dPct": 15.1,
+      "return20dPct": 6.69,
+      "answers": {
+        "lingeringBadNews": 0.16,
+        "pricedInRally": 0.49,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.61,
+          "probabilities": {
+            "earnings_or_contract": 0.01,
+            "theme_or_flow": 0.71,
+            "market_wide": 0.01,
+            "unclear": 0.27
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 960,
+        "outputTokens": 95
+      }
+    },
+    "2026-10-30|036460": {
+      "key": "2026-10-30|036460",
+      "date": "2026-10-30",
+      "ticker": "036460",
+      "companyName": "한국가스공사",
+      "watchOnly": false,
+      "asOf": "2026-10-29T22:58:42.066Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 4,
+      "newestHeadlineDate": "2026-10-21",
+      "return5dPct": 2.35,
+      "return20dPct": 5.86,
+      "answers": {
+        "lingeringBadNews": 0.05,
+        "pricedInRally": 0.29,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.89,
+          "probabilities": {
+            "earnings_or_contract": 0.92,
+            "theme_or_flow": 0.03,
+            "market_wide": 0.02,
+            "unclear": 0.03
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 2,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 1018,
+        "outputTokens": 96
+      }
     }
   }
 }
