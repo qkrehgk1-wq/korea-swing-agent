@@ -2063,6 +2063,43 @@
         "inputTokens": 836,
         "outputTokens": 94
       }
+    },
+    "2026-11-02|035900": {
+      "key": "2026-11-02|035900",
+      "date": "2026-11-02",
+      "ticker": "035900",
+      "companyName": "JYP Ent.",
+      "watchOnly": false,
+      "asOf": "2026-11-01T22:21:58.493Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 5,
+      "newestHeadlineDate": "2026-10-27",
+      "return5dPct": 5.83,
+      "return20dPct": 3.59,
+      "answers": {
+        "lingeringBadNews": 0.2,
+        "pricedInRally": 0.44,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.53,
+          "probabilities": {
+            "earnings_or_contract": 0.25,
+            "theme_or_flow": 0.65,
+            "market_wide": 0.01,
+            "unclear": 0.09
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 4
+      },
+      "usage": {
+        "inputTokens": 1029,
+        "outputTokens": 95
+      }
     }
   }
 }
