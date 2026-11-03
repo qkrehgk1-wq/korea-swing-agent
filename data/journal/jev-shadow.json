@@ -2100,6 +2100,116 @@
         "inputTokens": 1029,
         "outputTokens": 95
       }
+    },
+    "2026-11-03|030200": {
+      "key": "2026-11-03|030200",
+      "date": "2026-11-03",
+      "ticker": "030200",
+      "companyName": "KT",
+      "watchOnly": true,
+      "asOf": "2026-11-03T01:13:47.454Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 6.7,
+      "return20dPct": -8.08,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-03|000880": {
+      "key": "2026-11-03|000880",
+      "date": "2026-11-03",
+      "ticker": "000880",
+      "companyName": "한화",
+      "watchOnly": true,
+      "asOf": "2026-11-03T01:13:47.454Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": -0.64,
+      "return20dPct": -27.27,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-03|195940": {
+      "key": "2026-11-03|195940",
+      "date": "2026-11-03",
+      "ticker": "195940",
+      "companyName": "HK이노엔",
+      "watchOnly": true,
+      "asOf": "2026-11-03T01:13:47.454Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 4.26,
+      "return20dPct": -15.01,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-03|015760": {
+      "key": "2026-11-03|015760",
+      "date": "2026-11-03",
+      "ticker": "015760",
+      "companyName": "한국전력",
+      "watchOnly": true,
+      "asOf": "2026-11-03T01:13:47.454Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 5.57,
+      "return20dPct": -2.33,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-03|138930": {
+      "key": "2026-11-03|138930",
+      "date": "2026-11-03",
+      "ticker": "138930",
+      "companyName": "BNK금융지주",
+      "watchOnly": true,
+      "asOf": "2026-11-03T01:13:47.454Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 2.21,
+      "return20dPct": -19.1,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
     }
   }
 }
