@@ -2210,6 +2210,176 @@
       },
       "usage": null,
       "skippedReason": "no_headlines"
+    },
+    "2026-11-04|015760": {
+      "key": "2026-11-04|015760",
+      "date": "2026-11-04",
+      "ticker": "015760",
+      "companyName": "한국전력",
+      "watchOnly": false,
+      "asOf": "2026-11-03T23:40:10.742Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 4.31,
+      "return20dPct": -3.49,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 1
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-04|259960": {
+      "key": "2026-11-04|259960",
+      "date": "2026-11-04",
+      "ticker": "259960",
+      "companyName": "크래프톤",
+      "watchOnly": false,
+      "asOf": "2026-11-03T23:40:10.742Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 4,
+      "newestHeadlineDate": "2026-11-03",
+      "return5dPct": 6.2,
+      "return20dPct": -2.91,
+      "answers": {
+        "lingeringBadNews": 0.04,
+        "pricedInRally": 0.31,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.49,
+          "probabilities": {
+            "earnings_or_contract": 0.62,
+            "theme_or_flow": 0.15,
+            "market_wide": 0.02,
+            "unclear": 0.21
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 959,
+        "outputTokens": 96
+      }
+    },
+    "2026-11-04|012750": {
+      "key": "2026-11-04|012750",
+      "date": "2026-11-04",
+      "ticker": "012750",
+      "companyName": "에스원",
+      "watchOnly": true,
+      "asOf": "2026-11-03T23:40:10.742Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 5,
+      "newestHeadlineDate": "2026-11-03",
+      "return5dPct": 2.31,
+      "return20dPct": 16.05,
+      "answers": {
+        "lingeringBadNews": 0.17,
+        "pricedInRally": 0.45,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.44,
+          "probabilities": {
+            "earnings_or_contract": 0.58,
+            "theme_or_flow": 0.27,
+            "market_wide": 0.01,
+            "unclear": 0.14
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 1007,
+        "outputTokens": 96
+      }
+    },
+    "2026-11-04|082920": {
+      "key": "2026-11-04|082920",
+      "date": "2026-11-04",
+      "ticker": "082920",
+      "companyName": "비츠로셀",
+      "watchOnly": true,
+      "asOf": "2026-11-03T23:40:10.742Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-11-03",
+      "return5dPct": 4.03,
+      "return20dPct": -17.51,
+      "answers": {
+        "lingeringBadNews": 0.02,
+        "pricedInRally": 0.38,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.8,
+          "probabilities": {
+            "earnings_or_contract": 0.07,
+            "theme_or_flow": 0.85,
+            "market_wide": 0.01,
+            "unclear": 0.07
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 857,
+        "outputTokens": 95
+      }
+    },
+    "2026-11-04|001040": {
+      "key": "2026-11-04|001040",
+      "date": "2026-11-04",
+      "ticker": "001040",
+      "companyName": "CJ",
+      "watchOnly": true,
+      "asOf": "2026-11-03T23:40:10.742Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-06",
+      "return5dPct": 0.62,
+      "return20dPct": -13.13,
+      "answers": {
+        "lingeringBadNews": 0.52,
+        "pricedInRally": 0.06,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.71,
+          "probabilities": {
+            "earnings_or_contract": 0.04,
+            "theme_or_flow": 0.78,
+            "market_wide": 0.01,
+            "unclear": 0.17
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 6,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 895,
+        "outputTokens": 95
+      }
     }
   }
 }
