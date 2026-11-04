@@ -2380,6 +2380,220 @@
         "inputTokens": 895,
         "outputTokens": 95
       }
+    },
+    "2026-11-05|068760": {
+      "key": "2026-11-05|068760",
+      "date": "2026-11-05",
+      "ticker": "068760",
+      "companyName": "셀트리온제약",
+      "watchOnly": false,
+      "asOf": "2026-11-04T23:56:41.841Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 2.56,
+      "return20dPct": -4.03,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-05|323410": {
+      "key": "2026-11-05|323410",
+      "date": "2026-11-05",
+      "ticker": "323410",
+      "companyName": "카카오뱅크",
+      "watchOnly": false,
+      "asOf": "2026-11-04T23:56:41.841Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 3.07,
+      "return20dPct": 0.5,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-05|030200": {
+      "key": "2026-11-05|030200",
+      "date": "2026-11-05",
+      "ticker": "030200",
+      "companyName": "KT",
+      "watchOnly": false,
+      "asOf": "2026-11-04T23:56:41.841Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-11-03",
+      "return5dPct": 9.83,
+      "return20dPct": -3.68,
+      "answers": {
+        "lingeringBadNews": 0.02,
+        "pricedInRally": 0.6,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.53,
+          "probabilities": {
+            "earnings_or_contract": 0.65,
+            "theme_or_flow": 0.04,
+            "market_wide": 0.01,
+            "unclear": 0.3
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 3
+      },
+      "usage": {
+        "inputTokens": 827,
+        "outputTokens": 96
+      }
+    },
+    "2026-11-05|138040": {
+      "key": "2026-11-05|138040",
+      "date": "2026-11-05",
+      "ticker": "138040",
+      "companyName": "메리츠금융지주",
+      "watchOnly": true,
+      "asOf": "2026-11-04T23:56:41.841Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-29",
+      "return5dPct": 7.97,
+      "return20dPct": 2.55,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.26,
+        "moveDriver": {
+          "choice": "market_wide",
+          "confidence": 0.31,
+          "probabilities": {
+            "earnings_or_contract": 0,
+            "theme_or_flow": 0.28,
+            "market_wide": 0.48,
+            "unclear": 0.24
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 4
+      },
+      "usage": {
+        "inputTokens": 904,
+        "outputTokens": 95
+      }
+    },
+    "2026-11-05|021240": {
+      "key": "2026-11-05|021240",
+      "date": "2026-11-05",
+      "ticker": "021240",
+      "companyName": "코웨이",
+      "watchOnly": true,
+      "asOf": "2026-11-04T23:56:41.841Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 5.54,
+      "return20dPct": 6.38,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-05|010140": {
+      "key": "2026-11-05|010140",
+      "date": "2026-11-05",
+      "ticker": "010140",
+      "companyName": "삼성중공업",
+      "watchOnly": true,
+      "asOf": "2026-11-04T23:56:41.841Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-27",
+      "return5dPct": 6.82,
+      "return20dPct": -10.33,
+      "answers": {
+        "lingeringBadNews": 0.04,
+        "pricedInRally": 0.36,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.61,
+          "probabilities": {
+            "earnings_or_contract": 0.71,
+            "theme_or_flow": 0.13,
+            "market_wide": 0.03,
+            "unclear": 0.13
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 4
+      },
+      "usage": {
+        "inputTokens": 889,
+        "outputTokens": 96
+      }
+    },
+    "2026-11-05|140410": {
+      "key": "2026-11-05|140410",
+      "date": "2026-11-05",
+      "ticker": "140410",
+      "companyName": "메지온",
+      "watchOnly": true,
+      "asOf": "2026-11-04T23:56:41.841Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-08",
+      "return5dPct": 7.22,
+      "return20dPct": -20.34,
+      "answers": {
+        "lingeringBadNews": 0.21,
+        "pricedInRally": 0.29,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.24,
+          "probabilities": {
+            "earnings_or_contract": 0.42,
+            "theme_or_flow": 0.14,
+            "market_wide": 0.01,
+            "unclear": 0.43
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 2,
+        "catalystScore": 6
+      },
+      "usage": {
+        "inputTokens": 875,
+        "outputTokens": 94
+      }
     }
   }
 }
