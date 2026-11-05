@@ -2594,6 +2594,272 @@
         "inputTokens": 875,
         "outputTokens": 94
       }
+    },
+    "2026-11-06|003230": {
+      "key": "2026-11-06|003230",
+      "date": "2026-11-06",
+      "ticker": "003230",
+      "companyName": "삼양식품",
+      "watchOnly": false,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-06",
+      "return5dPct": 7.42,
+      "return20dPct": 1.65,
+      "answers": {
+        "lingeringBadNews": 0.27,
+        "pricedInRally": 0.11,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.39,
+          "probabilities": {
+            "earnings_or_contract": 0.02,
+            "theme_or_flow": 0.42,
+            "market_wide": 0.02,
+            "unclear": 0.54
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 848,
+        "outputTokens": 94
+      }
+    },
+    "2026-11-06|004020": {
+      "key": "2026-11-06|004020",
+      "date": "2026-11-06",
+      "ticker": "004020",
+      "companyName": "현대제철",
+      "watchOnly": false,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 4,
+      "newestHeadlineDate": "2026-11-02",
+      "return5dPct": 10.06,
+      "return20dPct": 2.29,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.48,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.71,
+          "probabilities": {
+            "earnings_or_contract": 0.16,
+            "theme_or_flow": 0.78,
+            "market_wide": 0.02,
+            "unclear": 0.04
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 4
+      },
+      "usage": {
+        "inputTokens": 988,
+        "outputTokens": 95
+      }
+    },
+    "2026-11-06|035760": {
+      "key": "2026-11-06|035760",
+      "date": "2026-11-06",
+      "ticker": "035760",
+      "companyName": "CJ ENM",
+      "watchOnly": true,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 9.25,
+      "return20dPct": 26.66,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "자료부족",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-06|068270": {
+      "key": "2026-11-06|068270",
+      "date": "2026-11-06",
+      "ticker": "068270",
+      "companyName": "셀트리온",
+      "watchOnly": true,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-20",
+      "return5dPct": 12.8,
+      "return20dPct": 17.74,
+      "answers": {
+        "lingeringBadNews": 0.02,
+        "pricedInRally": 0.64,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.43,
+          "probabilities": {
+            "earnings_or_contract": 0.33,
+            "theme_or_flow": 0.57,
+            "market_wide": 0,
+            "unclear": 0.1
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 861,
+        "outputTokens": 95
+      }
+    },
+    "2026-11-06|241560": {
+      "key": "2026-11-06|241560",
+      "date": "2026-11-06",
+      "ticker": "241560",
+      "companyName": "두산밥캣",
+      "watchOnly": true,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": null,
+      "headlineCount": 0,
+      "newestHeadlineDate": null,
+      "return5dPct": 4.91,
+      "return20dPct": -4.74,
+      "answers": null,
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": null,
+      "skippedReason": "no_headlines"
+    },
+    "2026-11-06|035720": {
+      "key": "2026-11-06|035720",
+      "date": "2026-11-06",
+      "ticker": "035720",
+      "companyName": "카카오",
+      "watchOnly": true,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-11-05",
+      "return5dPct": 10.02,
+      "return20dPct": -1.52,
+      "answers": {
+        "lingeringBadNews": 0.26,
+        "pricedInRally": 0.37,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.53,
+          "probabilities": {
+            "earnings_or_contract": 0.24,
+            "theme_or_flow": 0.08,
+            "market_wide": 0.03,
+            "unclear": 0.65
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 887,
+        "outputTokens": 94
+      }
+    },
+    "2026-11-06|034220": {
+      "key": "2026-11-06|034220",
+      "date": "2026-11-06",
+      "ticker": "034220",
+      "companyName": "LG디스플레이",
+      "watchOnly": true,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-14",
+      "return5dPct": 0.4,
+      "return20dPct": -9.69,
+      "answers": {
+        "lingeringBadNews": 0.59,
+        "pricedInRally": 0.02,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.07,
+          "probabilities": {
+            "earnings_or_contract": 0.3,
+            "theme_or_flow": 0.29,
+            "market_wide": 0.18,
+            "unclear": 0.23
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 829,
+        "outputTokens": 96
+      }
+    },
+    "2026-11-06|010130": {
+      "key": "2026-11-06|010130",
+      "date": "2026-11-06",
+      "ticker": "010130",
+      "companyName": "고려아연",
+      "watchOnly": true,
+      "asOf": "2026-11-05T23:51:43.009Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-11-04",
+      "return5dPct": 9.91,
+      "return20dPct": -7.41,
+      "answers": {
+        "lingeringBadNews": 0.03,
+        "pricedInRally": 0.46,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.48,
+          "probabilities": {
+            "earnings_or_contract": 0.61,
+            "theme_or_flow": 0.13,
+            "market_wide": 0.02,
+            "unclear": 0.24
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 0,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 875,
+        "outputTokens": 96
+      }
     }
   }
 }
