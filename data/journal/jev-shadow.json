@@ -2860,6 +2860,154 @@
         "inputTokens": 875,
         "outputTokens": 96
       }
+    },
+    "2026-11-07|241560": {
+      "key": "2026-11-07|241560",
+      "date": "2026-11-07",
+      "ticker": "241560",
+      "companyName": "두산밥캣",
+      "watchOnly": false,
+      "asOf": "2026-11-06T23:30:55.427Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-24",
+      "return5dPct": 8.81,
+      "return20dPct": -2.23,
+      "answers": {
+        "lingeringBadNews": 0.02,
+        "pricedInRally": 0.21,
+        "moveDriver": {
+          "choice": "unclear",
+          "confidence": 0.95,
+          "probabilities": {
+            "earnings_or_contract": 0,
+            "theme_or_flow": 0.03,
+            "market_wide": 0.01,
+            "unclear": 0.96
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 828,
+        "outputTokens": 94
+      }
+    },
+    "2026-11-07|161390": {
+      "key": "2026-11-07|161390",
+      "date": "2026-11-07",
+      "ticker": "161390",
+      "companyName": "한국타이어앤테크놀로지",
+      "watchOnly": false,
+      "asOf": "2026-11-06T23:30:55.427Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 2,
+      "newestHeadlineDate": "2026-10-28",
+      "return5dPct": 8.99,
+      "return20dPct": 0.16,
+      "answers": {
+        "lingeringBadNews": 0.54,
+        "pricedInRally": 0.27,
+        "moveDriver": {
+          "choice": "earnings_or_contract",
+          "confidence": 0.37,
+          "probabilities": {
+            "earnings_or_contract": 0.53,
+            "theme_or_flow": 0.08,
+            "market_wide": 0.11,
+            "unclear": 0.28
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "중립",
+        "riskScore": 2,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 897,
+        "outputTokens": 96
+      }
+    },
+    "2026-11-07|032640": {
+      "key": "2026-11-07|032640",
+      "date": "2026-11-07",
+      "ticker": "032640",
+      "companyName": "LG유플러스",
+      "watchOnly": true,
+      "asOf": "2026-11-06T23:30:55.427Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 1,
+      "newestHeadlineDate": "2026-10-16",
+      "return5dPct": 16.67,
+      "return20dPct": 14.48,
+      "answers": {
+        "lingeringBadNews": 0.02,
+        "pricedInRally": 0.69,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.59,
+          "probabilities": {
+            "earnings_or_contract": 0,
+            "theme_or_flow": 0.69,
+            "market_wide": 0.06,
+            "unclear": 0.25
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "긍정",
+        "riskScore": 0,
+        "catalystScore": 2
+      },
+      "usage": {
+        "inputTokens": 841,
+        "outputTokens": 95
+      }
+    },
+    "2026-11-07|251970": {
+      "key": "2026-11-07|251970",
+      "date": "2026-11-07",
+      "ticker": "251970",
+      "companyName": "펌텍코리아",
+      "watchOnly": true,
+      "asOf": "2026-11-06T23:30:55.427Z",
+      "questionsVersion": "q1-2026-10",
+      "model": "jev-1.14.0",
+      "headlineCount": 3,
+      "newestHeadlineDate": "2026-11-06",
+      "return5dPct": 10.83,
+      "return20dPct": 7.29,
+      "answers": {
+        "lingeringBadNews": 0.25,
+        "pricedInRally": 0.37,
+        "moveDriver": {
+          "choice": "theme_or_flow",
+          "confidence": 0.69,
+          "probabilities": {
+            "earnings_or_contract": 0.03,
+            "theme_or_flow": 0.77,
+            "market_wide": 0.01,
+            "unclear": 0.19
+          }
+        }
+      },
+      "baseline": {
+        "sentimentLabel": "부정",
+        "riskScore": 2,
+        "catalystScore": 0
+      },
+      "usage": {
+        "inputTokens": 932,
+        "outputTokens": 95
+      }
     }
   }
 }
